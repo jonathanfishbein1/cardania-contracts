@@ -1,0 +1,5 @@
+source-repository-package
+  type: git
+  location: https://github.com/input-output-hk/plutus.git
+
+packages: swap-on-chain
