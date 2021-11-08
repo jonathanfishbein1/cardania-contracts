@@ -34,5 +34,17 @@
         "type": "tarball",
         "url": "https://github.com/NixOS/nixpkgs/archive/eb73405ecceb1dc505b7cbbd234f8f94165e2696.tar.gz",
         "url_template": "https://github.com/<owner>/<repo>/archive/<rev>.tar.gz"
+    },
+    "plutus": {
+        "branch": "master",
+        "description": "The Plutus language implementation and tools",
+        "homepage": "",
+        "owner": "input-output-hk",
+        "repo": "plutus",
+        "rev": "36b437b44e9d4addba97c7f87ff91dbb6ab59338",
+        "sha256": "1c2qlq5gbc801y281whcrmnn2kfn4mjq7sk0w1qn8fphff7j4vfs",
+        "type": "tarball",
+        "url": "https://github.com/input-output-hk/plutus/archive/36b437b44e9d4addba97c7f87ff91dbb6ab59338.tar.gz",
+        "url_template": "https://github.com/<owner>/<repo>/archive/<rev>.tar.gz"
     }
 }
