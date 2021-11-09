@@ -3,8 +3,6 @@ name:               swap-on-chain
 version:            0.1.0.0
 
 library
-    main-is:          Main.hs
-
   build-depends:       base,
                         plutus-tx-plugin,
                         plutus-tx,
