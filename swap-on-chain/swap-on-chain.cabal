@@ -12,3 +12,12 @@ library
                      , containers
                      , aeson
   default-language:    Haskell2010
+
+
+executable swap-on-chain
+  main-is: Main.hs
+  other-modules:
+      Paths_my_project
+  build-depends:
+      base
+  default-language: Haskell2010
