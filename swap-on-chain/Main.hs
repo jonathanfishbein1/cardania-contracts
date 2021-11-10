@@ -1,6 +1,4 @@
 module Main where
 
-import qualified Script
-
 main :: IO ()
-main = someFunc
+main = putStrLn "Hello, Haskell!"

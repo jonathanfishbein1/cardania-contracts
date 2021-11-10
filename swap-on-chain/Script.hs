@@ -11,10 +11,10 @@
 module Script where
 
 import qualified PlutusTx
-
+import qualified PlutusTx.Prelude
 
 {-# OPTIONS_GHC -fno-warn-unused-imports #-}
 
 {-# INLINABLE mkValidator #-}
 mkValidator :: PlutusTx.Data ->  PlutusTx.Data -> PlutusTx.Data -> ()
-mkValidator _ _ _ = traceError "BURNT!"
+mkValidator _ _ _ = PlutusTx.Prelude.traceError "BURNT!"
