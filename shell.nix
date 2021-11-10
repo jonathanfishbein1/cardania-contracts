@@ -4,17 +4,7 @@ let
 in
 project.shellFor {
   buildInputs = [
-    nixpkgs.git
-    nixpkgs.haskellPackages.happy
-    nixpkgs.haskellPackages.microlens-th
+    nixpkgs.haskellPackages.filemanip
   ];
   exactDeps = true;
-  tools = {
-    cabal = "3.6.0.0";
-    hlint = "latest";
-    haskell-language-server = "latest";
-  };
-  packages = ps: with ps; [
-    swap-on-chain
-  ];
 }
