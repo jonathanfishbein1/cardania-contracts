@@ -1,7 +1,7 @@
 -- Bump this if you need newer packages
 index-state: 2021-10-20T00:00:00Z
 
-packages: swap-on-chain
+packages: ./*
 
 -- We never, ever, want this.
 write-ghc-environment-files: never
@@ -35,11 +35,13 @@ source-repository-package
   type: git
   location: https://github.com/Quid2/flat.git
   tag: ee59880f47ab835dbd73bea0847dab7869fc20d8
+  --sha256:1lrzknw765pz2j97nvv9ip3l1mcpf2zr4n56hwlz0rk7wq7ls4cm
 
 source-repository-package
   type: git
   location: https://github.com/input-output-hk/cardano-crypto.git
   tag: 07397f0e50da97eaa0575d93bee7ac4b2b2576ec
+  --sha256:06sdx5ndn2g722jhpicmg96vsrys89fl81k8290b3lr6b1b0w4m3
 
 source-repository-package
   type: git
@@ -56,6 +58,7 @@ source-repository-package
     orphans-deriving-via
     slotting
     strict-containers
+  --sha256:1bgq3a2wfdz24jqfwylcc6jjg5aji8dpy5gjkhpnmkkvgcr2rkyb
 
 source-repository-package
   type: git
@@ -64,18 +67,19 @@ source-repository-package
   subdir:
     cardano-prelude
     cardano-prelude-test
+  --sha256:02jddik1yw0222wd6q0vv10f7y8rdgrlqaiy83ph002f9kjx7mh6
 
 -- Needed when actually building on windows (not for windows cross)
 source-repository-package
   type: git
   location: https://github.com/input-output-hk/Win32-network
   tag: 3825d3abf75f83f406c1f7161883c438dac7277d
+  --sha256: 19wahfv726fa3mqajpqdqhnl9ica3xmf68i254q45iyjcpj1psqx
 
 source-repository-package
   type: git
   location: https://github.com/input-output-hk/plutus
-  subdir:doc
-          plutus-benchmark
+  subdir:plutus-benchmark
           plutus-core
           plutus-errors
           plutus-ledger-api
@@ -86,3 +90,10 @@ source-repository-package
           word-array
           stubs/plutus-ghc-stub
   tag: 5044611832e3110cb60ab9681bba3f22711706c2
+  --sha256:1pgh7vbdb3gjsfv6zkh680mqflyj70ywp35bsylv28zdkzcm5gcz
+
+source-repository-package
+  type: git
+  location:https://github.com/bos/filemanip
+  tag: 1ed1659a6459aeb66f4cec588ea1519bb6c26828
+  --sha256: 0l2v19ppgwmgswil4jzyz41qy1pjgylvf49rr43szj4317g8bx5x
