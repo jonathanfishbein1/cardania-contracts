@@ -1,5 +1,5 @@
 -- Bump this if you need newer packages
-index-state: 2021-10-20T00:00:00Z
+index-state: 2021-08-14T00:00:00Z
 
 packages: ./*
 
@@ -16,6 +16,11 @@ test-show-details: streaming
 allow-newer:
            -- Pins to an old version of Template Haskell, unclear if/when it will be updated
            size-based:template-haskell
+           , ouroboros-consensus-byron:formatting
+           , beam-core:aeson
+           , beam-sqlite:aeson
+           , beam-sqlite:dlist
+           , beam-migrate:aeson
 
 constraints:
   -- big breaking change here, inline-r doens't have an upper bound
@@ -29,6 +34,19 @@ constraints:
 -- (NOTE this will change to ieee754 in newer versions of nixpkgs).
 extra-packages: ieee, filemanip
 
+-- These packages appear in our dependency tree and are very slow to build.
+-- Empirically, turning off optimization shaves off ~50% build time.
+-- It also mildly improves recompilation avoidance.
+-- For deve work we don't care about performance so much, so this is okay.
+package cardano-ledger-alonzo
+  optimization: False
+package ouroboros-consensus-shelley
+  optimization: False
+package ouroboros-consensus-cardano
+  optimization: False
+package cardano-api
+  optimization: False
+
 -- https://github.com/Quid2/flat/pull/22 fixes a potential exception
 -- when decoding invalid (e.g. malicious) text literals.
 source-repository-package
@@ -36,6 +54,19 @@ source-repository-package
   location: https://github.com/Quid2/flat.git
   tag: ee59880f47ab835dbd73bea0847dab7869fc20d8
   --sha256:1lrzknw765pz2j97nvv9ip3l1mcpf2zr4n56hwlz0rk7wq7ls4cm
+
+-- Needs some patches, but upstream seems to be fairly dead (no activity in > 1 year)
+source-repository-package
+  type: git
+  location: https://github.com/input-output-hk/purescript-bridge.git
+  tag: 6a92d7853ea514be8b70bab5e72077bf5a510596
+  --sha256:13j64vv116in3c204qsl1v0ajphac9fqvsjp7x3zzfr7n7g61drb
+
+source-repository-package
+  type: git
+  location: https://github.com/input-output-hk/servant-purescript.git
+  tag: a0c7c7e37c95564061247461aef4be505a853538
+  --sha256:177na04jf6wf18kandzsah40lw3xswmmccpr3hkb8wb4hypcffnf
 
 source-repository-package
   type: git
@@ -69,31 +100,162 @@ source-repository-package
     cardano-prelude-test
   --sha256:02jddik1yw0222wd6q0vv10f7y8rdgrlqaiy83ph002f9kjx7mh6
 
--- Needed when actually building on windows (not for windows cross)
+source-repository-package
+  type: git
+  location: https://github.com/input-output-hk/cardano-addresses
+  tag: d2f86caa085402a953920c6714a0de6a50b655ec
+  subdir:
+    core
+  --sha256:0p6jbnd7ky2yf7bwb1350k8880py8dgqg39k49q02a6ij4ld01ay
+
+source-repository-package
+  type: git
+  location: https://github.com/input-output-hk/cardano-wallet
+  tag: ae7569293e94241ef6829139ec02bd91abd069df
+  subdir:
+    lib/text-class
+    lib/strict-non-empty-containers
+    lib/core
+    lib/test-utils
+    lib/numeric
+  --sha256:1mv1dhpkdj9ridm1fvq6jc85qs6zvbp172228rq72gyawjwrgvi6
+
+source-repository-package
+  type: git
+  location: https://github.com/input-output-hk/ouroboros-network
+  tag: 5d37a927046bc7da2887830d8e35cf604622ce09
+  subdir:
+    monoidal-synchronisation
+    typed-protocols
+    typed-protocols-examples
+    ouroboros-network
+    ouroboros-network-testing
+    ouroboros-network-framework
+    ouroboros-consensus
+    ouroboros-consensus-byron
+    ouroboros-consensus-cardano
+    ouroboros-consensus-shelley
+    io-sim
+    io-classes
+    network-mux
+    ntp-client
+  --sha256:1620zcnivgm1wp1kq3vqc44g77lv7dalzgywc96qsblf1sv9fw3p
+
+source-repository-package
+  type: git
+  location: https://github.com/input-output-hk/iohk-monitoring-framework
+  -- Important Note: Read below, before changing this!
+  tag: 46f994e216a1f8b36fe4669b47b2a7011b0e153c
+  -- Are you thinking of updating this tag to some other commit?  Please
+  -- ensure that the commit you are about to use is the latest one from
+  -- the *develop* branch of this repo:
+  --   * <https://github.com/input-output-hk/iohk-monitoring-framework/commits/develop>
+  -- (not master!)
+  --
+  -- In particular we rely on the code from this PR:
+  --  * <https://github.com/input-output-hk/iohk-monitoring-framework/pull/622>
+  -- being merged.
+  subdir:
+    iohk-monitoring
+    tracer-transformers
+    contra-tracer
+    plugins/backend-aggregation
+    plugins/backend-ekg
+    plugins/backend-monitoring
+    plugins/backend-trace-forwarder
+    plugins/scribe-systemd
+  --sha256:1il8fx3misp3650ryj368b3x95ksz01zz3x0z9k00807j93d0ka0
+
+source-repository-package
+  type: git
+  location: https://github.com/raduom/cardano-ledger-specs
+  tag: ef6bb99782d61316da55470620c7da994cc352b2
+  subdir:
+    byron/chain/executable-spec
+    byron/crypto
+    byron/crypto/test
+    byron/ledger/executable-spec
+    byron/ledger/impl
+    byron/ledger/impl/test
+    semantics/executable-spec
+    cardano-protocol-tpraos
+    semantics/small-steps-test
+    shelley/chain-and-ledger/dependencies/non-integer
+    shelley/chain-and-ledger/executable-spec
+    shelley/chain-and-ledger/shelley-spec-ledger-test
+    shelley-ma/impl
+    cardano-ledger-core
+    alonzo/impl
+  --sha256:0z2818kwiwv7smz0ff8wr4zb405pymgd12zm32asas0mp5bqxkin
+
+-- A lot of plutus dependencies have to be synchronized with the dependencies of
+-- cardano-node. If you update cardano-node, please make sure that all dependencies
+-- of cardano-node are also updated.
+source-repository-package
+  type: git
+  location: https://github.com/input-output-hk/cardano-node.git
+  tag: ed7fdbf65f40f8e194850b87dd8c631fe26154e6
+  subdir:
+    cardano-api
+    cardano-node
+    cardano-cli
+    cardano-config
+  --sha256:0ivvqnw6fflfbzywychfsyyjd6jn3pg1r0vv63m1rdwp04v59kh5
+
+source-repository-package
+  type: git
+  location: https://github.com/input-output-hk/optparse-applicative
+  tag: 7497a29cb998721a9068d5725d49461f2bba0e7a
+  --sha256:1gvsrg925vynwgqwplgjmp53vj953qyh3wbdf34pw21c8r47w35r
+
 source-repository-package
   type: git
   location: https://github.com/input-output-hk/Win32-network
   tag: 3825d3abf75f83f406c1f7161883c438dac7277d
-  --sha256: 19wahfv726fa3mqajpqdqhnl9ica3xmf68i254q45iyjcpj1psqx
+  --sha256:19wahfv726fa3mqajpqdqhnl9ica3xmf68i254q45iyjcpj1psqx
+
+source-repository-package
+  type: git
+  location: https://github.com/input-output-hk/hedgehog-extras
+  tag: edf6945007177a638fbeb8802397f3a6f4e47c14
+  --sha256:0wc7qzkc7j4ns2rz562h6qrx2f8xyq7yjcb7zidnj7f6j0pcd0i9
+
+source-repository-package
+  type: git
+  location: https://github.com/input-output-hk/goblins
+  tag: cde90a2b27f79187ca8310b6549331e59595e7ba
+  --sha256:17c88rbva3iw82yg9srlxjv2ia5wjb9cyqw44hik565f5v9svnyg
 
 source-repository-package
   type: git
   location: https://github.com/input-output-hk/plutus
-  subdir:plutus-benchmark
-          plutus-core
-          plutus-errors
-          plutus-ledger-api
-          plutus-metatheory
-          plutus-tx
-          plutus-tx-plugin
-          prettyprinter-configurable
-          word-array
-          stubs/plutus-ghc-stub
-  tag: 5044611832e3110cb60ab9681bba3f22711706c2
-  --sha256:1pgh7vbdb3gjsfv6zkh680mqflyj70ywp35bsylv28zdkzcm5gcz
-
-source-repository-package
-  type: git
-  location:https://github.com/bos/filemanip
-  tag: 1ed1659a6459aeb66f4cec588ea1519bb6c26828
-  --sha256: 0l2v19ppgwmgswil4jzyz41qy1pjgylvf49rr43szj4317g8bx5x
+  tag: e2cd641501d13715120329092b3a93df35493a44
+  subdir:
+    doc
+    fake-pab
+    freer-extras
+    marlowe
+    marlowe-actus
+    marlowe-playground-server
+    marlowe-dashboard-server
+    marlowe-symbolic
+    playground-common
+    plutus-benchmark
+    plutus-chain-index
+    plutus-contract
+    plutus-core
+    plutus-errors
+    plutus-ledger
+    plutus-ledger-api
+    plutus-metatheory
+    plutus-pab
+    plutus-playground-server
+    plutus-tx
+    plutus-tx-plugin
+    plutus-use-cases
+    prettyprinter-configurable
+    quickcheck-dynamic
+    web-ghc
+    word-array
+    stubs/plutus-ghc-stub
+  --sha256:0aicyg6skqhpfciakwn68b9ppkpm95j1x3d4sj3xmc542sr6932g
