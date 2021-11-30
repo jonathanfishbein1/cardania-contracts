@@ -2,3 +2,4 @@ dist-newstyle
 result*
 *.flat
 transactions/*
+.nix-shell-cabal.project
