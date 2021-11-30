@@ -18,6 +18,7 @@ import qualified PlutusTx.Builtins.Class
 import qualified Script
 import qualified System.Environment
 import qualified Prelude
+import qualified PlutusTx.Prelude
 main :: Prelude.IO ()
 main = 
     do
@@ -28,9 +29,9 @@ main =
                 Plutus.V1.Ledger.Api.Verbose
                 m
                 Script.tokenSaleSBS
-                [ Plutus.V1.Ledger.Api.toData  (PlutusTx.Builtins.Class.stringToBuiltinByteString "Hello World!"),
-                  Plutus.V1.Ledger.Api.toData (),
-                  Plutus.V1.Ledger.Api.toData ()
+                [ 
+                Plutus.V1.Ledger.Api.toData (0 :: PlutusTx.Prelude.Integer),
+                  Plutus.V1.Ledger.Api.toData (0 :: PlutusTx.Prelude.Integer)
                 ]
          in do
               Prelude.print ("e" Prelude.++ (Prelude.show e))
