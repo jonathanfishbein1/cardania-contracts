@@ -6,7 +6,7 @@
 {-# LANGUAGE TypeApplications #-}
 {-# LANGUAGE TypeFamilies #-}
 {-# LANGUAGE TypeOperators #-}
-{-# LANGUAGE NoImplicitPrelude     #-}
+{-# LANGUAGE NoImplicitPrelude #-}
 
 module Main where
 
@@ -15,13 +15,14 @@ import qualified Data.ByteString.Short
 import qualified Data.String
 import qualified Plutus.V1.Ledger.Api
 import qualified PlutusTx.Builtins.Class
+import qualified PlutusTx.Prelude
 import qualified Script
 import qualified System.Environment
 import qualified Prelude
-import qualified PlutusTx.Prelude
+
 main :: Prelude.IO ()
-main = 
-    do
+main =
+  do
     case Plutus.V1.Ledger.Api.defaultCostModelParams of
       Prelude.Just m ->
         let (logout, e) =
@@ -29,8 +30,7 @@ main =
                 Plutus.V1.Ledger.Api.Verbose
                 m
                 Script.tokenSaleSBS
-                [ 
-                Plutus.V1.Ledger.Api.toData (0 :: PlutusTx.Prelude.Integer),
+                [ Plutus.V1.Ledger.Api.toData (0 :: PlutusTx.Prelude.Integer),
                   Plutus.V1.Ledger.Api.toData (0 :: PlutusTx.Prelude.Integer)
                 ]
          in do
