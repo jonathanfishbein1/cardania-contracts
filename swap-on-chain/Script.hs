@@ -37,7 +37,6 @@ import qualified PlutusTx
 import qualified PlutusTx.Prelude
 import qualified Ledger.Typed.Scripts
 import qualified Prelude
-import qualified PlutusTx.Builtins
 
 data TokenSale
 
@@ -56,20 +55,18 @@ mkTokenSaleValidator _ _ context = contextCostCheck currentTxOutputs
     currentTxOutputs :: [Plutus.V1.Ledger.Contexts.TxOut]
     currentTxOutputs = Plutus.V1.Ledger.Contexts.txInfoOutputs info
 
-    -- tokenCost :: PlutusTx.Prelude.Integer
-    -- tokenCost = 10000000
+    tokenCost :: PlutusTx.Prelude.Integer
+    tokenCost = 10000000
 
-
+    sellerAddress :: Plutus.V1.Ledger.Address.Address
+    sellerAddress = Plutus.V1.Ledger.Address.pubKeyHashAddress (Plutus.V1.Ledger.Api.PubKeyHash "eefb5b9dbac4a380296de0655f6ace6c97e9b981eef89a7bf53dcd52")
 
     contextCostCheck :: [Plutus.V1.Ledger.Contexts.TxOut] -> PlutusTx.Prelude.Bool
     contextCostCheck [] = PlutusTx.Prelude.traceIfFalse "Incorrect Amount Of ADA Sent To Script Address" PlutusTx.Prelude.False
-    contextCostCheck (x : xs) = 
-        let
-          (Plutus.V1.Ledger.Api.PubKeyCredential pubKeyCred) = (Plutus.V1.Ledger.Api.addressCredential (Plutus.V1.Ledger.Contexts.txOutAddress x))
-        in
-           PlutusTx.Builtins.equalsByteString (Plutus.V1.Ledger.Api.getPubKeyHash pubKeyCred) "eefb5b9dbac4a380296de0655f6ace6c97e9b981eef89a7bf53dcd52"
-          --   PlutusTx.Prelude.&& (Plutus.V1.Ledger.Contexts.txOutValue x PlutusTx.Prelude.== Plutus.V1.Ledger.Ada.lovelaceValueOf tokenCost) = PlutusTx.Prelude.True
-          -- | PlutusTx.Prelude.otherwise = contextCostCheck xs
+    contextCostCheck (x : xs)
+      | (Plutus.V1.Ledger.Contexts.txOutAddress x PlutusTx.Prelude.== sellerAddress)
+        PlutusTx.Prelude.&& (Plutus.V1.Ledger.Contexts.txOutValue x PlutusTx.Prelude.== Plutus.V1.Ledger.Ada.lovelaceValueOf tokenCost) = PlutusTx.Prelude.True
+      | PlutusTx.Prelude.otherwise = contextCostCheck xs
 
 
 
