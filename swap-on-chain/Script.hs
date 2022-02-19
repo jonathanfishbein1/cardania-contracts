@@ -45,27 +45,8 @@ instance Ledger.Typed.Scripts.ValidatorTypes TokenSale where
 
 {-# INLINEABLE mkTokenSaleValidator #-}
 mkTokenSaleValidator :: PlutusTx.Prelude.Integer -> PlutusTx.Prelude.Integer -> Plutus.V1.Ledger.Contexts.ScriptContext -> PlutusTx.Prelude.Bool
-mkTokenSaleValidator _ _ context = contextCostCheck currentTxOutputs
-  where
-    info :: Plutus.V1.Ledger.Contexts.TxInfo
-    info = Plutus.V1.Ledger.Contexts.scriptContextTxInfo context
+mkTokenSaleValidator _ _ _ = PlutusTx.Prelude.False
 
-    currentTxOutputs :: [Plutus.V1.Ledger.Contexts.TxOut]
-    currentTxOutputs = Plutus.V1.Ledger.Contexts.txInfoOutputs info
-
-    tokenCost :: PlutusTx.Prelude.Integer
-    tokenCost = 10000000
-
-    sellerAddress :: Plutus.V1.Ledger.Address.Address
-    sellerAddress = Plutus.V1.Ledger.Address.pubKeyHashAddress (Plutus.V1.Ledger.Api.PubKeyHash "eefb5b9dbac4a380296de0655f6ace6c97e9b981eef89a7bf53dcd52")
-
-    contextCostCheck :: [Plutus.V1.Ledger.Contexts.TxOut] -> PlutusTx.Prelude.Bool
-    contextCostCheck [] = PlutusTx.Prelude.traceIfFalse "Incorrect Amount Of ADA Sent To Script Address" PlutusTx.Prelude.False
-    contextCostCheck (x : xs)
-      | (Plutus.V1.Ledger.Contexts.txOutAddress x PlutusTx.Prelude.== sellerAddress)
-          PlutusTx.Prelude.&& (Plutus.V1.Ledger.Contexts.txOutValue x PlutusTx.Prelude.== Plutus.V1.Ledger.Ada.lovelaceValueOf tokenCost) =
-        PlutusTx.Prelude.True
-      | PlutusTx.Prelude.otherwise = contextCostCheck xs
 
 typedValidator :: Ledger.Typed.Scripts.TypedValidator TokenSale
 typedValidator =
