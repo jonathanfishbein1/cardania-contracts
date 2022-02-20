@@ -40,18 +40,18 @@ import qualified Prelude
 data Burn
 
 instance Ledger.Typed.Scripts.ValidatorTypes Burn where
-  type RedeemerType Burn = PlutusTx.Prelude.Integer
-  type DatumType Burn = PlutusTx.Prelude.Integer
+  type RedeemerType Burn = ()
+  type DatumType Burn = ()
 
 {-# INLINEABLE mkBurnValidator #-}
-mkBurnValidator :: PlutusTx.Prelude.Integer -> PlutusTx.Prelude.Integer -> Plutus.V1.Ledger.Contexts.ScriptContext -> PlutusTx.Prelude.Bool
-mkBurnValidator _ _ context = PlutusTx.Prelude.False
+mkBurnValidator :: () -> () -> Plutus.V1.Ledger.Contexts.ScriptContext -> PlutusTx.Prelude.Bool
+mkBurnValidator _ _ _ = PlutusTx.Prelude.False
 
 typedValidator :: Ledger.Typed.Scripts.TypedValidator Burn
 typedValidator =
   Ledger.Typed.Scripts.mkTypedValidator @Burn
     $$(PlutusTx.compile [||mkBurnValidator||])
-    $$(PlutusTx.compile [||Ledger.Typed.Scripts.wrapValidator @PlutusTx.Prelude.Integer @PlutusTx.Prelude.Integer||])
+    $$(PlutusTx.compile [||Ledger.Typed.Scripts.wrapValidator @() @()||])
 
 validator :: Plutus.V1.Ledger.Scripts.Validator
 validator = Ledger.Typed.Scripts.validatorScript typedValidator
