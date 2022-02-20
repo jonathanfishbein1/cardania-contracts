@@ -29,7 +29,7 @@ main =
               Plutus.V1.Ledger.Api.evaluateScriptCounting
                 Plutus.V1.Ledger.Api.Verbose
                 m
-                Script.tokenSaleSBS
+                Script.burnSBS
                 [ Plutus.V1.Ledger.Api.toData (0 :: PlutusTx.Prelude.Integer),
                   Plutus.V1.Ledger.Api.toData (0 :: PlutusTx.Prelude.Integer)
                 ]
@@ -41,7 +41,7 @@ main =
                 Prelude.Left evalErr -> Prelude.print ("Eval Error" :: Prelude.String) Prelude.>> Prelude.print evalErr
                 Prelude.Right exbudget -> Prelude.print ("Ex Budget" :: Prelude.String) Prelude.>> Prelude.print exbudget
       Prelude.Nothing -> Prelude.error "defaultCostModelParams failed"
-    result <- Cardano.Api.writeFileTextEnvelope "./transactions/result.plutus" Prelude.Nothing Script.tokenSaledSerialised
+    result <- Cardano.Api.writeFileTextEnvelope "./transactions/result.plutus" Prelude.Nothing Script.burnSerialised
     case result of
       Prelude.Left err -> Prelude.print Prelude.$ Cardano.Api.displayError err
       Prelude.Right () -> Prelude.return ()

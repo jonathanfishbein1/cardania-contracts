@@ -14,8 +14,8 @@
 {-# OPTIONS_GHC -fno-ignore-interface-pragmas #-}
 
 module Script
-  ( tokenSaledSerialised,
-    tokenSaleSBS,
+  ( burnSerialised,
+    burnSBS,
   )
 where
 
@@ -37,50 +37,30 @@ import qualified PlutusTx.Lift.Class
 import qualified PlutusTx.Prelude
 import qualified Prelude
 
-data TokenSale
+data Burn
 
-instance Ledger.Typed.Scripts.ValidatorTypes TokenSale where
-  type RedeemerType TokenSale = PlutusTx.Prelude.Integer
-  type DatumType TokenSale = PlutusTx.Prelude.Integer
+instance Ledger.Typed.Scripts.ValidatorTypes Burn where
+  type RedeemerType Burn = PlutusTx.Prelude.Integer
+  type DatumType Burn = PlutusTx.Prelude.Integer
 
-{-# INLINEABLE mkTokenSaleValidator #-}
-mkTokenSaleValidator :: PlutusTx.Prelude.Integer -> PlutusTx.Prelude.Integer -> Plutus.V1.Ledger.Contexts.ScriptContext -> PlutusTx.Prelude.Bool
-mkTokenSaleValidator _ _ context = contextCostCheck currentTxOutputs
-  where
-    info :: Plutus.V1.Ledger.Contexts.TxInfo
-    info = Plutus.V1.Ledger.Contexts.scriptContextTxInfo context
+{-# INLINEABLE mkBurnValidator #-}
+mkBurnValidator :: PlutusTx.Prelude.Integer -> PlutusTx.Prelude.Integer -> Plutus.V1.Ledger.Contexts.ScriptContext -> PlutusTx.Prelude.Bool
+mkBurnValidator _ _ context = PlutusTx.Prelude.False
 
-    currentTxOutputs :: [Plutus.V1.Ledger.Contexts.TxOut]
-    currentTxOutputs = Plutus.V1.Ledger.Contexts.txInfoOutputs info
-
-    tokenCost :: PlutusTx.Prelude.Integer
-    tokenCost = 10000000
-
-    sellerAddress :: Plutus.V1.Ledger.Address.Address
-    sellerAddress = Plutus.V1.Ledger.Address.pubKeyHashAddress (Plutus.V1.Ledger.Api.PubKeyHash "eefb5b9dbac4a380296de0655f6ace6c97e9b981eef89a7bf53dcd52")
-
-    contextCostCheck :: [Plutus.V1.Ledger.Contexts.TxOut] -> PlutusTx.Prelude.Bool
-    contextCostCheck [] = PlutusTx.Prelude.traceIfFalse "Incorrect Amount Of ADA Sent To Script Address" PlutusTx.Prelude.False
-    contextCostCheck (x : xs)
-      | (Plutus.V1.Ledger.Contexts.txOutAddress x PlutusTx.Prelude.== sellerAddress)
-          PlutusTx.Prelude.&& (Plutus.V1.Ledger.Contexts.txOutValue x PlutusTx.Prelude.== Plutus.V1.Ledger.Ada.lovelaceValueOf tokenCost) =
-        PlutusTx.Prelude.True
-      | PlutusTx.Prelude.otherwise = contextCostCheck xs
-
-typedValidator :: Ledger.Typed.Scripts.TypedValidator TokenSale
+typedValidator :: Ledger.Typed.Scripts.TypedValidator Burn
 typedValidator =
-  Ledger.Typed.Scripts.mkTypedValidator @TokenSale
-    $$(PlutusTx.compile [||mkTokenSaleValidator||])
+  Ledger.Typed.Scripts.mkTypedValidator @Burn
+    $$(PlutusTx.compile [||mkBurnValidator||])
     $$(PlutusTx.compile [||Ledger.Typed.Scripts.wrapValidator @PlutusTx.Prelude.Integer @PlutusTx.Prelude.Integer||])
 
 validator :: Plutus.V1.Ledger.Scripts.Validator
 validator = Ledger.Typed.Scripts.validatorScript typedValidator
 
-tokenSaleScript :: Plutus.V1.Ledger.Scripts.Script
-tokenSaleScript = Plutus.V1.Ledger.Scripts.unValidatorScript validator
+burnScript :: Plutus.V1.Ledger.Scripts.Script
+burnScript = Plutus.V1.Ledger.Scripts.unValidatorScript validator
 
-tokenSaleSBS :: Data.ByteString.Short.ShortByteString
-tokenSaleSBS = Data.ByteString.Short.toShort PlutusTx.Prelude.. Data.ByteString.Lazy.toStrict PlutusTx.Prelude.$ Codec.Serialise.serialise tokenSaleScript
+burnSBS :: Data.ByteString.Short.ShortByteString
+burnSBS = Data.ByteString.Short.toShort PlutusTx.Prelude.. Data.ByteString.Lazy.toStrict PlutusTx.Prelude.$ Codec.Serialise.serialise burnScript
 
-tokenSaledSerialised :: Cardano.Api.PlutusScript Cardano.Api.PlutusScriptV1
-tokenSaledSerialised = Cardano.Api.Shelley.PlutusScriptSerialised tokenSaleSBS
+burnSerialised :: Cardano.Api.PlutusScript Cardano.Api.PlutusScriptV1
+burnSerialised = Cardano.Api.Shelley.PlutusScriptSerialised burnSBS
