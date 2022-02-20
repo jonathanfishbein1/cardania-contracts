@@ -45,7 +45,7 @@ instance Ledger.Typed.Scripts.ValidatorTypes Burn where
 
 {-# INLINEABLE mkBurnValidator #-}
 mkBurnValidator :: () -> () -> Plutus.V1.Ledger.Contexts.ScriptContext -> PlutusTx.Prelude.Bool
-mkBurnValidator _ _ _ = PlutusTx.Prelude.False
+mkBurnValidator _ _ _ = PlutusTx.Prelude.traceIfFalse "burnt" PlutusTx.Prelude.False
 
 typedValidator :: Ledger.Typed.Scripts.TypedValidator Burn
 typedValidator =
