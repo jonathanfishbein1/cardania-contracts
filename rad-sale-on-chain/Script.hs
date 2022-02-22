@@ -48,7 +48,7 @@ instance Ledger.Typed.Scripts.ValidatorTypes RadSaleOnChain where
 {-# INLINEABLE mkRadSaleOnChainValidator #-}
 mkRadSaleOnChainValidator :: () -> () -> Plutus.V1.Ledger.Contexts.ScriptContext -> PlutusTx.Prelude.Bool
 mkRadSaleOnChainValidator _ _ context
-  | contextCostCheck currentTxOutputs = PlutusTx.Prelude.True
+  | isTxToSeller = PlutusTx.Prelude.True
   | PlutusTx.Prelude.otherwise = PlutusTx.Prelude.traceIfFalse "Incorrect Tx To Script Address" PlutusTx.Prelude.False
   where
     info :: Plutus.V1.Ledger.Contexts.TxInfo
@@ -63,12 +63,14 @@ mkRadSaleOnChainValidator _ _ context
     sellerAddress :: Plutus.V1.Ledger.Api.Address
     sellerAddress = Plutus.V1.Ledger.Address.pubKeyHashAddress (Plutus.V1.Ledger.Crypto.PubKeyHash "eefb5b9dbac4a380296de0655f6ace6c97e9b981eef89a7bf53dcd52")
 
-    contextCostCheck [] = PlutusTx.Prelude.traceIfFalse "Incorrect Amount Of ADA Sent To Script Address" PlutusTx.Prelude.False
-    contextCostCheck (x : xs)
-      | (Plutus.V1.Ledger.Contexts.txOutAddress x PlutusTx.Prelude.== sellerAddress)
-          PlutusTx.Prelude.&& Plutus.V1.Ledger.Contexts.txOutValue x PlutusTx.Prelude.== Ledger.Ada.lovelaceValueOf tokenCost =
-        PlutusTx.Prelude.True
-      | PlutusTx.Prelude.otherwise = contextCostCheck xs
+    isTxToSeller :: PlutusTx.Prelude.Bool
+    isTxToSeller =
+      PlutusTx.Prelude.any
+        ( \x ->
+            (Plutus.V1.Ledger.Contexts.txOutAddress x PlutusTx.Prelude.== sellerAddress)
+              PlutusTx.Prelude.&& Plutus.V1.Ledger.Contexts.txOutValue x PlutusTx.Prelude.== Ledger.Ada.lovelaceValueOf tokenCost
+        )
+        currentTxOutputs
 
 typedValidator :: Ledger.Typed.Scripts.TypedValidator RadSaleOnChain
 typedValidator =
