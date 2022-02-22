@@ -14,8 +14,7 @@
 {-# OPTIONS_GHC -fno-ignore-interface-pragmas #-}
 
 module Script
-  ( rad-sale-on-chainSerialised,
-    rad-sale-on-chainSBS,
+  ( radSaleOnChainSerialised,
   )
 where
 
@@ -37,30 +36,30 @@ import qualified PlutusTx.Lift.Class
 import qualified PlutusTx.Prelude
 import qualified Prelude
 
-data rad-sale-on-chain
+data RadSaleOnChain
 
-instance Ledger.Typed.Scripts.ValidatorTypes rad-sale-on-chain where
-  type RedeemerType rad-sale-on-chain = ()
-  type DatumType rad-sale-on-chain = ()
+instance Ledger.Typed.Scripts.ValidatorTypes RadSaleOnChain where
+  type RedeemerType RadSaleOnChain = ()
+  type DatumType RadSaleOnChain = ()
 
-{-# INLINEABLE mkrad-sale-on-chainValidator #-}
-mkrad-sale-on-chainValidator :: () -> () -> Plutus.V1.Ledger.Contexts.ScriptContext -> PlutusTx.Prelude.Bool
-mkrad-sale-on-chainValidator _ _ _ = PlutusTx.Prelude.traceIfFalse "rad-sale-on-chaint" PlutusTx.Prelude.False
+{-# INLINEABLE mkRadSaleOnChainValidator #-}
+mkRadSaleOnChainValidator :: () -> () -> Plutus.V1.Ledger.Contexts.ScriptContext -> PlutusTx.Prelude.Bool
+mkRadSaleOnChainValidator _ _ _ = PlutusTx.Prelude.traceIfFalse "burnt" PlutusTx.Prelude.False
 
-typedValidator :: Ledger.Typed.Scripts.TypedValidator rad-sale-on-chain
+typedValidator :: Ledger.Typed.Scripts.TypedValidator RadSaleOnChain
 typedValidator =
-  Ledger.Typed.Scripts.mkTypedValidator @rad-sale-on-chain
-    $$(PlutusTx.compile [||mkrad-sale-on-chainValidator||])
+  Ledger.Typed.Scripts.mkTypedValidator @RadSaleOnChain
+    $$(PlutusTx.compile [||mkRadSaleOnChainValidator||])
     $$(PlutusTx.compile [||Ledger.Typed.Scripts.wrapValidator @() @()||])
 
 validator :: Plutus.V1.Ledger.Scripts.Validator
 validator = Ledger.Typed.Scripts.validatorScript typedValidator
 
-rad-sale-on-chainScript :: Plutus.V1.Ledger.Scripts.Script
-rad-sale-on-chainScript = Plutus.V1.Ledger.Scripts.unValidatorScript validator
+radSaleOnChainScript :: Plutus.V1.Ledger.Scripts.Script
+radSaleOnChainScript = Plutus.V1.Ledger.Scripts.unValidatorScript validator
 
-rad-sale-on-chainSBS :: Data.ByteString.Short.ShortByteString
-rad-sale-on-chainSBS = Data.ByteString.Short.toShort PlutusTx.Prelude.. Data.ByteString.Lazy.toStrict PlutusTx.Prelude.$ Codec.Serialise.serialise rad-sale-on-chainScript
+radSaleOnChainSBS :: Data.ByteString.Short.ShortByteString
+radSaleOnChainSBS = Data.ByteString.Short.toShort PlutusTx.Prelude.. Data.ByteString.Lazy.toStrict PlutusTx.Prelude.$ Codec.Serialise.serialise radSaleOnChainScript
 
-rad-sale-on-chainSerialised :: Cardano.Api.PlutusScript Cardano.Api.PlutusScriptV1
-rad-sale-on-chainSerialised = Cardano.Api.Shelley.PlutusScriptSerialised rad-sale-on-chainSBS
+radSaleOnChainSerialised :: Cardano.Api.PlutusScript Cardano.Api.PlutusScriptV1
+radSaleOnChainSerialised = Cardano.Api.Shelley.PlutusScriptSerialised radSaleOnChainSBS

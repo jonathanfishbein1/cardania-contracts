@@ -23,7 +23,7 @@ import qualified Prelude
 main :: Prelude.IO ()
 main =
   do
-    result <- Cardano.Api.writeFileTextEnvelope "./transactions/result.plutus" Prelude.Nothing Script.rad-sale-on-chainSerialised
+    result <- Cardano.Api.writeFileTextEnvelope "./transactions/result.plutus" Prelude.Nothing Script.radSaleOnChainSerialised
     case result of
       Prelude.Left err -> Prelude.print Prelude.$ Cardano.Api.displayError err
       Prelude.Right () -> Prelude.return ()
