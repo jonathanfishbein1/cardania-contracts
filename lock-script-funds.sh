@@ -1,29 +1,29 @@
-cardano-cli query protocol-parameters --testnet-magic 1097911063 --out-file ../burn/transactions/protocol.json
-
 utxoskey=../octoberFestMetaData/minting.skey
 
-paymentAddress="addr_test1vrh0kkuahtz28qpfdhsx2hm2eekf06des8h03xnm757u65sd6egwy"
-scriptAddress=`cardano-cli address build --payment-script-file ../burn/transactions/result.plutus --testnet-magic 1097911063`
-scriptTxOut="$scriptAddress+30000000"
-scriptdatumhash=`cardano-cli transaction hash-script-data --script-data-value 0`
-
-paymentAddressUtxo="db6c226409b47af3e501a6b087023100270e19d367d1fbdb60ce2d2cdae6f57f#0"
+paymentAddress="addr1v8h0kkuahtz28qpfdhsx2hm2eekf06des8h03xnm757u65skjd5pp"
+scriptAddress=`cardano-cli address build --payment-script-file ../rad-sale-on-chain/transactions/result.plutus --mainnet`
+scriptTxOut="$scriptAddress+1800000+1 f0b63bb98a30166333b0c92b54ff8b9ec9d40ef48e991ce86d6cd4ef.524144546f6b656e73"
+scriptTxOutTwo="$scriptAddress+1800000+99 f0b63bb98a30166333b0c92b54ff8b9ec9d40ef48e991ce86d6cd4ef.524144546f6b656e73"
+paymentAddressUtxo="4578889132e1554fcce96a94481a682e8157a50d94867d6e264e579c3ea930f7#0"
 
 cardano-cli transaction build \
   --alonzo-era \
   --cardano-mode \
-  --testnet-magic 1097911063 \
+  --mainnet \
   --tx-in "$paymentAddressUtxo" \
   --tx-out "$scriptTxOut" \
-  --tx-out-datum-hash ${scriptdatumhash} \
+  --tx-out "$scriptTxOutTwo" \
+  --tx-out-datum-hash-file ../rad-sale-on-chain/transactions/unit.json \
   --change-address "$paymentAddress" \
-  --protocol-params-file ~/Documents/burn/transactions/protocol.json \
-  --out-file "../burn/transactions/plutusSubmit.body"
+  --protocol-params-file ~/Documents/rad-sale-on-chain/transactions/protocol.json \
+  --out-file "../rad-sale-on-chain/transactions/rad-sale-on-chain.body"
 
 cardano-cli transaction sign \
-  --tx-body-file "../burn/transactions/plutusSubmit.body" \
+  --tx-body-file "../rad-sale-on-chain/transactions/rad-sale-on-chain.body" \
   --mainnet \
   --signing-key-file "$utxoskey" \
-  --out-file "../burn/transactions/plutusSubmit.tx"
+  --out-file "../rad-sale-on-chain/transactions/rad-sale-on-chain.tx"
 
-cardano-cli transaction submit --tx-file "../burn/transactions/plutusSubmit.tx" --testnet-magic 1097911063
+cardano-cli transaction submit \
+  --mainnet \
+  --tx-file "../rad-sale-on-chain/transactions/rad-sale-on-chain.tx"

@@ -7,7 +7,7 @@ let
 in
 pkgs.haskell-nix.project {
   src = pkgs.haskell-nix.haskellLib.cleanGit {
-    name = "burn";
+    name = "rad-sale-on-chain";
     src = ./.;
   };
   compiler-nix-name = "ghc8107";

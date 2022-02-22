@@ -1,31 +1,28 @@
-cardano-cli query protocol-parameters --testnet-magic 1097911063 --out-file ../burn/transactions/protocol.json
-
 utxoskey=../octoberFestMetaData/minting.skey
 
-paymentAddress="addr_test1vrh0kkuahtz28qpfdhsx2hm2eekf06des8h03xnm757u65sd6egwy"
-paymentAddressUtxo="db6c226409b47af3e501a6b087023100270e19d367d1fbdb60ce2d2cdae6f57f#0"
-scriptAddressUtxo="db6c226409b47af3e501a6b087023100270e19d367d1fbdb60ce2d2cdae6f57f#1"
-paymentTxOut="$paymentAddress+10000000"
-scriptAddress=`cardano-cli address build --payment-script-file ../burn/transactions/result.plutus --testnet-magic 1097911063`
+paymentAddress="addr1v8h0kkuahtz28qpfdhsx2hm2eekf06des8h03xnm757u65skjd5pp"
+paymentAddressUtxo="00fe52686ae4992fbe6200af4340c8db6661fed304905fc160e123e3814e1830#0"
+scriptAddressUtxo="00fe52686ae4992fbe6200af4340c8db6661fed304905fc160e123e3814e1830#2"
+paymentTxOut="$paymentAddress+1800000"
 
 cardano-cli transaction build \
     --alonzo-era \
-    --testnet-magic 1097911063 \
+    --mainnet \
     --tx-in ${scriptAddressUtxo} \
-    --tx-in-script-file ../burn/transactions/result.plutus \
-    --tx-in-datum-value 0 \
-    --tx-in-redeemer-value 0 \
+    --tx-in-script-file ../rad-sale-on-chain/transactions/result.plutus \
+    --tx-in-datum-file ../rad-sale-on-chain/transactions/unit.json \
+    --tx-in-redeemer-file ../rad-sale-on-chain/transactions/unit.json \
     --tx-in-collateral ${paymentAddressUtxo} \
     --tx-out "$paymentTxOut" \
     --change-address "$scriptAddress" \
-    --protocol-params-file ~/Documents/burn/transactions/protocol.json \
-    --out-file ../burn/transactions/test-alonzo.tx
+    --protocol-params-file ~/Documents/rad-sale-on-chain/transactions/protocol.json \
+    --out-file ../rad-sale-on-chain/transactions/redeem.body
 
 cardano-cli transaction sign \
-  --tx-body-file "../burn/transactions/test-alonzo.tx" \
-  --testnet-magic 1097911063 \
+  --tx-body-file "../rad-sale-on-chain/transactions/redeem.body" \
+  --mainnet \
   --signing-key-file "$utxoskey" \
-  --out-file "../burn/transactions/test-alonzo.signed"
+  --out-file "../rad-sale-on-chain/transactions/redeem.tx"
 
-cardano-cli transaction submit --tx-file "../burn/transactions/test-alonzo.signed" --testnet-magic 1097911063
+cardano-cli transaction submit --tx-file "../rad-sale-on-chain/transactions/redeem.tx" --mainnet
 
