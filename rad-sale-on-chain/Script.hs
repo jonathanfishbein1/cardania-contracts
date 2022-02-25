@@ -42,8 +42,8 @@ import qualified PlutusTx.Prelude
 import qualified Prelude
 
 data TokenSaleParams = TokenSaleParams
-  { tokenSellerAddress :: Plutus.V1.Ledger.Api.Address,
-    tokenCost :: !PlutusTx.Prelude.Integer
+  { tokenSellerPublicKeyHash :: Plutus.V1.Ledger.Crypto.PubKeyHash,
+    tokenCost :: PlutusTx.Prelude.Integer
   }
 
 PlutusTx.makeLift ''TokenSaleParams
@@ -51,7 +51,7 @@ PlutusTx.makeLift ''TokenSaleParams
 tokenSaleParams :: TokenSaleParams
 tokenSaleParams =
   TokenSaleParams
-    { tokenSellerAddress =
+    { tokenSellerPublicKeyHash =
         Plutus.V1.Ledger.Crypto.PubKeyHash
           "eefb5b9dbac4a380296de0655f6ace6c97e9b981eef89a7bf53dcd52",
       tokenCost = 10000000
@@ -75,16 +75,16 @@ mkRadSaleOnChainValidator tokenSaleParams _ _ context
     currentTxOutputs :: [Plutus.V1.Ledger.Contexts.TxOut]
     currentTxOutputs = Plutus.V1.Ledger.Contexts.txInfoOutputs info
 
-    tokenCost :: PlutusTx.Prelude.Integer
-    tokenCost = tokenCost tokenSaleParams
+    tkCost :: PlutusTx.Prelude.Integer
+    tkCost = tokenCost tokenSaleParams
 
     isTxToSeller :: PlutusTx.Prelude.Bool
     isTxToSeller =
       Plutus.V1.Ledger.Contexts.valuePaidTo
         info
-        ( tokenSellerAddress tokenSaleParams
+        ( tokenSellerPublicKeyHash tokenSaleParams
         )
-        PlutusTx.Prelude.== Ledger.Ada.lovelaceValueOf tokenCost
+        PlutusTx.Prelude.== Ledger.Ada.lovelaceValueOf tkCost
 
 typedValidator :: TokenSaleParams -> Ledger.Typed.Scripts.TypedValidator RadSaleOnChain
 typedValidator tokenSaleParams =
