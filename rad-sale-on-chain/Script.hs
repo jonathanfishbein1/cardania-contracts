@@ -91,9 +91,6 @@ mkRadSaleOnChainValidator tokenSaleParams datum _ context
     info :: Plutus.V1.Ledger.Contexts.TxInfo
     info = Plutus.V1.Ledger.Contexts.scriptContextTxInfo context
 
-    currentTxOutputs :: [Plutus.V1.Ledger.Contexts.TxOut]
-    currentTxOutputs = Plutus.V1.Ledger.Contexts.txInfoOutputs info
-
     isTxToSeller :: PlutusTx.Prelude.Bool
     isTxToSeller =
       Plutus.V1.Ledger.Contexts.valuePaidTo
