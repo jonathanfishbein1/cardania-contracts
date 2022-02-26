@@ -23,26 +23,39 @@ import qualified Cardano.Api.Shelley
 import qualified Codec.Serialise
 import qualified Data.Aeson
 import qualified Data.ByteString
-import qualified Data.ByteString as Ledger.Value
 import qualified Data.ByteString.Lazy
 import qualified Data.ByteString.Short
-import qualified GHC.Num as Plutus.Prelude
+import qualified GHC.Generics
 import qualified Ledger
 import qualified Ledger.Ada
 import qualified Ledger.Typed.Scripts
 import qualified Plutus.V1.Ledger.Ada
 import qualified Plutus.V1.Ledger.Address
 import qualified Plutus.V1.Ledger.Api
-import qualified Plutus.V1.Ledger.Api as Ledger
 import qualified Plutus.V1.Ledger.Contexts
 import qualified Plutus.V1.Ledger.Crypto
 import qualified Plutus.V1.Ledger.Scripts
+import qualified Plutus.V1.Ledger.Value
 import qualified PlutusTx
 import qualified PlutusTx.Builtins.Class
 import qualified PlutusTx.Builtins.Internal
 import qualified PlutusTx.Lift.Class
 import qualified PlutusTx.Prelude
 import qualified Prelude
+
+data TokenSale = TokenSale
+  { tokenCost :: !PlutusTx.Prelude.Integer,
+    assetClass :: !Plutus.V1.Ledger.Value.AssetClass
+  }
+
+PlutusTx.unstableMakeIsData ''TokenSale
+
+tokenSale :: TokenSale
+tokenSale =
+  TokenSale
+    { tokenCost = 10000000,
+      assetClass = Plutus.V1.Ledger.Value.assetClass (Plutus.V1.Ledger.Api.CurrencySymbol "") (Plutus.V1.Ledger.Api.TokenName "")
+    }
 
 data TokenSaleParams = TokenSaleParams
   { tokenSellerPublicKeyHash :: Plutus.V1.Ledger.Crypto.PubKeyHash,
@@ -51,7 +64,7 @@ data TokenSaleParams = TokenSaleParams
 
 PlutusTx.makeLift ''TokenSaleParams
 
-minLovelace :: Plutus.Prelude.Integer
+minLovelace :: PlutusTx.Prelude.Integer
 minLovelace = 2000000
 
 tokenSaleParams :: TokenSaleParams
@@ -67,10 +80,10 @@ data RadSaleOnChain
 
 instance Ledger.Typed.Scripts.ValidatorTypes RadSaleOnChain where
   type RedeemerType RadSaleOnChain = ()
-  type DatumType RadSaleOnChain = PlutusTx.Prelude.Integer
+  type DatumType RadSaleOnChain = TokenSale
 
 {-# INLINEABLE mkRadSaleOnChainValidator #-}
-mkRadSaleOnChainValidator :: TokenSaleParams -> PlutusTx.Prelude.Integer -> () -> Plutus.V1.Ledger.Contexts.ScriptContext -> PlutusTx.Prelude.Bool
+mkRadSaleOnChainValidator :: TokenSaleParams -> TokenSale -> () -> Plutus.V1.Ledger.Contexts.ScriptContext -> PlutusTx.Prelude.Bool
 mkRadSaleOnChainValidator tokenSaleParams datum _ context
   | isTxToSeller = PlutusTx.Prelude.True
   | PlutusTx.Prelude.otherwise = PlutusTx.Prelude.traceIfFalse "Incorrect output to seller" PlutusTx.Prelude.False
@@ -87,7 +100,7 @@ mkRadSaleOnChainValidator tokenSaleParams datum _ context
         info
         ( tokenSellerPublicKeyHash tokenSaleParams
         )
-        PlutusTx.Prelude.== Ledger.Ada.lovelaceValueOf datum
+        PlutusTx.Prelude.== Ledger.Ada.lovelaceValueOf (tokenCost datum)
 
     tokenValue :: Plutus.V1.Ledger.Api.Value
     tokenValue = Plutus.V1.Ledger.Api.singleton (Plutus.V1.Ledger.Api.CurrencySymbol "") (Plutus.V1.Ledger.Api.TokenName "") 1
@@ -104,7 +117,9 @@ typedValidator :: TokenSaleParams -> Ledger.Typed.Scripts.TypedValidator RadSale
 typedValidator tokenSaleParams =
   Ledger.Typed.Scripts.mkTypedValidator @RadSaleOnChain
     ($$(PlutusTx.compile [||mkRadSaleOnChainValidator||]) `PlutusTx.applyCode` PlutusTx.liftCode tokenSaleParams)
-    $$(PlutusTx.compile [||Ledger.Typed.Scripts.wrapValidator @PlutusTx.Prelude.Integer @()||])
+    $$(PlutusTx.compile [||wrap||])
+  where
+    wrap = Ledger.Typed.Scripts.wrapValidator @TokenSale @()
 
 validator :: Plutus.V1.Ledger.Scripts.Validator
 validator = Ledger.Typed.Scripts.validatorScript (typedValidator tokenSaleParams)
