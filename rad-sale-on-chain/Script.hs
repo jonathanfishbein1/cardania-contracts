@@ -51,8 +51,7 @@ tokenSale =
     }
 
 data TokenSaleParams = TokenSaleParams
-  { tokenSellerPublicKeyHash :: Plutus.V1.Ledger.Crypto.PubKeyHash,
-    tokenBuyerPublicKeyHash :: Plutus.V1.Ledger.Crypto.PubKeyHash
+  { tokenSellerPublicKeyHash :: Plutus.V1.Ledger.Crypto.PubKeyHash
   }
 
 PlutusTx.makeLift ''TokenSaleParams
@@ -64,8 +63,6 @@ tokenSaleParams :: TokenSaleParams
 tokenSaleParams =
   TokenSaleParams
     { tokenSellerPublicKeyHash =
-        "eefb5b9dbac4a380296de0655f6ace6c97e9b981eef89a7bf53dcd52",
-      tokenBuyerPublicKeyHash =
         "eefb5b9dbac4a380296de0655f6ace6c97e9b981eef89a7bf53dcd52"
     }
 
@@ -111,12 +108,14 @@ mkRadSaleOnChainValidator tokenSaleParams datum _ context
         (tokenName)
         1
 
+    tokenBuyerPublicKeyHash :: Plutus.V1.Ledger.Crypto.PubKeyHash
+    tokenBuyerPublicKeyHash = PlutusTx.Prelude.head (Plutus.V1.Ledger.Contexts.txInfoSignatories info)
+
     isTxToBuyer :: PlutusTx.Either.Either PlutusTx.Builtins.Internal.BuiltinString PlutusTx.Prelude.Bool
     isTxToBuyer =
       if ( Plutus.V1.Ledger.Contexts.valuePaidTo
              info
-             ( tokenBuyerPublicKeyHash tokenSaleParams
-             )
+             tokenBuyerPublicKeyHash
              PlutusTx.Prelude.== tokenValue PlutusTx.Prelude.<> Ledger.Ada.lovelaceValueOf minLovelace
          )
         PlutusTx.Prelude.== PlutusTx.Prelude.True
