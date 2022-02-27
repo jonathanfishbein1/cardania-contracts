@@ -55,7 +55,10 @@ tokenSale :: TokenSale
 tokenSale =
   TokenSale
     { tokenCost = 10000000,
-      assetClass = Plutus.V1.Ledger.Value.assetClass (Plutus.V1.Ledger.Api.CurrencySymbol "f2319ead26195a78dc3eb1fff35b98966617864ee12d1e433f78b68a") (Plutus.V1.Ledger.Api.TokenName "434c4153534943424c55453231")
+      assetClass =
+        Plutus.V1.Ledger.Value.assetClass
+          (Plutus.V1.Ledger.Api.CurrencySymbol "f2319ead26195a78dc3eb1fff35b98966617864ee12d1e433f78b68a")
+          (Plutus.V1.Ledger.Api.TokenName "434c4153534943424c55453231")
     }
 
 data TokenSaleParams = TokenSaleParams
@@ -101,7 +104,11 @@ mkRadSaleOnChainValidator tokenSaleParams datum _ context
         PlutusTx.Prelude.== Ledger.Ada.lovelaceValueOf (tokenCost datum)
 
     tokenValue :: Plutus.V1.Ledger.Api.Value
-    tokenValue = Plutus.V1.Ledger.Api.singleton (Plutus.V1.Ledger.Api.CurrencySymbol "") (Plutus.V1.Ledger.Api.TokenName "") 1
+    tokenValue =
+      Plutus.V1.Ledger.Api.singleton
+        (Plutus.V1.Ledger.Api.CurrencySymbol "")
+        (Plutus.V1.Ledger.Api.TokenName "")
+        1
 
     isTxToBuyer :: PlutusTx.Prelude.Bool
     isTxToBuyer =
@@ -126,7 +133,10 @@ radSaleOnChainScript :: Plutus.V1.Ledger.Scripts.Script
 radSaleOnChainScript = Plutus.V1.Ledger.Scripts.unValidatorScript validator
 
 radSaleOnChainSBS :: Data.ByteString.Short.ShortByteString
-radSaleOnChainSBS = Data.ByteString.Short.toShort PlutusTx.Prelude.. Data.ByteString.Lazy.toStrict PlutusTx.Prelude.$ Codec.Serialise.serialise radSaleOnChainScript
+radSaleOnChainSBS =
+  Data.ByteString.Short.toShort
+    PlutusTx.Prelude.. Data.ByteString.Lazy.toStrict
+    PlutusTx.Prelude.$ Codec.Serialise.serialise radSaleOnChainScript
 
 radSaleOnChainSerialised :: Cardano.Api.PlutusScript Cardano.Api.PlutusScriptV1
 radSaleOnChainSerialised = Cardano.Api.Shelley.PlutusScriptSerialised radSaleOnChainSBS
