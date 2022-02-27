@@ -85,6 +85,7 @@ mkRadSaleOnChainValidator tokenSaleParams datum _ context
   | (PlutusTx.Applicative.pure isValid PlutusTx.Applicative.<*> isTxToSeller PlutusTx.Applicative.<*> isTxToBuyer)
       PlutusTx.Prelude.== PlutusTx.Either.Right PlutusTx.Prelude.True =
     PlutusTx.Prelude.True
+  | Ledger.txSignedBy info (tokenSellerPublicKeyHash tokenSaleParams) = PlutusTx.Prelude.True
   | PlutusTx.Prelude.otherwise = PlutusTx.Prelude.traceIfFalse "Incorrect output to seller" PlutusTx.Prelude.False
   where
     info :: Plutus.V1.Ledger.Contexts.TxInfo
