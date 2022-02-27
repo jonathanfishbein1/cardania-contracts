@@ -77,7 +77,7 @@ instance Ledger.Typed.Scripts.ValidatorTypes RadSaleOnChain where
 
 {-# INLINEABLE isValid #-}
 isValid :: PlutusTx.Prelude.Bool -> PlutusTx.Prelude.Bool -> PlutusTx.Prelude.Bool
-isValid txToSeller txToBuyer = PlutusTx.Prelude.True
+isValid txToSeller txToBuyer = txToSeller PlutusTx.Prelude.&& txToBuyer PlutusTx.Prelude.== PlutusTx.Prelude.True
 
 {-# INLINEABLE mkRadSaleOnChainValidator #-}
 mkRadSaleOnChainValidator :: TokenSaleParams -> TokenSale -> () -> Plutus.V1.Ledger.Contexts.ScriptContext -> PlutusTx.Prelude.Bool
