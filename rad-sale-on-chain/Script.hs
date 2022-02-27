@@ -15,6 +15,7 @@
 
 module Script
   ( radSaleOnChainSerialised,
+    tokenSale,
   )
 where
 
@@ -54,7 +55,7 @@ tokenSale :: TokenSale
 tokenSale =
   TokenSale
     { tokenCost = 10000000,
-      assetClass = Plutus.V1.Ledger.Value.assetClass (Plutus.V1.Ledger.Api.CurrencySymbol "") (Plutus.V1.Ledger.Api.TokenName "")
+      assetClass = Plutus.V1.Ledger.Value.assetClass (Plutus.V1.Ledger.Api.CurrencySymbol "f2319ead26195a78dc3eb1fff35b98966617864ee12d1e433f78b68a") (Plutus.V1.Ledger.Api.TokenName "434c4153534943424c55453231")
     }
 
 data TokenSaleParams = TokenSaleParams
