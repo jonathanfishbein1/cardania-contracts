@@ -47,7 +47,7 @@ tokenSale =
       assetClass =
         Plutus.V1.Ledger.Value.assetClass
           (Plutus.V1.Ledger.Api.CurrencySymbol "f2319ead26195a78dc3eb1fff35b98966617864ee12d1e433f78b68a")
-          (Plutus.V1.Ledger.Api.TokenName "434c4153534943424c55453231")
+          (Plutus.V1.Ledger.Api.TokenName "436c617373696342616279426c75653134")
     }
 
 data TokenSaleParams = TokenSaleParams
@@ -82,11 +82,10 @@ isValid txToSeller txToBuyer = PlutusTx.Prelude.True
 {-# INLINEABLE mkRadSaleOnChainValidator #-}
 mkRadSaleOnChainValidator :: TokenSaleParams -> TokenSale -> () -> Plutus.V1.Ledger.Contexts.ScriptContext -> PlutusTx.Prelude.Bool
 mkRadSaleOnChainValidator tokenSaleParams datum _ context
-  | (PlutusTx.Applicative.pure isValid PlutusTx.Applicative.<*> isTxToSeller PlutusTx.Applicative.<*> isTxToBuyer)
-      PlutusTx.Prelude.== PlutusTx.Either.Right PlutusTx.Prelude.True =
-    PlutusTx.Prelude.True
   | Ledger.txSignedBy info (tokenSellerPublicKeyHash tokenSaleParams) = PlutusTx.Prelude.True
-  | PlutusTx.Prelude.otherwise = PlutusTx.Prelude.traceIfFalse "Incorrect output to seller" PlutusTx.Prelude.False
+  | PlutusTx.Prelude.True = case (PlutusTx.Applicative.pure isValid PlutusTx.Applicative.<*> isTxToSeller PlutusTx.Applicative.<*> isTxToBuyer) of
+    PlutusTx.Either.Right PlutusTx.Prelude.True -> PlutusTx.Prelude.True
+    PlutusTx.Either.Left error -> PlutusTx.Prelude.traceIfFalse error PlutusTx.Prelude.False
   where
     info :: Plutus.V1.Ledger.Contexts.TxInfo
     info = Plutus.V1.Ledger.Contexts.scriptContextTxInfo context
@@ -103,11 +102,13 @@ mkRadSaleOnChainValidator tokenSaleParams datum _ context
         then PlutusTx.Either.Right PlutusTx.Prelude.True
         else PlutusTx.Either.Left "Incorrect Tx to seller"
 
+    (currencySymbol, tokenName) = Plutus.V1.Ledger.Value.unAssetClass (assetClass datum)
+
     tokenValue :: Plutus.V1.Ledger.Api.Value
     tokenValue =
       Plutus.V1.Ledger.Api.singleton
-        (Plutus.V1.Ledger.Api.CurrencySymbol "f2319ead26195a78dc3eb1fff35b98966617864ee12d1e433f78b68a")
-        (Plutus.V1.Ledger.Api.TokenName "434c4153534943424c55453231")
+        (currencySymbol)
+        (tokenName)
         1
 
     isTxToBuyer :: PlutusTx.Either.Either PlutusTx.Builtins.Internal.BuiltinString PlutusTx.Prelude.Bool
