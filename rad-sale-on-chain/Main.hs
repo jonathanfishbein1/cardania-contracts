@@ -13,14 +13,9 @@ module Main where
 import qualified Cardano.Api
 import qualified Data.Aeson
 import qualified Data.ByteString.Lazy
-import qualified Data.ByteString.Short
-import qualified Data.String
-import qualified Plutus.V1.Ledger.Api
 import qualified PlutusTx
-import qualified PlutusTx.Builtins.Class
 import qualified PlutusTx.Prelude
 import qualified Script
-import qualified System.Environment
 import qualified Prelude
 
 dataToScriptData :: PlutusTx.Data -> Cardano.Api.ScriptData
@@ -31,7 +26,11 @@ dataToScriptData (PlutusTx.I n) = Cardano.Api.ScriptDataNumber n
 dataToScriptData (PlutusTx.B bs) = Cardano.Api.ScriptDataBytes bs
 
 writeJSON :: PlutusTx.ToData a => Prelude.FilePath -> a -> Prelude.IO ()
-writeJSON file = Data.ByteString.Lazy.writeFile file Prelude.. Data.Aeson.encode Prelude.. Cardano.Api.scriptDataToJson Cardano.Api.ScriptDataJsonDetailedSchema PlutusTx.Prelude.. dataToScriptData PlutusTx.Prelude.. PlutusTx.toData
+writeJSON file =
+  Data.ByteString.Lazy.writeFile file PlutusTx.Prelude.. Data.Aeson.encode
+    PlutusTx.Prelude.. Cardano.Api.scriptDataToJson Cardano.Api.ScriptDataJsonDetailedSchema
+    PlutusTx.Prelude.. dataToScriptData
+    PlutusTx.Prelude.. PlutusTx.toData
 
 writeDatum :: Prelude.IO ()
 writeDatum = writeJSON "/home/jonathan/Documents/rad-sale-on-chain/transactions/datum.json" Script.tokenSale
@@ -39,8 +38,8 @@ writeDatum = writeJSON "/home/jonathan/Documents/rad-sale-on-chain/transactions/
 main :: Prelude.IO ()
 main =
   do
-    result <- Cardano.Api.writeFileTextEnvelope "./transactions/result.plutus" Prelude.Nothing Script.radSaleOnChainSerialised
+    result <- Cardano.Api.writeFileTextEnvelope "./transactions/result.plutus" PlutusTx.Prelude.Nothing Script.radSaleOnChainSerialised
     dat <- writeDatum
     case result of
-      Prelude.Left err -> Prelude.print Prelude.$ Cardano.Api.displayError err
-      Prelude.Right () -> Prelude.return ()
+      PlutusTx.Prelude.Left err -> Prelude.print PlutusTx.Prelude.$ Cardano.Api.displayError err
+      PlutusTx.Prelude.Right () -> Prelude.return ()
