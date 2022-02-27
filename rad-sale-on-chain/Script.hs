@@ -22,27 +22,17 @@ where
 import qualified Cardano.Api
 import qualified Cardano.Api.Shelley
 import qualified Codec.Serialise
-import qualified Data.Aeson
-import qualified Data.ByteString
 import qualified Data.ByteString.Lazy
 import qualified Data.ByteString.Short
-import qualified GHC.Generics
-import qualified Ledger
 import qualified Ledger.Ada
 import qualified Ledger.Typed.Scripts
-import qualified Plutus.V1.Ledger.Ada
-import qualified Plutus.V1.Ledger.Address
 import qualified Plutus.V1.Ledger.Api
 import qualified Plutus.V1.Ledger.Contexts
 import qualified Plutus.V1.Ledger.Crypto
 import qualified Plutus.V1.Ledger.Scripts
 import qualified Plutus.V1.Ledger.Value
 import qualified PlutusTx
-import qualified PlutusTx.Builtins.Class
-import qualified PlutusTx.Builtins.Internal
-import qualified PlutusTx.Lift.Class
 import qualified PlutusTx.Prelude
-import qualified Prelude
 
 data TokenSale = TokenSale
   { tokenCost :: !PlutusTx.Prelude.Integer,
