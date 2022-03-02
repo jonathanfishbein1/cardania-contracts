@@ -121,23 +121,23 @@ mkRadSaleOnChainValidator datum _ context
 
     isTxToBuyer :: PlutusTx.Either.Either PlutusTx.Builtins.Internal.BuiltinString PlutusTx.Prelude.Bool
     isTxToBuyer =
-      case tokenBuyerPaymentPubKeyHashEither of
-        PlutusTx.Either.Right tokenBuyerPaymentPubKeyHash ->
-          let buyerTxOut =
-                PlutusTx.Prelude.filter
-                  ( \o ->
-                      Plutus.V1.Ledger.Contexts.txOutValue o
-                        PlutusTx.Prelude.== (tokenValue PlutusTx.Prelude.<> Ledger.Ada.lovelaceValueOf minLovelace)
-                  )
-                  (Plutus.V1.Ledger.Contexts.txInfoOutputs info)
-           in case buyerTxOut of
-                [] ->
-                  PlutusTx.Either.Left "No output to buyer"
-                [o] ->
-                  PlutusTx.Either.Right PlutusTx.Prelude.$
-                    Plutus.V1.Ledger.Contexts.txOutAddress o
-                      PlutusTx.Prelude.== Ledger.Address.pubKeyHashAddress tokenBuyerPaymentPubKeyHash PlutusTx.Prelude.Nothing
-        PlutusTx.Either.Left error -> PlutusTx.Either.Left error
+      tokenBuyerPaymentPubKeyHashEither
+        PlutusTx.Prelude.>>= ( \tokenBuyerPaymentPubKeyHash ->
+                                 let buyerTxOut =
+                                       PlutusTx.Prelude.filter
+                                         ( \o ->
+                                             Plutus.V1.Ledger.Contexts.txOutValue o
+                                               PlutusTx.Prelude.== (tokenValue PlutusTx.Prelude.<> Ledger.Ada.lovelaceValueOf minLovelace)
+                                         )
+                                         (Plutus.V1.Ledger.Contexts.txInfoOutputs info)
+                                  in case buyerTxOut of
+                                       [] ->
+                                         PlutusTx.Either.Left "No output to buyer"
+                                       [o] ->
+                                         PlutusTx.Either.Right PlutusTx.Prelude.$
+                                           Plutus.V1.Ledger.Contexts.txOutAddress o
+                                             PlutusTx.Prelude.== Ledger.Address.pubKeyHashAddress tokenBuyerPaymentPubKeyHash PlutusTx.Prelude.Nothing
+                             )
 
 typedValidator :: Ledger.Typed.Scripts.TypedValidator RadSaleOnChain
 typedValidator =
