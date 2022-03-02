@@ -122,10 +122,9 @@ mkRadSaleOnChainValidator datum _ context
     getsValue :: Ledger.Address.PaymentPubKeyHash -> Plutus.V1.Ledger.Api.Value -> PlutusTx.Either.Either PlutusTx.Builtins.Internal.BuiltinString PlutusTx.Prelude.Bool
     getsValue h v =
       let buyerTxOut =
-            [ o'
-              | o' <- Plutus.V1.Ledger.Contexts.txInfoOutputs info,
-                Plutus.V1.Ledger.Contexts.txOutValue o' PlutusTx.Prelude.== v
-            ]
+            PlutusTx.Prelude.filter
+              (\o -> Plutus.V1.Ledger.Contexts.txOutValue o PlutusTx.Prelude.== v)
+              (Plutus.V1.Ledger.Contexts.txInfoOutputs info)
        in case buyerTxOut of
             [] ->
               PlutusTx.Either.Left "No output to buyer"
