@@ -138,13 +138,9 @@ mkRadSaleOnChainValidator datum _ context
     isTxToBuyer =
       case tokenBuyerPaymentPubKeyHashEither of
         PlutusTx.Either.Right tokenBuyerPaymentPubKeyHash ->
-          case ( getsValue tokenBuyerPaymentPubKeyHash PlutusTx.Prelude.$
-                   tokenValue PlutusTx.Prelude.<> Ledger.Ada.lovelaceValueOf minLovelace
-               ) of
-            PlutusTx.Either.Right valueExits ->
-              PlutusTx.Either.Right valueExits
-            PlutusTx.Either.Left error ->
-              PlutusTx.Either.Left error
+          ( getsValue tokenBuyerPaymentPubKeyHash PlutusTx.Prelude.$
+              tokenValue PlutusTx.Prelude.<> Ledger.Ada.lovelaceValueOf minLovelace
+          )
         PlutusTx.Either.Left error -> PlutusTx.Either.Left error
 
 typedValidator :: Ledger.Typed.Scripts.TypedValidator RadSaleOnChain
