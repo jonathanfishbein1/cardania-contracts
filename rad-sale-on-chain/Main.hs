@@ -5,12 +5,15 @@ module Main where
 import qualified Cardano.Api
 import qualified Data.Aeson
 import qualified Data.ByteString.Lazy
+import qualified Ledger
 import qualified Ledger.Address
 import qualified Plutus.V1.Ledger.Api
 import qualified Plutus.V1.Ledger.Value
 import qualified PlutusTx
+import qualified PlutusTx.Builtins.Class
 import qualified PlutusTx.Prelude
 import qualified Script
+import qualified System.Environment
 import qualified Prelude
 
 tokenSaleParam :: Script.TokenSaleParam
@@ -42,6 +45,18 @@ writeJSON file =
 main :: Prelude.IO ()
 main =
   do
+    args <- System.Environment.getArgs
+    let [tokenCost, currencySymbol, tokenName, tokenSellerPublicKeyHash] = args
+    let tokenSaleParam =
+          Script.TokenSaleParam
+            { Script.tokenCost = Prelude.read tokenCost,
+              Script.assetClass =
+                Plutus.V1.Ledger.Value.assetClass
+                  (Plutus.V1.Ledger.Api.CurrencySymbol (PlutusTx.Builtins.Class.stringToBuiltinByteString currencySymbol))
+                  (Plutus.V1.Ledger.Api.TokenName (PlutusTx.Builtins.Class.stringToBuiltinByteString tokenName)),
+              Script.tokenSellerPublicKeyHash =
+                Ledger.Address.PaymentPubKeyHash (Ledger.PubKeyHash (PlutusTx.Builtins.Class.stringToBuiltinByteString tokenSellerPublicKeyHash))
+            }
     result <- Cardano.Api.writeFileTextEnvelope "./transactions/result.plutus" PlutusTx.Prelude.Nothing (Script.radSaleOnChainSerialised tokenSaleParam)
     case result of
       PlutusTx.Prelude.Left err -> Prelude.print PlutusTx.Prelude.$ Cardano.Api.displayError err
