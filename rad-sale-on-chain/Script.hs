@@ -10,7 +10,7 @@
 
 module Script
   ( radSaleOnChainSerialised,
-    TokenSaleParam (TokenSaleParam, tokenCost, assetClass, tokenSellerPublicKeyHash),
+    TokenSaleParam (TokenSaleParam, tokenCost, currencySymbol, tokenName),
   )
 where
 
@@ -38,10 +38,11 @@ import qualified Prelude
 
 data TokenSaleParam = TokenSaleParam
   { tokenCost :: !PlutusTx.Prelude.Integer,
-    assetClass :: !Plutus.V1.Ledger.Value.AssetClass,
-    tokenSellerPublicKeyHash :: Ledger.Address.PaymentPubKeyHash
+    currencySymbol :: !Plutus.V1.Ledger.Api.CurrencySymbol,
+    tokenName :: Plutus.V1.Ledger.Api.TokenName
   }
 
+PlutusTx.unstableMakeIsData ''TokenSaleParam
 PlutusTx.makeLift ''TokenSaleParam
 
 minLovelace :: PlutusTx.Prelude.Integer
@@ -51,7 +52,7 @@ data RadSaleOnChain
 
 instance Ledger.Typed.Scripts.ValidatorTypes RadSaleOnChain where
   type RedeemerType RadSaleOnChain = ()
-  type DatumType RadSaleOnChain = ()
+  type DatumType RadSaleOnChain = Ledger.Address.PaymentPubKeyHash
 
 {-# INLINEABLE isValid #-}
 isValid :: PlutusTx.Prelude.Bool -> PlutusTx.Prelude.Bool -> PlutusTx.Prelude.Bool
@@ -63,9 +64,9 @@ isValid
       PlutusTx.Prelude.== PlutusTx.Prelude.True
 
 {-# INLINEABLE mkRadSaleOnChainValidator #-}
-mkRadSaleOnChainValidator :: TokenSaleParam -> () -> () -> Plutus.V1.Ledger.Contexts.ScriptContext -> PlutusTx.Prelude.Bool
-mkRadSaleOnChainValidator tkSaleParam () () context
-  | Ledger.txSignedBy info (Ledger.Address.unPaymentPubKeyHash (tokenSellerPublicKeyHash tkSaleParam)) = PlutusTx.Prelude.True
+mkRadSaleOnChainValidator :: TokenSaleParam -> Ledger.Address.PaymentPubKeyHash -> () -> Plutus.V1.Ledger.Contexts.ScriptContext -> PlutusTx.Prelude.Bool
+mkRadSaleOnChainValidator tkSaleParam tokenSellerPublicKeyHash () context
+  | Ledger.txSignedBy info (Ledger.Address.unPaymentPubKeyHash (tokenSellerPublicKeyHash)) = PlutusTx.Prelude.True
   | PlutusTx.Prelude.True = case ( PlutusTx.Applicative.pure isValid PlutusTx.Applicative.<*> isTxToSeller
                                      PlutusTx.Applicative.<*> isTxToBuyer
                                  ) of
@@ -80,7 +81,7 @@ mkRadSaleOnChainValidator tkSaleParam () () context
       if ( Plutus.V1.Ledger.Contexts.valuePaidTo
              info
              ( Ledger.Address.unPaymentPubKeyHash
-                 ( tokenSellerPublicKeyHash tkSaleParam
+                 ( tokenSellerPublicKeyHash
                  )
              )
              PlutusTx.Prelude.== Ledger.Ada.lovelaceValueOf (tokenCost tkSaleParam)
@@ -107,7 +108,10 @@ mkRadSaleOnChainValidator tkSaleParam () () context
                                          ( \o ->
                                              Plutus.V1.Ledger.Value.assetClassValueOf
                                                (Plutus.V1.Ledger.Contexts.txOutValue o)
-                                               (assetClass tkSaleParam)
+                                               ( Plutus.V1.Ledger.Value.assetClass
+                                                   (currencySymbol tkSaleParam)
+                                                   (tokenName tkSaleParam)
+                                               )
                                                PlutusTx.Prelude.== 1
                                          )
                                          (Plutus.V1.Ledger.Contexts.txInfoOutputs info)
@@ -128,7 +132,7 @@ typedValidator p =
     ($$(PlutusTx.compile [||mkRadSaleOnChainValidator||]) `PlutusTx.applyCode` PlutusTx.liftCode p)
     $$(PlutusTx.compile [||wrap||])
   where
-    wrap = Ledger.Typed.Scripts.wrapValidator @() @()
+    wrap = Ledger.Typed.Scripts.wrapValidator @Ledger.Address.PaymentPubKeyHash @()
 
 validator :: TokenSaleParam -> Plutus.V1.Ledger.Scripts.Validator
 validator = Ledger.Typed.Scripts.validatorScript PlutusTx.Prelude.. typedValidator
