@@ -124,6 +124,8 @@ mkRadSaleOnChainValidator tkSaleParam tokenSellerPublicKeyHash () context
                                             )
                                            then PlutusTx.Either.Right PlutusTx.Prelude.True
                                            else PlutusTx.Either.Left "Wrong buyer address"
+                                       x : xs ->
+                                         PlutusTx.Either.Left "Too many outputs to buyer"
                              )
 
 typedValidator :: TokenSaleParam -> Ledger.Typed.Scripts.TypedValidator RadSaleOnChain
