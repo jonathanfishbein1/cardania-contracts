@@ -20,3 +20,6 @@ executable rad-sale-on-chain
         bytestring,
         cardano-api,
         serialise
+        , cardano-crypto-class
+        , cardano-ledger-core
+        , cardano-ledger-shelley
