@@ -49,6 +49,14 @@ tryReadAddress x = case Cardano.Api.Shelley.deserialiseAddress Cardano.Api.Shell
           Ledger.addressStakingCredential = PlutusTx.Prelude.Nothing
         }
 
+unsafeReadAddress :: Prelude.String -> Ledger.Address
+unsafeReadAddress s =
+  PlutusTx.Prelude.fromMaybe
+    ( Prelude.error PlutusTx.Prelude.$
+        "can't parse " PlutusTx.Prelude.++ s PlutusTx.Prelude.++ " as an address"
+    )
+    PlutusTx.Prelude.$ tryReadAddress s
+
 getCredentials :: Ledger.Address -> PlutusTx.Prelude.Maybe (Ledger.PaymentPubKeyHash, PlutusTx.Prelude.Maybe Ledger.StakePubKeyHash)
 getCredentials (Ledger.Address x y) = case x of
   Plutus.V1.Ledger.Api.ScriptCredential _ -> PlutusTx.Prelude.Nothing
