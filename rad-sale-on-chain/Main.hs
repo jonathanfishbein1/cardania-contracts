@@ -18,6 +18,7 @@ import qualified Ledger
 import qualified Ledger.Address
 import qualified Plutus.V1.Ledger.Address
 import qualified Plutus.V1.Ledger.Api
+import qualified Plutus.V1.Ledger.Crypto
 import qualified Plutus.V1.Ledger.Value
 import qualified PlutusTx
 import qualified PlutusTx.Builtins
@@ -80,17 +81,15 @@ main :: Prelude.IO ()
 main =
   do
     args <- System.Environment.getArgs
-    let [tokenCost, currencySymbol, tokenName] = args
+    let [tokenCost, currencySymbol, tokenName, addy] = args
+    let sellerAddress = unsafeReadAddress addy
+    let (Plutus.V1.Ledger.Api.PubKeyCredential pubKeyCredential) = (Plutus.V1.Ledger.Api.addressCredential sellerAddress)
     let tokenSaleParam =
           Script.TokenSaleParam
             { Script.tokenCost = Prelude.read tokenCost,
               Script.currencySymbol = Data.String.fromString currencySymbol,
               Script.tokenName = Data.String.fromString tokenName,
-              Script.sellerPaymentPubKeyHash =
-                Ledger.Address.PaymentPubKeyHash
-                  ( Plutus.V1.Ledger.Api.PubKeyHash
-                      (PlutusTx.Builtins.Class.stringToBuiltinByteString "eefb5b9dbac4a380296de0655f6ace6c97e9b981eef89a7bf53dcd52")
-                  )
+              Script.sellerPubKeyHash = pubKeyCredential
             }
     result <- Cardano.Api.writeFileTextEnvelope "./transactions/result.plutus" PlutusTx.Prelude.Nothing (Script.radSaleOnChainSerialised tokenSaleParam)
     case result of
