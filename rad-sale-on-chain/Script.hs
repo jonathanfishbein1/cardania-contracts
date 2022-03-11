@@ -7,6 +7,7 @@
 {-# LANGUAGE TypeApplications #-}
 {-# LANGUAGE TypeFamilies #-}
 {-# LANGUAGE NoImplicitPrelude #-}
+{-# LANGUAGE NumericUnderscores #-}
 
 module Script
   ( radSaleOnChainSerialised,
@@ -48,7 +49,7 @@ PlutusTx.unstableMakeIsData ''TokenSaleParam
 PlutusTx.makeLift ''TokenSaleParam
 
 minLovelace :: PlutusTx.Prelude.Integer
-minLovelace = 2000000
+minLovelace = 2_000_000
 
 data RadSaleOnChain
 
