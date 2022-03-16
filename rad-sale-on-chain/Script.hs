@@ -9,6 +9,7 @@
 {-# LANGUAGE TemplateHaskell #-}
 {-# LANGUAGE TypeApplications #-}
 {-# LANGUAGE TypeFamilies #-}
+{-# LANGUAGE TypeOperators #-}
 {-# LANGUAGE NoImplicitPrelude #-}
 
 module Script
@@ -59,6 +60,7 @@ data TokenSaleParam = TokenSaleParam
     tokenName :: Plutus.V1.Ledger.Api.TokenName,
     sellerPubKeyHash :: Ledger.PubKeyHash
   }
+  deriving (Data.Aeson.FromJSON, Schema.ToSchema, GHC.Generics.Generic)
 
 PlutusTx.unstableMakeIsData ''TokenSaleParam
 PlutusTx.makeLift ''TokenSaleParam
@@ -241,6 +243,11 @@ radSaleOnChainSBS p =
 radSaleOnChainSerialised :: TokenSaleParam -> Cardano.Api.PlutusScript Cardano.Api.PlutusScriptV1
 radSaleOnChainSerialised p = Cardano.Api.Shelley.PlutusScriptSerialised (radSaleOnChainSBS p)
 
+type SaleSchema =
+  Plutus.Contract.Endpoint "start" TokenSaleParam
+    Plutus.Contract..\/ Plutus.Contract.Endpoint "buy" TokenSaleParam
+    Plutus.Contract..\/ Plutus.Contract.Endpoint "close" TokenSaleParam
+
 start :: Plutus.Contract.Error.AsContractError e => TokenSaleParam -> Plutus.Contract.Contract w s e ()
 start tokenSaleParam = do
   pkh <- Playground.Contract.ownPaymentPubKeyHash
@@ -298,3 +305,18 @@ close tokenSaleParam = do
       "closed auction for token (%s, %s)"
       (Prelude.show (currencySymbol tokenSaleParam))
       (Prelude.show (tokenName tokenSaleParam))
+
+endpoints :: Plutus.Contract.Contract () SaleSchema Data.Text.Text ()
+endpoints =
+  Plutus.Contract.awaitPromise
+    ( start'
+        `Plutus.Contract.select` buy'
+        `Plutus.Contract.select` close'
+    )
+    PlutusTx.Prelude.>> endpoints
+  where
+    start' = Plutus.Contract.endpoint @"start" start
+    buy' = Plutus.Contract.endpoint @"buy" buy
+    close' = Plutus.Contract.endpoint @"close" close
+
+Playground.Contract.mkSchemaDefinitions ''SaleSchema
