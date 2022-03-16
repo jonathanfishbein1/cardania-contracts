@@ -284,3 +284,17 @@ buy tokenSaleParam = do
       (tokenCost tokenSaleParam)
       (Prelude.show (currencySymbol tokenSaleParam))
       (Prelude.show (tokenName tokenSaleParam))
+
+close :: forall w s e. (Plutus.Contract.Error.AsContractError e) => TokenSaleParam -> Plutus.Contract.Contract w s e ()
+close tokenSaleParam = do
+  pkh <- Plutus.Contract.ownPaymentPubKeyHash
+  let t = Plutus.V1.Ledger.Api.singleton (currencySymbol tokenSaleParam) (tokenName tokenSaleParam) 1
+      tx =
+        Ledger.Constraints.mustPayToPubKey pkh (t PlutusTx.Prelude.<> Ledger.Ada.lovelaceValueOf minLovelace)
+  ledgerTx <- Plutus.Contract.submitTxConstraints (typedValidator tokenSaleParam) tx
+  Data.Functor.void PlutusTx.Prelude.$ Plutus.Contract.awaitTxConfirmed PlutusTx.Prelude.$ Ledger.getCardanoTxId ledgerTx
+  Plutus.Contract.logInfo @Prelude.String PlutusTx.Prelude.$
+    Text.Printf.printf
+      "closed auction for token (%s, %s)"
+      (Prelude.show (currencySymbol tokenSaleParam))
+      (Prelude.show (tokenName tokenSaleParam))
