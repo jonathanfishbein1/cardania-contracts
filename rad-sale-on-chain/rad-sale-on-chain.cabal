@@ -13,6 +13,8 @@ executable rad-sale-on-chain
         plutus-core,
         plutus-ledger-api,
         plutus-ledger,
+        plutus-contract,
+        plutus-ledger-constraints,
         text,
         containers,
         aeson,
@@ -23,3 +25,4 @@ executable rad-sale-on-chain
         , cardano-crypto-class
         , cardano-ledger-core
         , cardano-ledger-shelley
+        , playground-common

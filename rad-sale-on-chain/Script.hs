@@ -24,6 +24,9 @@ import qualified Data.Aeson
 import qualified Data.ByteString.Lazy
 import qualified Data.ByteString.Short
 import qualified Data.Functor
+import qualified Data.Map
+import qualified Data.Text
+import qualified Data.Void
 import qualified GHC.Generics
 import qualified Ledger
 import qualified Ledger.Ada
@@ -239,15 +242,45 @@ radSaleOnChainSerialised :: TokenSaleParam -> Cardano.Api.PlutusScript Cardano.A
 radSaleOnChainSerialised p = Cardano.Api.Shelley.PlutusScriptSerialised (radSaleOnChainSBS p)
 
 start :: Plutus.Contract.Error.AsContractError e => TokenSaleParam -> Plutus.Contract.Contract w s e ()
-start tkSaleParam = do
+start tokenSaleParam = do
   pkh <- Playground.Contract.ownPaymentPubKeyHash
   let v =
-        Plutus.V1.Ledger.Api.singleton (currencySymbol tkSaleParam) (tokenName tkSaleParam) 1
+        Plutus.V1.Ledger.Api.singleton (currencySymbol tokenSaleParam) (tokenName tokenSaleParam) 1
           PlutusTx.Prelude.<> Ledger.Ada.lovelaceValueOf minLovelace
   let tx = Ledger.Constraints.TxConstraints.mustPayToTheScript () v
-  ledgerTx <- Plutus.Contract.submitTxConstraints (typedValidator tkSaleParam) tx
+  ledgerTx <- Plutus.Contract.submitTxConstraints (typedValidator tokenSaleParam) tx
   Data.Functor.void PlutusTx.Prelude.$
     Plutus.Contract.awaitTxConfirmed PlutusTx.Prelude.$
       Ledger.getCardanoTxId ledgerTx
   Plutus.Contract.logInfo @Prelude.String PlutusTx.Prelude.$
     Text.Printf.printf "started auction for token %s" (Prelude.show v)
+
+radSaleHash :: TokenSaleParam -> Ledger.ValidatorHash
+radSaleHash tokenSaleParam = Ledger.Typed.Scripts.validatorHash (typedValidator tokenSaleParam)
+
+scrAddress :: TokenSaleParam -> Ledger.Address
+scrAddress tokenSaleParam = Ledger.Address.scriptAddress (validator tokenSaleParam)
+
+buy :: forall w s e. (Plutus.Contract.Error.AsContractError e) => TokenSaleParam -> Plutus.Contract.Contract w s e ()
+buy tokenSaleParam = do
+  pkh <- Plutus.Contract.ownPaymentPubKeyHash
+  utxos <- Plutus.Contract.utxosAt (scrAddress tokenSaleParam)
+  let v =
+        Plutus.V1.Ledger.Api.singleton (currencySymbol tokenSaleParam) (tokenName tokenSaleParam) 1
+          PlutusTx.Prelude.<> Ledger.Ada.lovelaceValueOf minLovelace
+      tx =
+        Ledger.Constraints.TxConstraints.mustPayToTheScript () (Ledger.Ada.lovelaceValueOf minLovelace)
+          PlutusTx.Prelude.<> Ledger.Constraints.TxConstraints.mustPayToPubKey
+            (Ledger.Address.PaymentPubKeyHash (sellerPubKeyHash tokenSaleParam))
+            (Ledger.Ada.lovelaceValueOf (tokenCost tokenSaleParam))
+          PlutusTx.Prelude.<> Ledger.Constraints.TxConstraints.mustPayToPubKey
+            pkh
+            v
+  ledgerTx <- Plutus.Contract.submitTxConstraints (typedValidator tokenSaleParam) tx
+  Data.Functor.void PlutusTx.Prelude.$ Plutus.Contract.awaitTxConfirmed PlutusTx.Prelude.$ Ledger.getCardanoTxId ledgerTx
+  Plutus.Contract.logInfo @Prelude.String PlutusTx.Prelude.$
+    Text.Printf.printf
+      "made lovelace in auction %s for token (%s, %s)"
+      (tokenCost tokenSaleParam)
+      (Prelude.show (currencySymbol tokenSaleParam))
+      (Prelude.show (tokenName tokenSaleParam))
