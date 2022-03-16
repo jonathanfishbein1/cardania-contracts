@@ -1,13 +1,15 @@
 {-# LANGUAGE DataKinds #-}
+{-# LANGUAGE DeriveAnyClass #-}
+{-# LANGUAGE DeriveGeneric #-}
 {-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE MultiParamTypeClasses #-}
+{-# LANGUAGE NumericUnderscores #-}
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE ScopedTypeVariables #-}
 {-# LANGUAGE TemplateHaskell #-}
 {-# LANGUAGE TypeApplications #-}
 {-# LANGUAGE TypeFamilies #-}
 {-# LANGUAGE NoImplicitPrelude #-}
-{-# LANGUAGE NumericUnderscores #-}
 
 module Script
   ( radSaleOnChainSerialised,
@@ -18,12 +20,20 @@ where
 import qualified Cardano.Api
 import qualified Cardano.Api.Shelley
 import qualified Codec.Serialise
+import qualified Data.Aeson
 import qualified Data.ByteString.Lazy
 import qualified Data.ByteString.Short
+import qualified Data.Functor
+import qualified GHC.Generics
 import qualified Ledger
 import qualified Ledger.Ada
 import qualified Ledger.Address
+import qualified Ledger.Constraints
+import qualified Ledger.Constraints.TxConstraints
 import qualified Ledger.Typed.Scripts
+import qualified Playground.Contract
+import qualified Plutus.Contract
+import qualified Plutus.Contract.Error
 import qualified Plutus.V1.Ledger.Api
 import qualified Plutus.V1.Ledger.Contexts
 import qualified Plutus.V1.Ledger.Crypto
@@ -36,6 +46,8 @@ import qualified PlutusTx.Builtins.Class
 import qualified PlutusTx.Builtins.Internal
 import qualified PlutusTx.Either
 import qualified PlutusTx.Prelude
+import qualified Schema
+import qualified Text.Printf
 import qualified Prelude
 
 data TokenSaleParam = TokenSaleParam
@@ -225,3 +237,17 @@ radSaleOnChainSBS p =
 
 radSaleOnChainSerialised :: TokenSaleParam -> Cardano.Api.PlutusScript Cardano.Api.PlutusScriptV1
 radSaleOnChainSerialised p = Cardano.Api.Shelley.PlutusScriptSerialised (radSaleOnChainSBS p)
+
+start :: Plutus.Contract.Error.AsContractError e => TokenSaleParam -> Plutus.Contract.Contract w s e ()
+start tkSaleParam = do
+  pkh <- Playground.Contract.ownPaymentPubKeyHash
+  let v =
+        Plutus.V1.Ledger.Api.singleton (currencySymbol tkSaleParam) (tokenName tkSaleParam) 1
+          PlutusTx.Prelude.<> Ledger.Ada.lovelaceValueOf minLovelace
+  let tx = Ledger.Constraints.TxConstraints.mustPayToTheScript () v
+  ledgerTx <- Plutus.Contract.submitTxConstraints (typedValidator tkSaleParam) tx
+  Data.Functor.void PlutusTx.Prelude.$
+    Plutus.Contract.awaitTxConfirmed PlutusTx.Prelude.$
+      Ledger.getCardanoTxId ledgerTx
+  Plutus.Contract.logInfo @Prelude.String PlutusTx.Prelude.$
+    Text.Printf.printf "started auction for token %s" (Prelude.show v)
