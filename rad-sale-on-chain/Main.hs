@@ -28,27 +28,37 @@ import qualified Script
 import qualified System.Environment
 import qualified Prelude
 
-credentialLedgerToPlutus :: Cardano.Ledger.Credential.Credential a Cardano.Ledger.Crypto.StandardCrypto -> Plutus.V1.Ledger.Api.Credential
-credentialLedgerToPlutus (Cardano.Ledger.Credential.ScriptHashObj (Cardano.Ledger.Hashes.ScriptHash h)) =
-  Plutus.V1.Ledger.Api.ScriptCredential PlutusTx.Prelude.$
-    Ledger.ValidatorHash PlutusTx.Prelude.$
-      PlutusTx.Builtins.toBuiltin PlutusTx.Prelude.$
-        Cardano.Crypto.Hash.Class.hashToBytes h
+credentialLedgerToPlutus ::
+  Cardano.Ledger.Credential.Credential a Cardano.Ledger.Crypto.StandardCrypto ->
+  Plutus.V1.Ledger.Api.Credential
+credentialLedgerToPlutus
+  ( Cardano.Ledger.Credential.ScriptHashObj
+      (Cardano.Ledger.Hashes.ScriptHash h)
+    ) =
+    Plutus.V1.Ledger.Api.ScriptCredential PlutusTx.Prelude.$
+      Ledger.ValidatorHash PlutusTx.Prelude.$
+        PlutusTx.Builtins.toBuiltin PlutusTx.Prelude.$
+          Cardano.Crypto.Hash.Class.hashToBytes h
 credentialLedgerToPlutus (Cardano.Ledger.Credential.KeyHashObj (Cardano.Ledger.Keys.KeyHash h)) =
   Plutus.V1.Ledger.Api.PubKeyCredential PlutusTx.Prelude.$
     Ledger.PubKeyHash PlutusTx.Prelude.$
       PlutusTx.Builtins.toBuiltin PlutusTx.Prelude.$ Cardano.Crypto.Hash.Class.hashToBytes h
 
-tryReadAddress :: Prelude.String -> PlutusTx.Prelude.Maybe Ledger.Address
-tryReadAddress x = case Cardano.Api.Shelley.deserialiseAddress Cardano.Api.Shelley.AsAddressAny PlutusTx.Prelude.$ Data.Text.pack x of
+tryReadAddress ::
+  Prelude.String ->
+  PlutusTx.Prelude.Maybe Ledger.Address
+tryReadAddress x = case Cardano.Api.Shelley.deserialiseAddress
+  Cardano.Api.Shelley.AsAddressAny
+  PlutusTx.Prelude.$ Data.Text.pack x of
   PlutusTx.Prelude.Nothing -> PlutusTx.Prelude.Nothing
   PlutusTx.Prelude.Just (Cardano.Api.AddressByron _) -> PlutusTx.Prelude.Nothing
-  PlutusTx.Prelude.Just (Cardano.Api.AddressShelley (Cardano.Api.Shelley.ShelleyAddress _ p s)) ->
-    PlutusTx.Prelude.Just
-      Ledger.Address
-        { Ledger.addressCredential = credentialLedgerToPlutus p,
-          Ledger.addressStakingCredential = PlutusTx.Prelude.Nothing
-        }
+  PlutusTx.Prelude.Just
+    (Cardano.Api.AddressShelley (Cardano.Api.Shelley.ShelleyAddress _ p s)) ->
+      PlutusTx.Prelude.Just
+        Ledger.Address
+          { Ledger.addressCredential = credentialLedgerToPlutus p,
+            Ledger.addressStakingCredential = PlutusTx.Prelude.Nothing
+          }
 
 unsafeReadAddress :: Prelude.String -> Ledger.Address
 unsafeReadAddress s =
@@ -58,22 +68,34 @@ unsafeReadAddress s =
     )
     PlutusTx.Prelude.$ tryReadAddress s
 
-getCredentials :: Ledger.Address -> PlutusTx.Prelude.Maybe (Ledger.PaymentPubKeyHash, PlutusTx.Prelude.Maybe Ledger.StakePubKeyHash)
+getCredentials ::
+  Ledger.Address ->
+  PlutusTx.Prelude.Maybe (Ledger.PaymentPubKeyHash, PlutusTx.Prelude.Maybe Ledger.StakePubKeyHash)
 getCredentials (Ledger.Address x y) = case x of
   Plutus.V1.Ledger.Api.ScriptCredential _ -> PlutusTx.Prelude.Nothing
   Plutus.V1.Ledger.Api.PubKeyCredential pkh ->
     let ppkh = Ledger.PaymentPubKeyHash pkh
      in case y of
-          PlutusTx.Prelude.Nothing -> PlutusTx.Prelude.Just (ppkh, PlutusTx.Prelude.Nothing)
-          PlutusTx.Prelude.Just (Plutus.V1.Ledger.Api.StakingPtr _ _ _) -> PlutusTx.Prelude.Nothing
+          PlutusTx.Prelude.Nothing ->
+            PlutusTx.Prelude.Just
+              (ppkh, PlutusTx.Prelude.Nothing)
+          PlutusTx.Prelude.Just (Plutus.V1.Ledger.Api.StakingPtr _ _ _) ->
+            PlutusTx.Prelude.Nothing
           PlutusTx.Prelude.Just (Plutus.V1.Ledger.Api.StakingHash h) -> case h of
-            Plutus.V1.Ledger.Api.ScriptCredential _ -> PlutusTx.Prelude.Nothing
-            Plutus.V1.Ledger.Api.PubKeyCredential pkh' -> PlutusTx.Prelude.Just (ppkh, PlutusTx.Prelude.Just PlutusTx.Prelude.$ Ledger.StakePubKeyHash pkh')
+            Plutus.V1.Ledger.Api.ScriptCredential _ ->
+              PlutusTx.Prelude.Nothing
+            Plutus.V1.Ledger.Api.PubKeyCredential pkh' ->
+              PlutusTx.Prelude.Just
+                (ppkh, PlutusTx.Prelude.Just PlutusTx.Prelude.$ Ledger.StakePubKeyHash pkh')
 
 unsafePaymentPubKeyHash :: Ledger.Address -> Ledger.PaymentPubKeyHash
 unsafePaymentPubKeyHash addr =
   PlutusTx.Prelude.maybe
-    (Prelude.error PlutusTx.Prelude.$ "script address " PlutusTx.Prelude.++ Prelude.show addr PlutusTx.Prelude.++ " does not contain a payment key")
+    ( Prelude.error PlutusTx.Prelude.$
+        "script address "
+          PlutusTx.Prelude.++ Prelude.show addr
+          PlutusTx.Prelude.++ " does not contain a payment key"
+    )
     PlutusTx.Prelude.fst
     PlutusTx.Prelude.$ getCredentials addr
 
@@ -83,7 +105,8 @@ main =
     args <- System.Environment.getArgs
     let [tokenCost, currencySymbol, tokenName, addy] = args
     let sellerAddress = unsafeReadAddress addy
-    let (Plutus.V1.Ledger.Api.PubKeyCredential pubKeyCredential) = (Plutus.V1.Ledger.Api.addressCredential sellerAddress)
+    let (Plutus.V1.Ledger.Api.PubKeyCredential pubKeyCredential) =
+          (Plutus.V1.Ledger.Api.addressCredential sellerAddress)
     let tokenSaleParam =
           Script.TokenSaleParam
             { Script.tokenCost = Prelude.read tokenCost,
@@ -91,7 +114,11 @@ main =
               Script.tokenName = Data.String.fromString tokenName,
               Script.sellerPubKeyHash = pubKeyCredential
             }
-    result <- Cardano.Api.writeFileTextEnvelope "./transactions/result.plutus" PlutusTx.Prelude.Nothing (Script.radSaleOnChainSerialised tokenSaleParam)
+    result <-
+      Cardano.Api.writeFileTextEnvelope
+        "./transactions/result.plutus"
+        PlutusTx.Prelude.Nothing
+        (Script.radSaleOnChainSerialised tokenSaleParam)
     case result of
       PlutusTx.Prelude.Left err -> Prelude.print PlutusTx.Prelude.$ Cardano.Api.displayError err
       PlutusTx.Prelude.Right () -> Prelude.return ()

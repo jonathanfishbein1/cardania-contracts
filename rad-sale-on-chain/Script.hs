@@ -14,7 +14,13 @@
 
 module Script
   ( radSaleOnChainSerialised,
-    TokenSaleParam (TokenSaleParam, tokenCost, currencySymbol, tokenName, sellerPubKeyHash),
+    TokenSaleParam
+      ( TokenSaleParam,
+        tokenCost,
+        currencySymbol,
+        tokenName,
+        sellerPubKeyHash
+      ),
   )
 where
 
@@ -75,7 +81,12 @@ instance Ledger.Typed.Scripts.ValidatorTypes RadSaleOnChain where
   type DatumType RadSaleOnChain = ()
 
 {-# INLINEABLE isValid #-}
-isValid :: PlutusTx.Prelude.Bool -> PlutusTx.Prelude.Bool -> PlutusTx.Prelude.Bool -> PlutusTx.Prelude.Bool -> PlutusTx.Prelude.Bool
+isValid ::
+  PlutusTx.Prelude.Bool ->
+  PlutusTx.Prelude.Bool ->
+  PlutusTx.Prelude.Bool ->
+  PlutusTx.Prelude.Bool ->
+  PlutusTx.Prelude.Bool
 isValid
   txToSeller
   txToBuyer
@@ -88,42 +99,66 @@ isValid
       PlutusTx.Prelude.== PlutusTx.Prelude.True
 
 {-# INLINEABLE mkRadSaleOnChainValidator #-}
-mkRadSaleOnChainValidator :: TokenSaleParam -> () -> () -> Plutus.V1.Ledger.Contexts.ScriptContext -> PlutusTx.Prelude.Bool
+mkRadSaleOnChainValidator ::
+  TokenSaleParam ->
+  () ->
+  () ->
+  Plutus.V1.Ledger.Contexts.ScriptContext ->
+  PlutusTx.Prelude.Bool
 mkRadSaleOnChainValidator tkSaleParam () () context
-  | Ledger.txSignedBy info ((sellerPubKeyHash tkSaleParam)) = PlutusTx.Prelude.True
-  | PlutusTx.Prelude.True = case ( PlutusTx.Applicative.pure isValid PlutusTx.Applicative.<*> isTxToSeller
-                                     PlutusTx.Applicative.<*> isTxToBuyer
-                                     PlutusTx.Applicative.<*> correctOutputDatum
-                                     PlutusTx.Applicative.<*> correctScriptOutputValue
-                                 ) of
-    PlutusTx.Either.Right PlutusTx.Prelude.True -> PlutusTx.Prelude.True
-    PlutusTx.Either.Left error -> PlutusTx.Prelude.traceIfFalse error PlutusTx.Prelude.False
+  | Ledger.txSignedBy
+      info
+      ((sellerPubKeyHash tkSaleParam)) =
+    PlutusTx.Prelude.True
+  | PlutusTx.Prelude.True =
+    case ( PlutusTx.Applicative.pure isValid
+             PlutusTx.Applicative.<*> isTxToSeller
+             PlutusTx.Applicative.<*> isTxToBuyer
+             PlutusTx.Applicative.<*> correctOutputDatum
+             PlutusTx.Applicative.<*> correctScriptOutputValue
+         ) of
+      PlutusTx.Either.Right PlutusTx.Prelude.True -> PlutusTx.Prelude.True
+      PlutusTx.Either.Left error ->
+        PlutusTx.Prelude.traceIfFalse error PlutusTx.Prelude.False
   where
     info :: Plutus.V1.Ledger.Contexts.TxInfo
     info = Plutus.V1.Ledger.Contexts.scriptContextTxInfo context
 
-    isTxToSeller :: PlutusTx.Either.Either PlutusTx.Builtins.Internal.BuiltinString PlutusTx.Prelude.Bool
+    isTxToSeller ::
+      PlutusTx.Either.Either
+        PlutusTx.Builtins.Internal.BuiltinString
+        PlutusTx.Prelude.Bool
     isTxToSeller =
       if ( Plutus.V1.Ledger.Contexts.valuePaidTo
              info
              ( sellerPubKeyHash tkSaleParam
              )
-             PlutusTx.Prelude.== Ledger.Ada.lovelaceValueOf (tokenCost tkSaleParam)
+             PlutusTx.Prelude.== Ledger.Ada.lovelaceValueOf
+               (tokenCost tkSaleParam)
          )
         PlutusTx.Prelude.== PlutusTx.Prelude.True
         then PlutusTx.Either.Right PlutusTx.Prelude.True
         else PlutusTx.Either.Left "Incorrect Tx to seller"
 
-    tokenBuyerPaymentPubKeyHashEither :: PlutusTx.Either.Either PlutusTx.Builtins.Internal.BuiltinString Ledger.Address.PaymentPubKeyHash
+    tokenBuyerPaymentPubKeyHashEither ::
+      PlutusTx.Either.Either
+        PlutusTx.Builtins.Internal.BuiltinString
+        Ledger.Address.PaymentPubKeyHash
     tokenBuyerPaymentPubKeyHashEither =
-      if PlutusTx.Prelude.length (Plutus.V1.Ledger.Contexts.txInfoSignatories info) PlutusTx.Prelude.> 0
+      if PlutusTx.Prelude.length
+        (Plutus.V1.Ledger.Contexts.txInfoSignatories info)
+        PlutusTx.Prelude.> 0
         then
           PlutusTx.Either.Right PlutusTx.Prelude.$
             Ledger.Address.PaymentPubKeyHash PlutusTx.Prelude.$
-              PlutusTx.Prelude.head (Plutus.V1.Ledger.Contexts.txInfoSignatories info)
+              PlutusTx.Prelude.head
+                (Plutus.V1.Ledger.Contexts.txInfoSignatories info)
         else PlutusTx.Either.Left "No signer"
 
-    isTxToBuyer :: PlutusTx.Either.Either PlutusTx.Builtins.Internal.BuiltinString PlutusTx.Prelude.Bool
+    isTxToBuyer ::
+      PlutusTx.Either.Either
+        PlutusTx.Builtins.Internal.BuiltinString
+        PlutusTx.Prelude.Bool
     isTxToBuyer =
       tokenBuyerPaymentPubKeyHashEither
         PlutusTx.Prelude.>>= ( \tokenBuyerPaymentPubKeyHash ->
@@ -138,7 +173,9 @@ mkRadSaleOnChainValidator tkSaleParam () () context
                                                )
                                                PlutusTx.Prelude.== 1
                                                PlutusTx.Prelude.&& ( Plutus.V1.Ledger.Contexts.txOutAddress o
-                                                                       PlutusTx.Prelude.== Ledger.Address.pubKeyHashAddress tokenBuyerPaymentPubKeyHash PlutusTx.Prelude.Nothing
+                                                                       PlutusTx.Prelude.== Ledger.Address.pubKeyHashAddress
+                                                                         tokenBuyerPaymentPubKeyHash
+                                                                         PlutusTx.Prelude.Nothing
                                                                    )
                                          )
                                          (Plutus.V1.Ledger.Contexts.txInfoOutputs info)
@@ -151,7 +188,10 @@ mkRadSaleOnChainValidator tkSaleParam () () context
                                          PlutusTx.Either.Left "Too many outputs to buyer"
                              )
 
-    correctOutputDatum :: PlutusTx.Either.Either PlutusTx.Builtins.Internal.BuiltinString PlutusTx.Prelude.Bool
+    correctOutputDatum ::
+      PlutusTx.Either.Either
+        PlutusTx.Builtins.Internal.BuiltinString
+        PlutusTx.Prelude.Bool
     correctOutputDatum = case Plutus.V1.Ledger.Contexts.getContinuingOutputs context of
       [o] ->
         let cOutDat =
@@ -164,8 +204,10 @@ mkRadSaleOnChainValidator tkSaleParam () () context
                                                                 )
                                      )
          in case cOutDat of
-              PlutusTx.Prelude.Nothing -> PlutusTx.Either.Left "Error converting txOutDatum to unit"
-              PlutusTx.Prelude.Just val -> PlutusTx.Either.Right val
+              PlutusTx.Prelude.Nothing ->
+                PlutusTx.Either.Left "Error converting txOutDatum to unit"
+              PlutusTx.Prelude.Just val ->
+                PlutusTx.Either.Right val
       _ -> PlutusTx.Either.Left "No continuing output"
 
     scriptInputValue :: PlutusTx.Prelude.Maybe Plutus.V1.Ledger.Value.Value
@@ -178,10 +220,17 @@ mkRadSaleOnChainValidator tkSaleParam () () context
                                    )
                              )
 
-    flippedAssetClassValueOf :: Plutus.V1.Ledger.Value.AssetClass -> Plutus.V1.Ledger.Value.Value -> PlutusTx.Prelude.Integer
-    flippedAssetClassValueOf = PlutusTx.Base.flip Plutus.V1.Ledger.Value.assetClassValueOf
+    flippedAssetClassValueOf ::
+      Plutus.V1.Ledger.Value.AssetClass ->
+      Plutus.V1.Ledger.Value.Value ->
+      PlutusTx.Prelude.Integer
+    flippedAssetClassValueOf =
+      PlutusTx.Base.flip
+        Plutus.V1.Ledger.Value.assetClassValueOf
 
-    quantityOfNativeTokenBeforeMaybe :: PlutusTx.Prelude.Maybe PlutusTx.Prelude.Integer
+    quantityOfNativeTokenBeforeMaybe ::
+      PlutusTx.Prelude.Maybe
+        PlutusTx.Prelude.Integer
     quantityOfNativeTokenBeforeMaybe =
       PlutusTx.Prelude.fmap
         ( flippedAssetClassValueOf
@@ -192,7 +241,9 @@ mkRadSaleOnChainValidator tkSaleParam () () context
         )
         scriptInputValue
 
-    quantityOfNativeTokenAfterMaybe :: PlutusTx.Prelude.Maybe Plutus.V1.Ledger.Value.Value
+    quantityOfNativeTokenAfterMaybe ::
+      PlutusTx.Prelude.Maybe
+        Plutus.V1.Ledger.Value.Value
     quantityOfNativeTokenAfterMaybe =
       PlutusTx.Prelude.fmap
         ( \quantityOfNativeTokenBefore ->
@@ -203,47 +254,74 @@ mkRadSaleOnChainValidator tkSaleParam () () context
         )
         quantityOfNativeTokenBeforeMaybe
 
-    quantityOfNativeTokenAfter :: PlutusTx.Either.Either PlutusTx.Builtins.Internal.BuiltinString Plutus.V1.Ledger.Value.Value
+    quantityOfNativeTokenAfter ::
+      PlutusTx.Either.Either
+        PlutusTx.Builtins.Internal.BuiltinString
+        Plutus.V1.Ledger.Value.Value
     quantityOfNativeTokenAfter = case quantityOfNativeTokenAfterMaybe of
-      PlutusTx.Prelude.Nothing -> PlutusTx.Prelude.Left "Error getting native token from input"
-      PlutusTx.Prelude.Just value -> PlutusTx.Prelude.Right value
+      PlutusTx.Prelude.Nothing ->
+        PlutusTx.Prelude.Left "Error getting native token from input"
+      PlutusTx.Prelude.Just value ->
+        PlutusTx.Prelude.Right value
 
-    correctScriptOutputValue :: PlutusTx.Either.Either PlutusTx.Builtins.Internal.BuiltinString PlutusTx.Prelude.Bool
+    correctScriptOutputValue ::
+      PlutusTx.Either.Either
+        PlutusTx.Builtins.Internal.BuiltinString
+        PlutusTx.Prelude.Bool
     correctScriptOutputValue =
       quantityOfNativeTokenAfter
         PlutusTx.Prelude.>>= ( \nativeTokenValue ->
                                  if PlutusTx.Prelude.any
-                                   (\output -> Plutus.V1.Ledger.Contexts.txOutValue output PlutusTx.Prelude.== nativeTokenValue PlutusTx.Prelude.<> Ledger.Ada.lovelaceValueOf minLovelace)
+                                   ( \output ->
+                                       Plutus.V1.Ledger.Contexts.txOutValue output
+                                         PlutusTx.Prelude.== nativeTokenValue
+                                           PlutusTx.Prelude.<> Ledger.Ada.lovelaceValueOf minLovelace
+                                   )
                                    (Plutus.V1.Ledger.Contexts.getContinuingOutputs context)
                                    PlutusTx.Prelude.== PlutusTx.Prelude.True
                                    then PlutusTx.Prelude.Right PlutusTx.Prelude.True
                                    else PlutusTx.Prelude.Left "No output to script"
                              )
 
-typedValidator :: TokenSaleParam -> Ledger.Typed.Scripts.TypedValidator RadSaleOnChain
+typedValidator ::
+  TokenSaleParam ->
+  Ledger.Typed.Scripts.TypedValidator RadSaleOnChain
 typedValidator p =
   Ledger.Typed.Scripts.mkTypedValidator @RadSaleOnChain
-    ($$(PlutusTx.compile [||mkRadSaleOnChainValidator||]) `PlutusTx.applyCode` PlutusTx.liftCode p)
+    ( $$(PlutusTx.compile [||mkRadSaleOnChainValidator||])
+        `PlutusTx.applyCode` PlutusTx.liftCode p
+    )
     $$(PlutusTx.compile [||wrap||])
   where
     wrap = Ledger.Typed.Scripts.wrapValidator @() @()
 
 validator :: TokenSaleParam -> Plutus.V1.Ledger.Scripts.Validator
-validator = Ledger.Typed.Scripts.validatorScript PlutusTx.Prelude.. typedValidator
+validator =
+  Ledger.Typed.Scripts.validatorScript
+    PlutusTx.Prelude.. typedValidator
 
 type SaleSchema =
   Plutus.Contract.Endpoint "start" TokenSaleParam
     Plutus.Contract..\/ Plutus.Contract.Endpoint "buy" TokenSaleParam
     Plutus.Contract..\/ Plutus.Contract.Endpoint "close" TokenSaleParam
 
-start :: Plutus.Contract.Error.AsContractError e => TokenSaleParam -> Plutus.Contract.Contract w s e ()
+start ::
+  Plutus.Contract.Error.AsContractError e =>
+  TokenSaleParam ->
+  Plutus.Contract.Contract w s e ()
 start tokenSaleParam = do
   pkh <- Playground.Contract.ownPaymentPubKeyHash
   let v =
-        Plutus.V1.Ledger.Api.singleton (currencySymbol tokenSaleParam) (tokenName tokenSaleParam) 1
+        Plutus.V1.Ledger.Api.singleton
+          (currencySymbol tokenSaleParam)
+          (tokenName tokenSaleParam)
+          1
           PlutusTx.Prelude.<> Ledger.Ada.lovelaceValueOf minLovelace
   let tx = Ledger.Constraints.TxConstraints.mustPayToTheScript () v
-  ledgerTx <- Plutus.Contract.submitTxConstraints (typedValidator tokenSaleParam) tx
+  ledgerTx <-
+    Plutus.Contract.submitTxConstraints
+      (typedValidator tokenSaleParam)
+      tx
   Data.Functor.void PlutusTx.Prelude.$
     Plutus.Contract.awaitTxConfirmed PlutusTx.Prelude.$
       Ledger.getCardanoTxId ledgerTx
@@ -251,28 +329,45 @@ start tokenSaleParam = do
     Text.Printf.printf "started auction for token %s" (Prelude.show v)
 
 radSaleHash :: TokenSaleParam -> Ledger.ValidatorHash
-radSaleHash tokenSaleParam = Ledger.Typed.Scripts.validatorHash (typedValidator tokenSaleParam)
+radSaleHash tokenSaleParam =
+  Ledger.Typed.Scripts.validatorHash
+    (typedValidator tokenSaleParam)
 
 scrAddress :: TokenSaleParam -> Ledger.Address
-scrAddress tokenSaleParam = Ledger.Address.scriptAddress (validator tokenSaleParam)
+scrAddress tokenSaleParam =
+  Ledger.Address.scriptAddress
+    (validator tokenSaleParam)
 
-buy :: forall w s e. (Plutus.Contract.Error.AsContractError e) => TokenSaleParam -> Plutus.Contract.Contract w s e ()
+buy ::
+  forall w s e.
+  (Plutus.Contract.Error.AsContractError e) =>
+  TokenSaleParam ->
+  Plutus.Contract.Contract w s e ()
 buy tokenSaleParam = do
   pkh <- Plutus.Contract.ownPaymentPubKeyHash
   utxos <- Plutus.Contract.utxosAt (scrAddress tokenSaleParam)
   let v =
-        Plutus.V1.Ledger.Api.singleton (currencySymbol tokenSaleParam) (tokenName tokenSaleParam) 1
+        Plutus.V1.Ledger.Api.singleton
+          (currencySymbol tokenSaleParam)
+          (tokenName tokenSaleParam)
+          1
           PlutusTx.Prelude.<> Ledger.Ada.lovelaceValueOf minLovelace
       tx =
-        Ledger.Constraints.TxConstraints.mustPayToTheScript () (Ledger.Ada.lovelaceValueOf minLovelace)
+        Ledger.Constraints.TxConstraints.mustPayToTheScript
+          ()
+          (Ledger.Ada.lovelaceValueOf minLovelace)
           PlutusTx.Prelude.<> Ledger.Constraints.TxConstraints.mustPayToPubKey
             (Ledger.Address.PaymentPubKeyHash (sellerPubKeyHash tokenSaleParam))
             (Ledger.Ada.lovelaceValueOf (tokenCost tokenSaleParam))
           PlutusTx.Prelude.<> Ledger.Constraints.TxConstraints.mustPayToPubKey
             pkh
             v
-  ledgerTx <- Plutus.Contract.submitTxConstraints (typedValidator tokenSaleParam) tx
-  Data.Functor.void PlutusTx.Prelude.$ Plutus.Contract.awaitTxConfirmed PlutusTx.Prelude.$ Ledger.getCardanoTxId ledgerTx
+  ledgerTx <-
+    Plutus.Contract.submitTxConstraints
+      (typedValidator tokenSaleParam)
+      tx
+  Data.Functor.void PlutusTx.Prelude.$
+    Plutus.Contract.awaitTxConfirmed PlutusTx.Prelude.$ Ledger.getCardanoTxId ledgerTx
   Plutus.Contract.logInfo @Prelude.String PlutusTx.Prelude.$
     Text.Printf.printf
       "made lovelace in auction %s for token (%s, %s)"
@@ -280,14 +375,27 @@ buy tokenSaleParam = do
       (Prelude.show (currencySymbol tokenSaleParam))
       (Prelude.show (tokenName tokenSaleParam))
 
-close :: forall w s e. (Plutus.Contract.Error.AsContractError e) => TokenSaleParam -> Plutus.Contract.Contract w s e ()
+close ::
+  forall w s e.
+  (Plutus.Contract.Error.AsContractError e) =>
+  TokenSaleParam ->
+  Plutus.Contract.Contract w s e ()
 close tokenSaleParam = do
   pkh <- Plutus.Contract.ownPaymentPubKeyHash
-  let t = Plutus.V1.Ledger.Api.singleton (currencySymbol tokenSaleParam) (tokenName tokenSaleParam) 1
+  let t =
+        Plutus.V1.Ledger.Api.singleton
+          (currencySymbol tokenSaleParam)
+          (tokenName tokenSaleParam)
+          1
       tx =
-        Ledger.Constraints.mustPayToPubKey pkh (t PlutusTx.Prelude.<> Ledger.Ada.lovelaceValueOf minLovelace)
+        Ledger.Constraints.mustPayToPubKey
+          pkh
+          ( t
+              PlutusTx.Prelude.<> Ledger.Ada.lovelaceValueOf minLovelace
+          )
   ledgerTx <- Plutus.Contract.submitTxConstraints (typedValidator tokenSaleParam) tx
-  Data.Functor.void PlutusTx.Prelude.$ Plutus.Contract.awaitTxConfirmed PlutusTx.Prelude.$ Ledger.getCardanoTxId ledgerTx
+  Data.Functor.void PlutusTx.Prelude.$
+    Plutus.Contract.awaitTxConfirmed PlutusTx.Prelude.$ Ledger.getCardanoTxId ledgerTx
   Plutus.Contract.logInfo @Prelude.String PlutusTx.Prelude.$
     Text.Printf.printf
       "closed auction for token (%s, %s)"
@@ -309,13 +417,19 @@ endpoints =
 
 Playground.Contract.mkSchemaDefinitions ''SaleSchema
 
-myToken :: KnownCurrency
-myToken = KnownCurrency (ValidatorHash "f") "Token" (TokenName "T" :| [])
+myToken :: Playground.Contract.KnownCurrency
+myToken =
+  Playground.Contract.KnownCurrency
+    (Plutus.V1.Ledger.Scripts.ValidatorHash "f")
+    "Token"
+    (Plutus.V1.Ledger.Value.TokenName "T" Playground.Contract.:| [])
 
-mkKnownCurrencies ['myToken]
+-- Playground.Contract.mkKnownCurrencies ['myToken]
 
 radSaleOnChainScript :: TokenSaleParam -> Plutus.V1.Ledger.Scripts.Script
-radSaleOnChainScript = Plutus.V1.Ledger.Scripts.unValidatorScript PlutusTx.Prelude.. validator
+radSaleOnChainScript =
+  Plutus.V1.Ledger.Scripts.unValidatorScript
+    PlutusTx.Prelude.. validator
 
 radSaleOnChainSBS :: TokenSaleParam -> Data.ByteString.Short.ShortByteString
 radSaleOnChainSBS p =
@@ -323,5 +437,7 @@ radSaleOnChainSBS p =
     PlutusTx.Prelude.. Data.ByteString.Lazy.toStrict
     PlutusTx.Prelude.$ Codec.Serialise.serialise (radSaleOnChainScript p)
 
-radSaleOnChainSerialised :: TokenSaleParam -> Cardano.Api.PlutusScript Cardano.Api.PlutusScriptV1
+radSaleOnChainSerialised ::
+  TokenSaleParam ->
+  Cardano.Api.PlutusScript Cardano.Api.PlutusScriptV1
 radSaleOnChainSerialised p = Cardano.Api.Shelley.PlutusScriptSerialised (radSaleOnChainSBS p)
