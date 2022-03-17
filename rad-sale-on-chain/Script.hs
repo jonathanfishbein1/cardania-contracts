@@ -231,18 +231,6 @@ typedValidator p =
 validator :: TokenSaleParam -> Plutus.V1.Ledger.Scripts.Validator
 validator = Ledger.Typed.Scripts.validatorScript PlutusTx.Prelude.. typedValidator
 
-radSaleOnChainScript :: TokenSaleParam -> Plutus.V1.Ledger.Scripts.Script
-radSaleOnChainScript = Plutus.V1.Ledger.Scripts.unValidatorScript PlutusTx.Prelude.. validator
-
-radSaleOnChainSBS :: TokenSaleParam -> Data.ByteString.Short.ShortByteString
-radSaleOnChainSBS p =
-  Data.ByteString.Short.toShort
-    PlutusTx.Prelude.. Data.ByteString.Lazy.toStrict
-    PlutusTx.Prelude.$ Codec.Serialise.serialise (radSaleOnChainScript p)
-
-radSaleOnChainSerialised :: TokenSaleParam -> Cardano.Api.PlutusScript Cardano.Api.PlutusScriptV1
-radSaleOnChainSerialised p = Cardano.Api.Shelley.PlutusScriptSerialised (radSaleOnChainSBS p)
-
 type SaleSchema =
   Plutus.Contract.Endpoint "start" TokenSaleParam
     Plutus.Contract..\/ Plutus.Contract.Endpoint "buy" TokenSaleParam
@@ -320,3 +308,20 @@ endpoints =
     close' = Plutus.Contract.endpoint @"close" close
 
 Playground.Contract.mkSchemaDefinitions ''SaleSchema
+
+myToken :: KnownCurrency
+myToken = KnownCurrency (ValidatorHash "f") "Token" (TokenName "T" :| [])
+
+mkKnownCurrencies ['myToken]
+
+radSaleOnChainScript :: TokenSaleParam -> Plutus.V1.Ledger.Scripts.Script
+radSaleOnChainScript = Plutus.V1.Ledger.Scripts.unValidatorScript PlutusTx.Prelude.. validator
+
+radSaleOnChainSBS :: TokenSaleParam -> Data.ByteString.Short.ShortByteString
+radSaleOnChainSBS p =
+  Data.ByteString.Short.toShort
+    PlutusTx.Prelude.. Data.ByteString.Lazy.toStrict
+    PlutusTx.Prelude.$ Codec.Serialise.serialise (radSaleOnChainScript p)
+
+radSaleOnChainSerialised :: TokenSaleParam -> Cardano.Api.PlutusScript Cardano.Api.PlutusScriptV1
+radSaleOnChainSerialised p = Cardano.Api.Shelley.PlutusScriptSerialised (radSaleOnChainSBS p)
