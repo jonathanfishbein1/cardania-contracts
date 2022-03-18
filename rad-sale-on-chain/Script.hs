@@ -27,6 +27,7 @@ where
 import qualified Cardano.Api
 import qualified Cardano.Api.Shelley
 import qualified Codec.Serialise
+import qualified Control.Monad.Freer.Extras
 import qualified Data.Aeson
 import qualified Data.ByteString.Lazy
 import qualified Data.ByteString.Short
@@ -44,6 +45,7 @@ import qualified Ledger.Typed.Scripts
 import qualified Playground.Contract
 import qualified Plutus.Contract
 import qualified Plutus.Contract.Error
+import qualified Plutus.Trace
 import qualified Plutus.V1.Ledger.Api
 import qualified Plutus.V1.Ledger.Contexts
 import qualified Plutus.V1.Ledger.Crypto
@@ -58,6 +60,7 @@ import qualified PlutusTx.Either
 import qualified PlutusTx.Prelude
 import qualified Schema
 import qualified Text.Printf
+import qualified Wallet.Emulator.Wallet
 import qualified Prelude
 
 data TokenSaleParam = TokenSaleParam
@@ -429,6 +432,35 @@ myToken =
     (Plutus.V1.Ledger.Value.TokenName "CardaniaFounderWhite" Playground.Contract.:| [])
 
 --Playground.Contract.mkKnownCurrencies ['myToken]
+
+myTrace :: Plutus.Trace.EmulatorTrace ()
+myTrace = do
+  h1 <-
+    Plutus.Trace.activateContractWallet
+      (Wallet.Emulator.Wallet.knownWallet 1)
+      endpoints
+  h2 <-
+    Plutus.Trace.activateContractWallet
+      (Wallet.Emulator.Wallet.knownWallet 2)
+      endpoints
+  Plutus.Trace.callEndpoint @"start" h1 PlutusTx.Prelude.$
+    TokenSaleParam
+      { tokenCost = 10000000,
+        currencySymbol = "641593ca39c5cbd3eb314533841d53e61ebf6ee7a0ec7c391652f31e",
+        tokenName = "CardaniaFounderWhite",
+        sellerPubKeyHash =
+          Ledger.Address.unPaymentPubKeyHash PlutusTx.Prelude.$
+            Wallet.Emulator.Wallet.mockWalletPaymentPubKeyHash PlutusTx.Prelude.$
+              Wallet.Emulator.Wallet.knownWallet 1
+      }
+
+test :: Prelude.IO ()
+test = Plutus.Trace.runEmulatorTraceIO myTrace
+
+-- Data.Functor.void PlutusTx.Prelude.$ waitUntilSlot 20
+-- callEndpoint @"grab" h2 ()
+-- s <- waitNSlots 2
+-- Control.Monad.Freer.Extras.logInfo PlutusTx.Prelude.$ "reached " ++ Prelude.show s
 
 radSaleOnChainScript :: TokenSaleParam -> Plutus.V1.Ledger.Scripts.Script
 radSaleOnChainScript =

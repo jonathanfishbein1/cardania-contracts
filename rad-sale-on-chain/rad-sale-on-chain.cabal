@@ -26,3 +26,4 @@ executable rad-sale-on-chain
         , cardano-ledger-core
         , cardano-ledger-shelley
         , playground-common
+         , freer-extras
