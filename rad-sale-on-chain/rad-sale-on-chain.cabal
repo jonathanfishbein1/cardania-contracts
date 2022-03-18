@@ -27,3 +27,29 @@ executable rad-sale-on-chain
         , cardano-ledger-shelley
         , playground-common
          , freer-extras
+
+executable emulator
+    main-is: Emulator.hs
+    other-modules:    Script
+    default-language: Haskell2010
+    build-depends:
+        base,
+        plutus-tx-plugin,
+        plutus-tx,
+        plutus-core,
+        plutus-ledger-api,
+        plutus-ledger,
+        plutus-contract,
+        plutus-ledger-constraints,
+        text,
+        containers,
+        aeson,
+        flat,
+        bytestring,
+        cardano-api,
+        serialise
+        , cardano-crypto-class
+        , cardano-ledger-core
+        , cardano-ledger-shelley
+        , playground-common
+            , freer-extras
