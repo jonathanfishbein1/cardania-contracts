@@ -63,10 +63,15 @@ import qualified Prelude
 data TokenSaleParam = TokenSaleParam
   { tokenCost :: !PlutusTx.Prelude.Integer,
     currencySymbol :: !Plutus.V1.Ledger.Api.CurrencySymbol,
-    tokenName :: Plutus.V1.Ledger.Api.TokenName,
-    sellerPubKeyHash :: Ledger.PubKeyHash
+    tokenName :: !Plutus.V1.Ledger.Api.TokenName,
+    sellerPubKeyHash :: !Ledger.PubKeyHash
   }
-  deriving (Data.Aeson.FromJSON, Schema.ToSchema, GHC.Generics.Generic)
+  deriving
+    ( Data.Aeson.FromJSON,
+      Data.Aeson.ToJSON,
+      Schema.ToSchema,
+      GHC.Generics.Generic
+    )
 
 PlutusTx.unstableMakeIsData ''TokenSaleParam
 PlutusTx.makeLift ''TokenSaleParam
@@ -310,12 +315,11 @@ start ::
   TokenSaleParam ->
   Plutus.Contract.Contract w s e ()
 start tokenSaleParam = do
-  pkh <- Playground.Contract.ownPaymentPubKeyHash
   let v =
         Plutus.V1.Ledger.Api.singleton
           (currencySymbol tokenSaleParam)
           (tokenName tokenSaleParam)
-          1
+          100
           PlutusTx.Prelude.<> Ledger.Ada.lovelaceValueOf minLovelace
   let tx = Ledger.Constraints.TxConstraints.mustPayToTheScript () v
   ledgerTx <-
@@ -420,11 +424,11 @@ Playground.Contract.mkSchemaDefinitions ''SaleSchema
 myToken :: Playground.Contract.KnownCurrency
 myToken =
   Playground.Contract.KnownCurrency
-    (Plutus.V1.Ledger.Scripts.ValidatorHash "f")
+    (Plutus.V1.Ledger.Scripts.ValidatorHash "641593ca39c5cbd3eb314533841d53e61ebf6ee7a0ec7c391652f31e")
     "Token"
-    (Plutus.V1.Ledger.Value.TokenName "T" Playground.Contract.:| [])
+    (Plutus.V1.Ledger.Value.TokenName "CardaniaFounderWhite" Playground.Contract.:| [])
 
--- Playground.Contract.mkKnownCurrencies ['myToken]
+--Playground.Contract.mkKnownCurrencies ['myToken]
 
 radSaleOnChainScript :: TokenSaleParam -> Plutus.V1.Ledger.Scripts.Script
 radSaleOnChainScript =
