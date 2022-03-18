@@ -44,7 +44,6 @@ import qualified Ledger.Constraints.TxConstraints
 import qualified Ledger.Typed.Scripts
 import qualified Playground.Contract
 import qualified Plutus.Contract
-import qualified Plutus.Contract.Error
 import qualified Plutus.Trace
 import qualified Plutus.V1.Ledger.Api
 import qualified Plutus.V1.Ledger.Contexts
@@ -314,7 +313,7 @@ type SaleSchema =
     Plutus.Contract..\/ Plutus.Contract.Endpoint "close" TokenSaleParam
 
 start ::
-  Plutus.Contract.Error.AsContractError e =>
+  Plutus.Contract.AsContractError e =>
   TokenSaleParam ->
   Plutus.Contract.Contract w s e ()
 start tokenSaleParam = do
@@ -347,7 +346,7 @@ scrAddress tokenSaleParam =
 
 buy ::
   forall w s e.
-  (Plutus.Contract.Error.AsContractError e) =>
+  (Plutus.Contract.AsContractError e) =>
   TokenSaleParam ->
   Plutus.Contract.Contract w s e ()
 buy tokenSaleParam = do
@@ -384,7 +383,7 @@ buy tokenSaleParam = do
 
 close ::
   forall w s e.
-  (Plutus.Contract.Error.AsContractError e) =>
+  (Plutus.Contract.AsContractError e) =>
   TokenSaleParam ->
   Plutus.Contract.Contract w s e ()
 close tokenSaleParam = do
