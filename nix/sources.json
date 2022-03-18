@@ -5,10 +5,10 @@
         "homepage": "https://input-output-hk.github.io/haskell.nix",
         "owner": "input-output-hk",
         "repo": "haskell.nix",
-        "rev": "95b3617b2af0a04c04f16e4b88df291587f6a418",
-        "sha256": "0p7na8ii7mnrmyhrhm1h051yxgqra6vxzsj7yzxp7l37lhwzkqza",
+        "rev": "1ca99326b2e71d8e52bb64f7a7831011abec2f09",
+        "sha256": "15f8w7j0aidw4z5aliskbpr49r4wyw54yf30vi58wys8hn391kzd",
         "type": "tarball",
-        "url": "https://github.com/input-output-hk/haskell.nix/archive/95b3617b2af0a04c04f16e4b88df291587f6a418.tar.gz",
+        "url": "https://github.com/input-output-hk/haskell.nix/archive/1ca99326b2e71d8e52bb64f7a7831011abec2f09.tar.gz",
         "url_template": "https://github.com/<owner>/<repo>/archive/<rev>.tar.gz"
     },
     "niv": {
@@ -21,30 +21,6 @@
         "sha256": "17mirpsx5wyw262fpsd6n6m47jcgw8k2bwcp1iwdnrlzy4dhcgqh",
         "type": "tarball",
         "url": "https://github.com/nmattia/niv/archive/65a61b147f307d24bfd0a5cd56ce7d7b7cc61d2e.tar.gz",
-        "url_template": "https://github.com/<owner>/<repo>/archive/<rev>.tar.gz"
-    },
-    "nixpkgs": {
-        "branch": "release-20.03",
-        "description": "Nix Packages collection",
-        "homepage": "",
-        "owner": "NixOS",
-        "repo": "nixpkgs",
-        "rev": "eb73405ecceb1dc505b7cbbd234f8f94165e2696",
-        "sha256": "06k21wbyhhvq2f1xczszh3c2934p0m02by3l2ixvd6nkwrqklax7",
-        "type": "tarball",
-        "url": "https://github.com/NixOS/nixpkgs/archive/eb73405ecceb1dc505b7cbbd234f8f94165e2696.tar.gz",
-        "url_template": "https://github.com/<owner>/<repo>/archive/<rev>.tar.gz"
-    },
-    "plutus": {
-        "branch": "master",
-        "description": "The Plutus language implementation and tools",
-        "homepage": "",
-        "owner": "input-output-hk",
-        "repo": "plutus",
-        "rev": "36b437b44e9d4addba97c7f87ff91dbb6ab59338",
-        "sha256": "1c2qlq5gbc801y281whcrmnn2kfn4mjq7sk0w1qn8fphff7j4vfs",
-        "type": "tarball",
-        "url": "https://github.com/input-output-hk/plutus/archive/36b437b44e9d4addba97c7f87ff91dbb6ab59338.tar.gz",
         "url_template": "https://github.com/<owner>/<repo>/archive/<rev>.tar.gz"
     }
 }
