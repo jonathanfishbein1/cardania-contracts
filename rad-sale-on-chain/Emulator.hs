@@ -57,7 +57,7 @@ import qualified Prelude
 
 tokenSaleParam =
   Script.TokenSaleParam
-    { Script.tokenCost = 10000000,
+    { Script.tokenCost = 10_000_000,
       Script.currencySymbol = "641593ca39c5cbd3eb314533841d53e61ebf6ee7a0ec7c391652f31e",
       Script.tokenName = "CardaniaFounderWhite",
       Script.sellerPubKeyHash =
