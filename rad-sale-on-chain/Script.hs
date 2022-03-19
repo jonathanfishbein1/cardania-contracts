@@ -21,6 +21,7 @@ module Script
         tokenName,
         sellerPubKeyHash
       ),
+    minLovelace,
     endpoints,
   )
 where
@@ -322,7 +323,7 @@ start tokenSaleParam = do
         Plutus.V1.Ledger.Api.singleton
           (currencySymbol tokenSaleParam)
           (tokenName tokenSaleParam)
-          100
+          1
           PlutusTx.Prelude.<> Ledger.Ada.lovelaceValueOf minLovelace
   let tx = Ledger.Constraints.TxConstraints.mustPayToTheScript () v
   ledgerTx <-

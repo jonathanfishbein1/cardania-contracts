@@ -21,6 +21,7 @@ import qualified Control.Monad.Freer.Extras
 import qualified Data.Aeson
 import qualified Data.ByteString.Lazy
 import qualified Data.ByteString.Short
+import qualified Data.Default
 import qualified Data.Functor
 import qualified Data.Map
 import qualified Data.Text
@@ -35,6 +36,7 @@ import qualified Ledger.Typed.Scripts
 import qualified Playground.Contract
 import qualified Plutus.Contract
 import qualified Plutus.Trace
+import qualified Plutus.Trace.Emulator
 import qualified Plutus.V1.Ledger.Api
 import qualified Plutus.V1.Ledger.Contexts
 import qualified Plutus.V1.Ledger.Crypto
@@ -74,8 +76,25 @@ myTrace = do
               Wallet.Emulator.Wallet.knownWallet 1
       }
 
+v =
+  Plutus.V1.Ledger.Api.singleton
+    "641593ca39c5cbd3eb314533841d53e61ebf6ee7a0ec7c391652f31e"
+    "CardaniaFounderWhite"
+    1
+    PlutusTx.Prelude.<> Ledger.Ada.lovelaceValueOf 10000000
+
+emulatorConfig :: Plutus.Trace.Emulator.EmulatorConfig
+emulatorConfig =
+  Plutus.Trace.EmulatorConfig
+    { Plutus.Trace._initialChainState =
+        PlutusTx.Prelude.Left
+          (Data.Map.singleton (Wallet.Emulator.Wallet.knownWallet 1) v),
+      Plutus.Trace._slotConfig = Data.Default.def,
+      Plutus.Trace._feeConfig = Data.Default.def
+    }
+
 test :: Prelude.IO ()
-test = Plutus.Trace.runEmulatorTraceIO myTrace
+test = Plutus.Trace.runEmulatorTraceIO' Data.Default.def emulatorConfig myTrace
 
 main :: Prelude.IO ()
 main = test

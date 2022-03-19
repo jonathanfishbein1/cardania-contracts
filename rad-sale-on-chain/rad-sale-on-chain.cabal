@@ -53,3 +53,4 @@ executable emulator
         , cardano-ledger-shelley
         , playground-common
             , freer-extras
+        , data-default
