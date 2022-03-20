@@ -51,16 +51,16 @@ tokenSaleParam =
             Wallet.Emulator.Wallet.knownWallet 1
     }
 
-tokenValue :: Plutus.V1.Ledger.Value.Value
-tokenValue =
+walletOneValue :: Plutus.V1.Ledger.Value.Value
+walletOneValue =
   Plutus.V1.Ledger.Api.singleton
     "641593ca39c5cbd3eb314533841d53e61ebf6ee7a0ec7c391652f31e"
     "CardaniaFounderWhite"
     1
-    PlutusTx.Prelude.<> Ledger.Ada.lovelaceValueOf 10000000
+    PlutusTx.Prelude.<> Ledger.Ada.lovelaceValueOf 100_000_000
 
-walletValue :: Plutus.V1.Ledger.Value.Value
-walletValue =
+walletTwoValue :: Plutus.V1.Ledger.Value.Value
+walletTwoValue =
   Ledger.Ada.lovelaceValueOf 100_000_000
 
 emulatorConfig :: Plutus.Trace.Emulator.EmulatorConfig
@@ -69,8 +69,8 @@ emulatorConfig =
     { Plutus.Trace._initialChainState =
         PlutusTx.Prelude.Left PlutusTx.Prelude.$
           Data.Map.fromList
-            [ ((Wallet.Emulator.Wallet.knownWallet 1), tokenValue),
-              ((Wallet.Emulator.Wallet.knownWallet 2), walletValue)
+            [ ((Wallet.Emulator.Wallet.knownWallet 1), walletOneValue),
+              ((Wallet.Emulator.Wallet.knownWallet 2), walletTwoValue)
             ],
       Plutus.Trace._slotConfig = Data.Default.def,
       Plutus.Trace._feeConfig = Data.Default.def
