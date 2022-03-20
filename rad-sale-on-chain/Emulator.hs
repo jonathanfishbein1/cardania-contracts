@@ -14,27 +14,18 @@
 
 module Main (main) where
 
-import qualified Cardano.Api
-import qualified Cardano.Api.Shelley
-import qualified Codec.Serialise
+
 import qualified Control.Monad.Freer.Extras
-import qualified Data.Aeson
-import qualified Data.ByteString.Lazy
-import qualified Data.ByteString.Short
 import qualified Data.Default
 import qualified Data.Functor
 import qualified Data.Map
-import qualified Data.Text
 import qualified Data.Void
-import qualified GHC.Generics
 import qualified Ledger
 import qualified Ledger.Ada
 import qualified Ledger.Address
 import qualified Ledger.Constraints
 import qualified Ledger.Constraints.TxConstraints
 import qualified Ledger.Typed.Scripts
-import qualified Playground.Contract
-import qualified Plutus.Contract
 import qualified Plutus.Trace
 import qualified Plutus.Trace.Emulator
 import qualified Plutus.V1.Ledger.Api
@@ -43,18 +34,13 @@ import qualified Plutus.V1.Ledger.Crypto
 import qualified Plutus.V1.Ledger.Scripts
 import qualified Plutus.V1.Ledger.Value
 import qualified PlutusTx
-import qualified PlutusTx.Applicative
-import qualified PlutusTx.Base
-import qualified PlutusTx.Builtins.Class
-import qualified PlutusTx.Builtins.Internal
-import qualified PlutusTx.Either
 import qualified PlutusTx.Prelude
-import qualified Schema
 import qualified Script
 import qualified Text.Printf
 import qualified Wallet.Emulator.Wallet
 import qualified Prelude
 
+tokenSaleParam :: Script.TokenSaleParam
 tokenSaleParam =
   Script.TokenSaleParam
     { Script.tokenCost = 10_000_000,
@@ -65,25 +51,6 @@ tokenSaleParam =
           Wallet.Emulator.Wallet.mockWalletPaymentPubKeyHash PlutusTx.Prelude.$
             Wallet.Emulator.Wallet.knownWallet 1
     }
-
-myTrace :: Plutus.Trace.EmulatorTrace ()
-myTrace = do
-  h1 <-
-    Plutus.Trace.activateContractWallet
-      (Wallet.Emulator.Wallet.knownWallet 1)
-      Script.endpoints
-  h2 <-
-    Plutus.Trace.activateContractWallet
-      (Wallet.Emulator.Wallet.knownWallet 2)
-      Script.endpoints
-  Plutus.Trace.callEndpoint @"start" h1 PlutusTx.Prelude.$
-    tokenSaleParam
-  s <- Plutus.Trace.Emulator.waitNSlots 2
-  Plutus.Trace.callEndpoint @"buy" h2 PlutusTx.Prelude.$
-    tokenSaleParam
-  s2 <- Plutus.Trace.Emulator.waitNSlots 2
-  Control.Monad.Freer.Extras.logInfo PlutusTx.Prelude.$
-    "reached " PlutusTx.Prelude.++ Prelude.show 1
 
 tokenValue :: Plutus.V1.Ledger.Value.Value
 tokenValue =
@@ -104,11 +71,30 @@ emulatorConfig =
         PlutusTx.Prelude.Left PlutusTx.Prelude.$
           Data.Map.fromList
             [ ((Wallet.Emulator.Wallet.knownWallet 1), tokenValue),
-              ((Wallet.Emulator.Wallet.knownWallet 2), walletValue)
+              ((Wallet.Emulator.Wallet.knownWallet 2), walletValue),
             ],
       Plutus.Trace._slotConfig = Data.Default.def,
       Plutus.Trace._feeConfig = Data.Default.def
     }
+
+myTrace :: Plutus.Trace.EmulatorTrace ()
+myTrace = do
+  h1 <-
+    Plutus.Trace.activateContractWallet
+      (Wallet.Emulator.Wallet.knownWallet 1)
+      Script.endpoints
+  h2 <-
+    Plutus.Trace.activateContractWallet
+      (Wallet.Emulator.Wallet.knownWallet 2)
+      Script.endpoints
+  Plutus.Trace.callEndpoint @"start" h1 PlutusTx.Prelude.$
+    tokenSaleParam
+  s <- Plutus.Trace.Emulator.waitNSlots 2
+  Plutus.Trace.callEndpoint @"buy" h2 PlutusTx.Prelude.$
+    tokenSaleParam
+  s2 <- Plutus.Trace.Emulator.waitNSlots 2
+  Control.Monad.Freer.Extras.logInfo PlutusTx.Prelude.$
+    "reached " PlutusTx.Prelude.++ Prelude.show 1
 
 test :: Prelude.IO ()
 test = Plutus.Trace.runEmulatorTraceIO' Data.Default.def emulatorConfig myTrace
