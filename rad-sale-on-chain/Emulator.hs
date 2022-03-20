@@ -14,7 +14,6 @@
 
 module Main (main) where
 
-
 import qualified Control.Monad.Freer.Extras
 import qualified Data.Default
 import qualified Data.Functor
@@ -71,7 +70,7 @@ emulatorConfig =
         PlutusTx.Prelude.Left PlutusTx.Prelude.$
           Data.Map.fromList
             [ ((Wallet.Emulator.Wallet.knownWallet 1), tokenValue),
-              ((Wallet.Emulator.Wallet.knownWallet 2), walletValue),
+              ((Wallet.Emulator.Wallet.knownWallet 2), walletValue)
             ],
       Plutus.Trace._slotConfig = Data.Default.def,
       Plutus.Trace._feeConfig = Data.Default.def
