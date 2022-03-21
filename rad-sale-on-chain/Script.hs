@@ -363,9 +363,11 @@ buy tokenSaleParam = do
   let utxosList = Data.Map.toList scriptUtxos
       utxoOref = PlutusTx.Prelude.fst (PlutusTx.Prelude.head utxosList)
   let lookups =
-        Ledger.Constraints.typedValidatorLookups (typedValidator tokenSaleParam)
-          Data.Semigroup.<> Ledger.Constraints.otherScript (validator tokenSaleParam)
-          Data.Semigroup.<> Ledger.Constraints.unspentOutputs scriptUtxos
+        Data.Monoid.mconcat
+          [ Ledger.Constraints.typedValidatorLookups (typedValidator tokenSaleParam),
+            Ledger.Constraints.otherScript (validator tokenSaleParam),
+            Ledger.Constraints.unspentOutputs scriptUtxos
+          ]
 
       tx =
         PlutusTx.Prelude.mconcat
@@ -382,14 +384,7 @@ buy tokenSaleParam = do
               pkh
               v
           ]
-  --,
-  -- ( PlutusTx.Prelude.mconcat
-  --     [ Ledger.Constraints.TxConstraints.mustSpendScriptOutput
-  --         oref
-  --         Plutus.V1.Ledger.Scripts.unitRedeemer
-  --       | oref <- s
-  --     ]
-  -- )
+
   Plutus.Contract.logInfo @Prelude.String PlutusTx.Prelude.$
     Text.Printf.printf
       "made lovelace in auction %s"
