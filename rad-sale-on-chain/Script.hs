@@ -357,9 +357,8 @@ buy ::
 buy tokenSaleParam = do
   pkh <- Plutus.Contract.ownPaymentPubKeyHash
   scriptUtxos <-
-    -- Data.Map.filter isSuitable
-    --   PlutusTx.Prelude.<$>
-    Plutus.Contract.utxosAt (scrAddress tokenSaleParam)
+    Data.Map.filter isSuitable
+      PlutusTx.Prelude.<$> Plutus.Contract.utxosAt (scrAddress tokenSaleParam)
   let utxosList = Data.Map.toList scriptUtxos
       utxoOref = PlutusTx.Prelude.fst (PlutusTx.Prelude.head utxosList)
   let lookups =
@@ -415,7 +414,7 @@ buy tokenSaleParam = do
         (Ledger._ciTxOutValue o)
         (currencySymbol tokenSaleParam)
         (tokenName tokenSaleParam)
-        PlutusTx.Prelude.== 1
+        PlutusTx.Prelude.>= 1
 
 close ::
   forall w s e.
