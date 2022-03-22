@@ -67,6 +67,12 @@ import qualified Text.Printf
 import qualified Wallet.Emulator.Wallet
 import qualified Prelude
 
+data SaleAction = Buy | Close
+  deriving (Prelude.Show)
+
+PlutusTx.unstableMakeIsData ''SaleAction
+PlutusTx.makeLift ''SaleAction
+
 data TokenSaleParam = TokenSaleParam
   { tokenCost :: !PlutusTx.Prelude.Integer,
     currencySymbol :: !Plutus.V1.Ledger.Api.CurrencySymbol,
@@ -89,7 +95,7 @@ minLovelace = 2_000_000
 data RadSaleOnChain
 
 instance Ledger.Typed.Scripts.ValidatorTypes RadSaleOnChain where
-  type RedeemerType RadSaleOnChain = ()
+  type RedeemerType RadSaleOnChain = SaleAction
   type DatumType RadSaleOnChain = ()
 
 {-# INLINEABLE isValid #-}
@@ -114,24 +120,25 @@ isValid
 mkRadSaleOnChainValidator ::
   TokenSaleParam ->
   () ->
-  () ->
+  SaleAction ->
   Plutus.V1.Ledger.Contexts.ScriptContext ->
   PlutusTx.Prelude.Bool
-mkRadSaleOnChainValidator tkSaleParam () () context
-  | Ledger.txSignedBy
-      info
-      ((sellerPubKeyHash tkSaleParam)) =
-    PlutusTx.Prelude.True
-  | PlutusTx.Prelude.True =
-    case ( PlutusTx.Applicative.pure isValid
-             PlutusTx.Applicative.<*> isTxToSeller
-             PlutusTx.Applicative.<*> isTxToBuyer
-             PlutusTx.Applicative.<*> correctOutputDatum
-             PlutusTx.Applicative.<*> correctScriptOutputValue
-         ) of
-      PlutusTx.Either.Right PlutusTx.Prelude.True -> PlutusTx.Prelude.True
-      PlutusTx.Either.Left error ->
-        PlutusTx.Prelude.traceIfFalse error PlutusTx.Prelude.False
+mkRadSaleOnChainValidator tkSaleParam () redeemer context =
+  case redeemer of
+    Close ->
+      Ledger.txSignedBy
+        info
+        ((sellerPubKeyHash tkSaleParam))
+    Buy ->
+      case ( PlutusTx.Applicative.pure isValid
+               PlutusTx.Applicative.<*> isTxToSeller
+               PlutusTx.Applicative.<*> isTxToBuyer
+               PlutusTx.Applicative.<*> correctOutputDatum
+               PlutusTx.Applicative.<*> correctScriptOutputValue
+           ) of
+        PlutusTx.Either.Right PlutusTx.Prelude.True -> PlutusTx.Prelude.True
+        PlutusTx.Either.Left error ->
+          PlutusTx.Prelude.traceIfFalse error PlutusTx.Prelude.False
   where
     info :: Plutus.V1.Ledger.Contexts.TxInfo
     info = Plutus.V1.Ledger.Contexts.scriptContextTxInfo context
@@ -305,7 +312,7 @@ typedValidator p =
     )
     $$(PlutusTx.compile [||wrap||])
   where
-    wrap = Ledger.Typed.Scripts.wrapValidator @() @()
+    wrap = Ledger.Typed.Scripts.wrapValidator @() @SaleAction
 
 validator :: TokenSaleParam -> Plutus.V1.Ledger.Scripts.Validator
 validator =
@@ -361,7 +368,10 @@ buy tokenSaleParam = do
       PlutusTx.Prelude.<$> Plutus.Contract.utxosAt (scrAddress tokenSaleParam)
   let utxosList = Data.Map.toList scriptUtxos
       utxoOref = PlutusTx.Prelude.fst (PlutusTx.Prelude.head utxosList)
-  let lookups =
+      redeemer =
+        Plutus.V1.Ledger.Scripts.Redeemer PlutusTx.Prelude.$
+          PlutusTx.toBuiltinData PlutusTx.Prelude.$ Buy
+      lookups =
         Data.Monoid.mconcat
           [ Ledger.Constraints.typedValidatorLookups (typedValidator tokenSaleParam),
             Ledger.Constraints.otherScript (validator tokenSaleParam),
@@ -372,7 +382,7 @@ buy tokenSaleParam = do
         PlutusTx.Prelude.mconcat
           [ Ledger.Constraints.TxConstraints.mustSpendScriptOutput
               utxoOref
-              Plutus.V1.Ledger.Scripts.unitRedeemer,
+              redeemer,
             Ledger.Constraints.TxConstraints.mustPayToTheScript
               ()
               (Ledger.Ada.lovelaceValueOf minLovelace),
@@ -428,12 +438,13 @@ close tokenSaleParam = do
       --       (currencySymbol tokenSaleParam)
       --       (tokenName tokenSaleParam)
       --       1
+      redeemer =
+        Plutus.V1.Ledger.Scripts.Redeemer PlutusTx.Prelude.$
+          PlutusTx.toBuiltinData PlutusTx.Prelude.$ Close
       tx =
         Ledger.Constraints.mustPayToPubKey
           pkh
-          ( -- t
-            --   PlutusTx.Prelude.<>
-            Ledger.Ada.lovelaceValueOf minLovelace
+          ( Ledger.Ada.lovelaceValueOf minLovelace
           )
   ledgerTx <- Plutus.Contract.submitTxConstraints (typedValidator tokenSaleParam) tx
   Data.Functor.void PlutusTx.Prelude.$
