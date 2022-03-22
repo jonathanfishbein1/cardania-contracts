@@ -99,6 +99,24 @@ unsafePaymentPubKeyHash addr =
     PlutusTx.Prelude.fst
     PlutusTx.Prelude.$ getCredentials addr
 
+dataToScriptData :: PlutusTx.Data -> Cardano.Api.Shelley.ScriptData
+dataToScriptData (PlutusTx.Constr n xs) = Cardano.Api.Shelley.ScriptDataConstructor n PlutusTx.Prelude.$ dataToScriptData PlutusTx.Prelude.<$> xs
+dataToScriptData (PlutusTx.Map xs) = Cardano.Api.Shelley.ScriptDataMap [(dataToScriptData x, dataToScriptData y) | (x, y) <- xs]
+dataToScriptData (PlutusTx.List xs) = Cardano.Api.Shelley.ScriptDataList PlutusTx.Prelude.$ dataToScriptData PlutusTx.Prelude.<$> xs
+dataToScriptData (PlutusTx.I n) = Cardano.Api.Shelley.ScriptDataNumber n
+dataToScriptData (PlutusTx.B bs) = Cardano.Api.Shelley.ScriptDataBytes bs
+
+writeJSON :: PlutusTx.ToData a => Prelude.FilePath -> a -> Prelude.IO ()
+writeJSON file =
+  Data.ByteString.Lazy.writeFile file
+    PlutusTx.Prelude.. Data.Aeson.encode
+    PlutusTx.Prelude.. Cardano.Api.Shelley.scriptDataToJson Cardano.Api.Shelley.ScriptDataJsonDetailedSchema
+    PlutusTx.Prelude.. dataToScriptData
+    PlutusTx.Prelude.. PlutusTx.toData
+
+writeRedeemer :: Prelude.IO ()
+writeRedeemer = writeJSON "transactions/redeemer.json" ()
+
 main :: Prelude.IO ()
 main =
   do
