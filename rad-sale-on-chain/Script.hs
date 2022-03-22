@@ -334,7 +334,7 @@ start tokenSaleParam = do
           (currencySymbol tokenSaleParam)
           (tokenName tokenSaleParam)
           1
-          PlutusTx.Prelude.<> Ledger.Ada.lovelaceValueOf 10_000_000
+          PlutusTx.Prelude.<> Ledger.Ada.lovelaceValueOf 2_000_000
   let tx = Ledger.Constraints.TxConstraints.mustPayToTheScript () v
   ledgerTx <-
     Plutus.Contract.submitTxConstraints
