@@ -65,14 +65,15 @@ data ResourceData = ResourceData
 
 instance Data.Aeson.ToJSON ResourceData
 
-generateResourceMetaData :: Relude.String -> Relude.Text -> ResourceData
-generateResourceMetaData contents cid =
+generateResourceMetaData :: Relude.String -> Relude.String -> Relude.Text -> ResourceData
+generateResourceMetaData filePath contents cid =
   let sha = Data.Digest.Pure.SHA.sha256 (Data.ByteString.Lazy.UTF8.fromString contents)
+      characterRegex = "[A-Za-z]+" :: Relude.String
    in ResourceData
         { image = "ipfs://" Relude.++ Relude.toString cid,
           mediaType = "image/png",
           sha256 = Relude.show sha,
-          name = "Space Bretzel #",
+          name = filePath Text.Regex.TDFA.=~ characterRegex :: Relude.String,
           description = ""
         }
 
@@ -89,7 +90,7 @@ main = do
           handle <- ("/home/jonathan/Documents/cardania-contracts/mint-using-plutus/images/" Relude.++ filePath) `System.IO.openBinaryFile` System.IO.ReadMode
           contents <- System.IO.hGetContents handle
           let resourceAssetData =
-                generateResourceMetaData contents cid
+                generateResourceMetaData filePath contents cid
               resourceAsset = ResourceAsset {name = resourceAssetData}
           let resourceMetaData =
                 MetaData

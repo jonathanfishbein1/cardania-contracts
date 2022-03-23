@@ -3,3 +3,4 @@ result*
 *.flat
 transactions/*
 .nix-shell-cabal.project
+mint-using-plutus/metadata/*
