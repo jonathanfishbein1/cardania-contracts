@@ -1,0 +1,13 @@
+{
+    "721": {
+        "{policy_id}": {
+            "AntigravityParticles": {
+                "name": "Antigravity Particles",
+                "description": "<optional>",
+                "sha256": "5391c8b8620681213689666e9826a16173c2e3c28b9db39dcb7eec7539419a20",
+                "type": "image/png",
+                "image": "ipfs://QmZo49SCGYjEBD2sdkyneonPFVMQ6ruZyTGbL1TMxaAYGu"
+            }
+        }
+    }
+}
