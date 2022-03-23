@@ -52,7 +52,7 @@ newtype ResourceAsset = ResourceAsset
 
 instance Data.Aeson.ToJSON ResourceAsset where
   toJSON (ResourceAsset resourceData) =
-    Data.Aeson.object [( Data.Text.pack ((name :: ResourceData -> Relude.String) resourceData)) Data.Aeson..= resourceData]
+    Data.Aeson.object [Data.Text.pack ((name :: ResourceData -> Relude.String) resourceData) Data.Aeson..= resourceData]
 
 data ResourceData = ResourceData
   { image :: Relude.String,
@@ -65,49 +65,44 @@ data ResourceData = ResourceData
 
 instance Data.Aeson.ToJSON ResourceData
 
-generateResourceMetaData :: Relude.String -> ResourceData
-generateResourceMetaData contents  =
+generateResourceMetaData :: Relude.String -> Relude.Text -> ResourceData
+generateResourceMetaData contents cid =
   let sha = Data.Digest.Pure.SHA.sha256 (Data.ByteString.Lazy.UTF8.fromString contents)
    in ResourceData
-        { image = "ipfs://QmddEBi17KzzzbUG9PYSb5yoaWps1KgcYaTjCjqenqP1UD",
+        { image = "ipfs://" Relude.++ Relude.toString cid,
           mediaType = "image/png",
           sha256 = Relude.show sha,
-          name = "Space Bretzel #"
+          name = "Space Bretzel #",
+          description = ""
         }
-
 
 main :: Relude.IO ()
 main = do
-  imageDir <- System.Directory.listDirectory "image"
-  resourceCidsHandle <- "./CIDs.txt" `System.IO.openFile` System.IO.ReadMode
+  imageDir <- System.Directory.listDirectory "/home/jonathan/Documents/cardania-contracts/mint-using-plutus/images/"
+  resourceCidsHandle <- "/home/jonathan/Documents/cardania-contracts/mint-using-plutus/CIDs.txt" `System.IO.openFile` System.IO.ReadMode
   resourceCidsContents <- System.IO.hGetContents resourceCidsHandle
+
   let resourceCids = Relude.lines (Relude.toText resourceCidsContents)
---     Relude.zipWithM_
---         ( \filePath cid ->
---             do
---             handle <- ("images/" Relude.++ filePath) `System.IO.openBinaryFile` System.IO.ReadMode
---             contents <- System.IO.hGetContents handle
---             let resourceAssetData =
---                     generateResourceMetaData filePath contents cid index
---                 brewAsset = BrewAsset {name = brewAssetData}
---             let brewMetaData =
---                     MetaData
---                     { label = Policy {policy = BA brewAsset}
---                     }
+  Relude.zipWithM_
+    ( \filePath cid ->
+        do
+          handle <- ("/home/jonathan/Documents/cardania-contracts/mint-using-plutus/images/" Relude.++ filePath) `System.IO.openBinaryFile` System.IO.ReadMode
+          contents <- System.IO.hGetContents handle
+          let resourceAssetData =
+                generateResourceMetaData contents cid
+              resourceAsset = ResourceAsset {name = resourceAssetData}
+          let resourceMetaData =
+                MetaData
+                  { label = Policy {policy = R resourceAsset}
+                  }
 
---             Data.Aeson.encodeFile
---                 ("metadatas/" Relude.++ (Data.Aeson.Key.toString Relude.$ convertName Relude.$ brewAssetData) Relude.++ ".json")
---                 brewMetaData
---         )
---         sortedBrewDir
---         brewCids
--- )
-
---   Relude.mapM_
---     ( \filePath -> do
---         handle <- ("brews/" Relude.++ filePath) `System.IO.openBinaryFile` System.IO.ReadMode
---         System.IO.hClose handle
---     )
---     brewDir
-
-  Relude.return ()
+          Data.Aeson.encodeFile
+            ( "/home/jonathan/Documents/cardania-contracts/mint-using-plutus/metadata/"
+                Relude.++ (name :: ResourceData -> Relude.String)
+                  resourceAssetData
+                Relude.++ ".json"
+            )
+            resourceMetaData
+    )
+    imageDir
+    resourceCids
