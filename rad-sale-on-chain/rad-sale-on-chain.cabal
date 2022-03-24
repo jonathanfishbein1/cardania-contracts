@@ -21,16 +21,16 @@ executable rad-sale-on-chain
         flat,
         bytestring,
         cardano-api,
-        serialise
-        , cardano-crypto-class
-        , cardano-ledger-core
-        , cardano-ledger-shelley
-        , playground-common
-         , freer-extras
-         , serialize-to-cardano-api
-         
+        serialise,
+        cardano-crypto-class,
+        cardano-ledger-core,
+        cardano-ledger-shelley,
+        playground-common,
+        freer-extras,
+        serialize-to-cardano-api
+
 executable emulator
-    main-is: Emulator.hs
+    main-is:          Emulator.hs
     other-modules:    Script
     default-language: Haskell2010
     build-depends:
@@ -48,10 +48,10 @@ executable emulator
         flat,
         bytestring,
         cardano-api,
-        serialise
-        , cardano-crypto-class
-        , cardano-ledger-core
-        , cardano-ledger-shelley
-        , playground-common
-            , freer-extras
-        , data-default
+        serialise,
+        cardano-crypto-class,
+        cardano-ledger-core,
+        cardano-ledger-shelley,
+        playground-common,
+        freer-extras,
+        data-default
