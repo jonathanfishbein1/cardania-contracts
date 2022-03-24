@@ -19,6 +19,7 @@ module Script
         mpAmount,
         mpTokenName
       ),
+      mintSerialised
   )
 where
 
@@ -114,3 +115,19 @@ endpoints = mint' PlutusTx.Prelude.>> endpoints
 Playground.Contract.mkSchemaDefinitions ''FreeSchema
 
 -- Playground.Contract.mkKnownCurrencies []
+
+mintScript :: Ledger.Address.PaymentPubKeyHash -> Plutus.V1.Ledger.Scripts.Script
+mintScript =
+  Plutus.V1.Ledger.Scripts.unMintingPolicyScript
+    PlutusTx.Prelude.. policy
+
+mintSBS :: Ledger.Address.PaymentPubKeyHash -> Data.ByteString.Short.ShortByteString
+mintSBS p =
+  Data.ByteString.Short.toShort
+    PlutusTx.Prelude.. Data.ByteString.Lazy.toStrict
+    PlutusTx.Prelude.$ Codec.Serialise.serialise (mintScript p)
+
+mintSerialised ::
+  Ledger.Address.PaymentPubKeyHash ->
+  Cardano.Api.PlutusScript Cardano.Api.PlutusScriptV1
+mintSerialised p = Cardano.Api.Shelley.PlutusScriptSerialised (mintSBS p)

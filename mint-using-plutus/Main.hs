@@ -27,7 +27,20 @@ import qualified PlutusTx.Prelude
 import qualified Script
 import qualified System.Environment
 import qualified Prelude
-
+import qualified SerializeToCardanoApi
 
 main :: Prelude.IO ()
-main = Prelude.return ()
+main =
+    do
+    args <- System.Environment.getArgs
+    let [addy] = args
+        sellerAddress = SerializeToCardanoApi.unsafeReadAddress addy
+        sellerPaymentPubKeyHash = SerializeToCardanoApi.unsafePaymentPubKeyHash sellerAddress
+    result <-
+      Cardano.Api.writeFileTextEnvelope
+        "./transactions/result.plutus"
+        PlutusTx.Prelude.Nothing
+        (Script.mintSerialised sellerPaymentPubKeyHash)
+    case result of
+      PlutusTx.Prelude.Left err -> Prelude.print PlutusTx.Prelude.$ Cardano.Api.displayError err
+      PlutusTx.Prelude.Right () -> Prelude.return ()

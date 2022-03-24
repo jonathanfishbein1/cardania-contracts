@@ -27,7 +27,8 @@ executable rad-sale-on-chain
         , cardano-ledger-shelley
         , playground-common
          , freer-extras
-
+         , serialize-to-cardano-api
+         
 executable emulator
     main-is: Emulator.hs
     other-modules:    Script
