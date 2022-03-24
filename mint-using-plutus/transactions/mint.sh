@@ -1,48 +1,43 @@
-utxovkey=minting.vkey
-utxoskey=minting.skey
+utxovkey=/home/jonathan/Documents/octoberFestMetaData/minting.vkey
+utxoskey=/home/jonathan/Documents/octoberFestMetaData/minting.skey
+
+transactionsPath=${transactionsPath}
 
 utxoaddr=$(cardano-cli address build --testnet-magic 1097911063 --payment-verification-key-file $utxovkey)
 
-cardano-cli query utxo --address "$utxoaddr" --testnet-magic 1097911063
-
 cardano-cli query protocol-parameters --testnet-magic 1097911063 --out-file protocol.json
 
-walletAddress="addr1qxldw6tu3l644fftqpepp9rz6c76kwcna5dnf9dh6lp6jjq32t906vdyzfah2x6rt4920uh42fz43extjglwftjym33qm66ygl"
+walletAddress="addr_test1vrh0kkuahtz28qpfdhsx2hm2eekf06des8h03xnm757u65sd6egwy"
 wallettxOut="$walletAddress+2000000"
+policyFile="${transactionsPath}result.plutus"
+policyId=$(cardano-cli transaction policyid --script-file $policyFile)
 
-
-policyId="d0b4c7811012fc5e9860c2fe374265f4e465ff99586ed7352fa9a866"
-
-
-
-for filepath in ./metadatas/*; do
+for filepath in "${transactionPath}metadata/*"; do
   filenameWithExtension=$(basename $filepath)
   filename="${filenameWithExtension%.*}"
   mint="1 $policyId.$filename"
   txuot="${wallettxOut}+$mint" 
 
-  cardano-cli query utxo --address "$utxoaddr" --testnet-magic 1097911063 --out-file "utxo.json"
-  scriptownerUtxo1=$(jq -r 'keys[0]' "utxo.json")
+  cardano-cli query utxo --address "$utxoaddr" --testnet-magic 1097911063 --out-file "${transactionsPath}utxo.json"
+  scriptownerUtxo1=$(jq -r 'keys[0]' "${transactionsPath}utxo.json")
 
   cardano-cli transaction build \
-    --alonzo-era \
-    --cardano-mode \
     --testnet-magic 1097911063 \
     --tx-in "$scriptownerUtxo1" \
     --tx-out "$txuot" \
     --change-address "$utxoaddr" \
     --mint="$mint" \
-    --mint-script-file "policy.script" \
+    --mint-script-file "${transactionsPath}result.plutus" \
     --metadata-json-file "$filepath" \
     --protocol-params-file protocol.json \
-    --out-file "mint.body"
+    --out-file "${transactionsPath}mint.body"
 
   cardano-cli transaction sign \
-    --tx-body-file "mint.body" \
+    --tx-body-file "${transactionsPath}mint.body" \
     --testnet-magic 1097911063 \
     --signing-key-file "$utxoskey" \
-    --out-file "mint.tx"
+    --out-file "${transactionsPath}mint.tx"
 
-  cardano-cli transaction submit --tx-file "mint.tx" --testnet-magic 1097911063
+  cardano-cli transaction submit --tx-file "${transactionsPath}mint.tx" --testnet-magic 1097911063
   sleep 480
 done
