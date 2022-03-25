@@ -1,16 +1,17 @@
 {-# LANGUAGE DeriveGeneric #-}
 {-# LANGUAGE DuplicateRecordFields #-}
+{-# LANGUAGE GADTs #-}
 {-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE QuasiQuotes #-}
-{-# LANGUAGE GADTs #-}
 
 module SerializeToCardanoApi
   ( dataToScriptData,
     writeJSON,
     writeRedeemer,
     unsafePaymentPubKeyHash,
-    unsafeReadAddress
+    unsafeReadAddress,
+    unsafeTokenNameToHex,
   )
 where
 
@@ -22,7 +23,9 @@ import qualified Cardano.Ledger.Crypto
 import qualified Cardano.Ledger.Hashes
 import qualified Cardano.Ledger.Keys
 import qualified Data.Aeson
+import qualified Data.ByteString.Char8
 import qualified Data.ByteString.Lazy
+import qualified Data.Maybe
 import qualified Data.String
 import qualified Data.Text
 import qualified Ledger
@@ -34,6 +37,7 @@ import qualified Plutus.V1.Ledger.Value
 import qualified PlutusTx
 import qualified PlutusTx.Builtins
 import qualified PlutusTx.Builtins.Class
+import qualified PlutusTx.Builtins.Internal
 import qualified PlutusTx.Prelude
 import qualified System.Environment
 import qualified Prelude
@@ -71,7 +75,6 @@ credentialLedgerToPlutus (Cardano.Ledger.Credential.KeyHashObj (Cardano.Ledger.K
   Plutus.V1.Ledger.Api.PubKeyCredential PlutusTx.Prelude.$
     Ledger.PubKeyHash PlutusTx.Prelude.$
       PlutusTx.Builtins.toBuiltin PlutusTx.Prelude.$ Cardano.Crypto.Hash.Class.hashToBytes h
-
 
 tryReadAddress ::
   Prelude.String ->
@@ -117,7 +120,6 @@ getCredentials (Ledger.Address x y) = case x of
               PlutusTx.Prelude.Just
                 (ppkh, PlutusTx.Prelude.Just PlutusTx.Prelude.$ Ledger.StakePubKeyHash pkh')
 
-
 unsafePaymentPubKeyHash :: Ledger.Address -> Ledger.PaymentPubKeyHash
 unsafePaymentPubKeyHash addr =
   PlutusTx.Prelude.maybe
@@ -128,3 +130,14 @@ unsafePaymentPubKeyHash addr =
     )
     PlutusTx.Prelude.fst
     PlutusTx.Prelude.$ getCredentials addr
+
+unsafeTokenNameToHex :: Plutus.V1.Ledger.Value.TokenName -> Prelude.String
+unsafeTokenNameToHex =
+  Data.ByteString.Char8.unpack
+    PlutusTx.Prelude.. Cardano.Api.Shelley.serialiseToRawBytesHex
+    PlutusTx.Prelude.. Data.Maybe.fromJust
+    PlutusTx.Prelude.. Cardano.Api.Shelley.deserialiseFromRawBytes Cardano.Api.Shelley.AsAssetName
+    PlutusTx.Prelude.. getByteString
+    PlutusTx.Prelude.. Plutus.V1.Ledger.Value.unTokenName
+  where
+    getByteString (PlutusTx.Builtins.Internal.BuiltinByteString bs) = bs
