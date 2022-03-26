@@ -1,7 +1,7 @@
 utxovkey=/home/jonathan/Documents/octoberFestMetaData/minting.vkey
 utxoskey=/home/jonathan/Documents/octoberFestMetaData/minting.skey
 
-transactionsPath=${transactionsPath}
+transactionsPath=/home/jonathan/Documents/cardania-contracts/mint-using-plutus/transactions/
 
 utxoaddr=$(cardano-cli address build --testnet-magic 1097911063 --payment-verification-key-file $utxovkey)
 
@@ -12,10 +12,12 @@ wallettxOut="$walletAddress+2000000"
 policyFile="${transactionsPath}result.plutus"
 policyId=$(cardano-cli transaction policyid --script-file $policyFile)
 
-for filepath in "${transactionPath}metadata/*"; do
+for filepath in /home/jonathan/Documents/cardania-contracts/mint-using-plutus/metadata/*; do
   filenameWithExtension=$(basename $filepath)
   filename="${filenameWithExtension%.*}"
-  mint="1 $policyId.$filename"
+  echo "$filename"
+  tokenName=$(cabal exec token-name -- $filename)
+  mint="1 $policyId.$tokenName"
   txuot="${wallettxOut}+$mint" 
 
   cardano-cli query utxo --address "$utxoaddr" --testnet-magic 1097911063 --out-file "${transactionsPath}utxo.json"
@@ -23,11 +25,14 @@ for filepath in "${transactionPath}metadata/*"; do
 
   cardano-cli transaction build \
     --testnet-magic 1097911063 \
+    --tx-in-collateral "$scriptownerUtxo1" \
     --tx-in "$scriptownerUtxo1" \
     --tx-out "$txuot" \
     --change-address "$utxoaddr" \
     --mint="$mint" \
     --mint-script-file "${transactionsPath}result.plutus" \
+    --mint-redeemer-file "${transactionsPath}unit.json" \
+    --required-signer-hash eefb5b9dbac4a380296de0655f6ace6c97e9b981eef89a7bf53dcd52 \
     --metadata-json-file "$filepath" \
     --protocol-params-file protocol.json \
     --out-file "${transactionsPath}mint.body"
