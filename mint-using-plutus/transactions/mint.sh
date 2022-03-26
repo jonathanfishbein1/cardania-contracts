@@ -13,10 +13,10 @@ policyFile="${transactionsPath}result.plutus"
 policyId=$(cardano-cli transaction policyid --script-file $policyFile)
 
 for filepath in /home/jonathan/Documents/cardania-contracts/mint-using-plutus/metadata/*; do
-  filenameWithExtension=$(basename $filepath)
+  filenameWithExtension=$(basename "$filepath")
   filename="${filenameWithExtension%.*}"
   echo "$filename"
-  tokenName=$(cabal exec token-name -- $filename)
+  tokenName=$(cabal exec token-name -- "$filename")
   mint="1 $policyId.$tokenName"
   txuot="${wallettxOut}+$mint" 
 
@@ -25,8 +25,8 @@ for filepath in /home/jonathan/Documents/cardania-contracts/mint-using-plutus/me
 
   cardano-cli transaction build \
     --testnet-magic 1097911063 \
-    --tx-in-collateral "$scriptownerUtxo1" \
-    --tx-in "$scriptownerUtxo1" \
+    --tx-in-collateral "47cbbf0bd746003cacf2f599726a0dd2e1d4504d328c564d429dfe53e7ae8ddd#0" \
+    --tx-in "47cbbf0bd746003cacf2f599726a0dd2e1d4504d328c564d429dfe53e7ae8ddd#0" \
     --tx-out "$txuot" \
     --change-address "$utxoaddr" \
     --mint="$mint" \
