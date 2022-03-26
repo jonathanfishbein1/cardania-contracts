@@ -5,7 +5,7 @@ transactionsPath=/home/jonathan/Documents/cardania-contracts/mint-using-plutus/t
 
 utxoaddr=$(cardano-cli address build --testnet-magic 1097911063 --payment-verification-key-file $utxovkey)
 
-cardano-cli query protocol-parameters --testnet-magic 1097911063 --out-file protocol.json
+cardano-cli query protocol-parameters --testnet-magic 1097911063 --out-file "${transactionsPath}protocol.json"
 
 walletAddress="addr_test1vrh0kkuahtz28qpfdhsx2hm2eekf06des8h03xnm757u65sd6egwy"
 wallettxOut="$walletAddress+2000000"
@@ -34,7 +34,7 @@ for filepath in /home/jonathan/Documents/cardania-contracts/mint-using-plutus/me
     --mint-redeemer-file "${transactionsPath}unit.json" \
     --required-signer-hash eefb5b9dbac4a380296de0655f6ace6c97e9b981eef89a7bf53dcd52 \
     --metadata-json-file "$filepath" \
-    --protocol-params-file protocol.json \
+    --protocol-params-file "${transactionsPath}protocol.json" \
     --out-file "${transactionsPath}mint.body"
 
   cardano-cli transaction sign \
