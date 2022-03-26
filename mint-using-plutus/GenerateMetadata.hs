@@ -68,7 +68,7 @@ instance Data.Aeson.ToJSON ResourceData
 generateResourceMetaData :: Relude.String -> Relude.String -> Relude.Text -> ResourceData
 generateResourceMetaData filePath contents cid =
   let sha = Data.Digest.Pure.SHA.sha256 (Data.ByteString.Lazy.UTF8.fromString contents)
-      characterRegex = "[A-Za-z]+" :: Relude.String
+      characterRegex = "[^.]*" :: Relude.String
    in ResourceData
         { image = "ipfs://" Relude.++ Relude.toString cid,
           mediaType = "image/png",
