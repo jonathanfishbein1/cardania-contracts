@@ -364,8 +364,9 @@ buy ::
 buy tokenSaleParam = do
   pkh <- Plutus.Contract.ownPaymentPubKeyHash
   scriptUtxos <-
-    Data.Map.filter isSuitable
-      PlutusTx.Prelude.<$> Plutus.Contract.utxosAt (scrAddress tokenSaleParam)
+    -- Data.Map.filter isSuitable
+    --   PlutusTx.Prelude.<$>
+    Plutus.Contract.utxosAt (scrAddress tokenSaleParam)
   let utxosList = Data.Map.toList scriptUtxos
       utxoOref = PlutusTx.Prelude.fst (PlutusTx.Prelude.head utxosList)
       redeemer =
@@ -393,11 +394,6 @@ buy tokenSaleParam = do
               pkh
               v
           ]
-
-  Plutus.Contract.logInfo @Prelude.String PlutusTx.Prelude.$
-    Text.Printf.printf
-      "made lovelace in auction %s"
-      (Prelude.show utxoOref)
 
   ledgerTx <-
     Plutus.Contract.submitTxConstraintsWith lookups tx
@@ -433,27 +429,51 @@ close ::
   Plutus.Contract.Contract w s e ()
 close tokenSaleParam = do
   pkh <- Plutus.Contract.ownPaymentPubKeyHash
-  let -- t =
-      --     Plutus.V1.Ledger.Api.singleton
-      --       (currencySymbol tokenSaleParam)
-      --       (tokenName tokenSaleParam)
-      --       1
+  scriptUtxos <- Plutus.Contract.utxosAt (scrAddress tokenSaleParam)
+  let utxosList = Data.Map.toList scriptUtxos
+      totalValue =
+        Data.Map.foldl'
+          ( \w o ->
+              w
+                PlutusTx.Prelude.<> Ledger._ciTxOutValue o
+          )
+          PlutusTx.Prelude.mempty
+          scriptUtxos
       redeemer =
         Plutus.V1.Ledger.Scripts.Redeemer PlutusTx.Prelude.$
           PlutusTx.toBuiltinData PlutusTx.Prelude.$ Close
+      lookups =
+        Data.Monoid.mconcat
+          [ Ledger.Constraints.typedValidatorLookups (typedValidator tokenSaleParam),
+            Ledger.Constraints.otherScript (validator tokenSaleParam),
+            Ledger.Constraints.unspentOutputs scriptUtxos
+          ]
       tx =
-        Ledger.Constraints.mustPayToPubKey
-          pkh
-          ( Ledger.Ada.lovelaceValueOf minLovelace
-          )
-  ledgerTx <- Plutus.Contract.submitTxConstraints (typedValidator tokenSaleParam) tx
+        PlutusTx.Prelude.mconcat
+          [ PlutusTx.Prelude.mconcat
+              ( PlutusTx.Prelude.map
+                  ( \(oref, o) ->
+                      Ledger.Constraints.TxConstraints.mustSpendScriptOutput
+                        oref
+                        redeemer
+                  )
+                  utxosList
+              ),
+            Ledger.Constraints.mustPayToPubKey
+              pkh
+              ( totalValue
+              )
+          ]
+  ledgerTx <-
+    Plutus.Contract.submitTxConstraintsWith lookups tx
   Data.Functor.void PlutusTx.Prelude.$
     Plutus.Contract.awaitTxConfirmed PlutusTx.Prelude.$ Ledger.getCardanoTxId ledgerTx
   Plutus.Contract.logInfo @Prelude.String PlutusTx.Prelude.$
     Text.Printf.printf
-      "closed auction for token (%s, %s)"
+      "closed sale for token (%s, %s), withdraw %s"
       (Prelude.show (currencySymbol tokenSaleParam))
       (Prelude.show (tokenName tokenSaleParam))
+      (Prelude.show totalValue)
 
 endpoints :: Plutus.Contract.Contract () SaleSchema Data.Text.Text ()
 endpoints =

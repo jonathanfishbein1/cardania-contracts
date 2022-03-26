@@ -88,12 +88,13 @@ myTrace = do
       Script.endpoints
   Plutus.Trace.callEndpoint @"start" h1 PlutusTx.Prelude.$
     tokenSaleParam
-  s <- Plutus.Trace.Emulator.waitNSlots 10
+  s <- Plutus.Trace.Emulator.waitNSlots 2
   Plutus.Trace.callEndpoint @"buy" h2 PlutusTx.Prelude.$
     tokenSaleParam
-  -- Plutus.Trace.callEndpoint @"close" h1 PlutusTx.Prelude.$
-  --   tokenSaleParam
-  s2 <- Plutus.Trace.Emulator.waitNSlots 2
+  sTwo <- Plutus.Trace.Emulator.waitNSlots 2
+  Plutus.Trace.callEndpoint @"close" h1 PlutusTx.Prelude.$
+    tokenSaleParam
+  sThree <- Plutus.Trace.Emulator.waitNSlots 2
   Control.Monad.Freer.Extras.logInfo PlutusTx.Prelude.$
     "reached " PlutusTx.Prelude.++ Prelude.show 1
 
