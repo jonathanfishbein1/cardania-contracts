@@ -43,7 +43,7 @@ newtype Policy = Policy
 
 instance Data.Aeson.ToJSON Policy where
   toJSON (Policy pol) =
-    Data.Aeson.object ["d0b4c7811012fc5e9860c2fe374265f4e465ff99586ed7352fa9a866" Data.Aeson..= Data.Aeson.toJSON pol]
+    Data.Aeson.object ["650296faadaccf9bb9852678ce0e881c5c09f1a6da9cb7531b3c23bb" Data.Aeson..= Data.Aeson.toJSON pol]
 
 newtype ResourceAsset = ResourceAsset
   { name :: ResourceData
