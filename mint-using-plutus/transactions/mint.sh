@@ -3,12 +3,11 @@ utxoskey=/home/jonathan/Documents/octoberFestMetaData/minting.skey
 
 transactionsPath=/home/jonathan/Documents/cardania-contracts/mint-using-plutus/transactions/
 
-utxoaddr=$(cardano-cli address build --testnet-magic 1097911063 --payment-verification-key-file $utxovkey)
-
 cardano-cli query protocol-parameters --testnet-magic 1097911063 --out-file "${transactionsPath}protocol.json"
 
-walletAddress="addr_test1vrh0kkuahtz28qpfdhsx2hm2eekf06des8h03xnm757u65sd6egwy"
-wallettxOut="$walletAddress+2000000"
+mintingWalletAddress="addr_test1vrh0kkuahtz28qpfdhsx2hm2eekf06des8h03xnm757u65sd6egwy"
+testingWalletAddress="addr_test1qqfaj02yn24e38q8q4sea086yqem4tyt4n6seaxjaa4cnpzydjptew90z2m64jvqwxhzlke5kgkw82w3v52tfuwu3zssn2770q"
+wallettxOut="$testingWalletAddress+2000000"
 policyFile="${transactionsPath}result.plutus"
 policyId=$(cardano-cli transaction policyid --script-file $policyFile)
 
@@ -19,16 +18,18 @@ for filepath in /home/jonathan/Documents/cardania-contracts/mint-using-plutus/me
   tokenName=$(cabal exec token-name -- "$filename")
   mint="1 $policyId.$tokenName"
   txuot="${wallettxOut}+$mint" 
-
-  cardano-cli query utxo --address "$utxoaddr" --testnet-magic 1097911063 --out-file "${transactionsPath}utxo.json"
+  echo "$filepath"
+  cardano-cli query utxo --address "$mintingWalletAddress" --testnet-magic 1097911063 --out-file "${transactionsPath}utxo.json"
   scriptownerUtxo1=$(jq -r 'keys[0]' "${transactionsPath}utxo.json")
 
   cardano-cli transaction build \
+    --alonzo-era \
+    --cardano-mode \
     --testnet-magic 1097911063 \
-    --tx-in-collateral "47cbbf0bd746003cacf2f599726a0dd2e1d4504d328c564d429dfe53e7ae8ddd#0" \
-    --tx-in "47cbbf0bd746003cacf2f599726a0dd2e1d4504d328c564d429dfe53e7ae8ddd#0" \
+    --tx-in-collateral "89543252435349432d5f429cb3d017a49702784d383a5f5e5b65d51e52118a3f#0" \
+    --tx-in "89543252435349432d5f429cb3d017a49702784d383a5f5e5b65d51e52118a3f#0" \
     --tx-out "$txuot" \
-    --change-address "$utxoaddr" \
+    --change-address "$mintingWalletAddress" \
     --mint="$mint" \
     --mint-script-file "${transactionsPath}result.plutus" \
     --mint-redeemer-file "${transactionsPath}unit.json" \
