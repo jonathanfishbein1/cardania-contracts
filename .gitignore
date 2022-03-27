@@ -1,7 +1,8 @@
 dist-newstyle
 result*
 *.flat
-transactions/*
 .nix-shell-cabal.project
 mint-using-plutus/metadata/*
 mint-using-plutus/transactions/utxo.json
+mint-using-plutus/transactions/*.body
+mint-using-plutus/transactions/*.tx
