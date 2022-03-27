@@ -84,6 +84,7 @@ main = do
   resourceCidsContents <- System.IO.hGetContents resourceCidsHandle
 
   let resourceCids = Relude.lines (Relude.toText resourceCidsContents)
+      sortedImageDir = Data.List.sort imageDir
   Relude.zipWithM_
     ( \filePath cid ->
         do
@@ -105,5 +106,5 @@ main = do
             )
             resourceMetaData
     )
-    imageDir
+    sortedImageDir
     resourceCids
