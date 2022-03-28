@@ -26,8 +26,8 @@ for filepath in /home/jonathan/Documents/cardania-contracts/mint-using-plutus/me
     --alonzo-era \
     --cardano-mode \
     --testnet-magic 1097911063 \
-    --tx-in-collateral "89543252435349432d5f429cb3d017a49702784d383a5f5e5b65d51e52118a3f#0" \
-    --tx-in "89543252435349432d5f429cb3d017a49702784d383a5f5e5b65d51e52118a3f#0" \
+    --tx-in-collateral "$scriptownerUtxo1" \
+    --tx-in "$scriptownerUtxo1" \
     --tx-out "$txuot" \
     --change-address "$mintingWalletAddress" \
     --mint="$mint" \
