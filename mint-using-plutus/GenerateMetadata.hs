@@ -109,8 +109,8 @@ data ResourceData = ResourceData
 
 instance Data.Aeson.ToJSON ResourceData
 
-generateResourceMetaData :: Relude.String -> Relude.String -> Relude.Text -> ResourceData
-generateResourceMetaData filePath contents cid =
+generateResourceMetaData :: Relude.String -> Relude.String -> Relude.Text -> Relude.String -> ResourceData
+generateResourceMetaData filePath contents cid description =
   let sha = Data.Digest.Pure.SHA.sha256 (Data.ByteString.Lazy.UTF8.fromString contents)
       characterRegex = "[^.]*" :: Relude.String
    in ResourceData
@@ -118,7 +118,7 @@ generateResourceMetaData filePath contents cid =
           mediaType = "image/png",
           sha256 = Relude.show sha,
           name = filePath Text.Regex.TDFA.=~ characterRegex :: Relude.String,
-          description = ""
+          description = description
         }
 
 main :: Relude.IO ()
@@ -129,26 +129,30 @@ main = do
 
   let resourceCids = Relude.lines (Relude.toText resourceCidsContents)
       sortedImageDir = Data.List.sort imageDir
-  Relude.zipWithM_
-    ( \filePath cid ->
-        do
-          handle <- ("/home/jonathan/Documents/cardania-contracts/mint-using-plutus/images/" Relude.++ filePath) `System.IO.openBinaryFile` System.IO.ReadMode
-          contents <- System.IO.hGetContents handle
-          let resourceAssetData =
-                generateResourceMetaData filePath contents cid
-              resourceAsset = ResourceAsset {name = resourceAssetData}
-          let resourceMetaData =
-                MetaData
-                  { label = Policy {policy = R resourceAsset}
-                  }
+      metas =
+        Data.List.zipWith3
+          ( \filePath cid description ->
+              do
+                handle <- ("/home/jonathan/Documents/cardania-contracts/mint-using-plutus/images/" Relude.++ filePath) `System.IO.openBinaryFile` System.IO.ReadMode
+                contents <- System.IO.hGetContents handle
+                let resourceAssetData =
+                      generateResourceMetaData filePath contents cid description
+                    resourceAsset = ResourceAsset {name = resourceAssetData}
+                let resourceMetaData =
+                      MetaData
+                        { label = Policy {policy = R resourceAsset}
+                        }
 
-          Data.Aeson.encodeFile
-            ( "/home/jonathan/Documents/cardania-contracts/mint-using-plutus/metadata/"
-                Relude.++ (name :: ResourceData -> Relude.String)
-                  resourceAssetData
-                Relude.++ ".json"
-            )
-            resourceMetaData
-    )
-    sortedImageDir
-    resourceCids
+                Data.Aeson.encodeFile
+                  ( "/home/jonathan/Documents/cardania-contracts/mint-using-plutus/metadata/"
+                      Relude.++ (name :: ResourceData -> Relude.String)
+                        resourceAssetData
+                      Relude.++ ".json"
+                  )
+                  resourceMetaData
+          )
+          sortedImageDir
+          resourceCids
+          descriptions
+
+  Relude.sequence_ metas
