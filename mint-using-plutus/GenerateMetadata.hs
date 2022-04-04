@@ -105,8 +105,8 @@ descriptions =
     ],
     ["The edible remains of an organic lifeform. Quite nutritious."],
     ["The valuable mineral remnants of space rock."],
-    ["The fresh fruit and leaves of the wondrous Prismaleaf tree."],
-    [ "Prismaleaf is valued for its incredible medical utility,",
+    [ "The fresh fruit and leaves of the wondrous Prismaleaf tree.",
+      "Prismaleaf is valued for its incredible medical utility,",
       "and useful in a variety of restorative",
       "medicines and other tradecraft."
     ],
@@ -117,8 +117,10 @@ descriptions =
       "from near the Summoning Pool, an ancient technological wonder",
       "that powers the Cardania megastructure."
     ],
-    ["A highly valuable and extremely radioactive"],
-    [ "alkaline earth mineral. An aggregate score",
+    [ "A highly valuable and extremely radioactive",
+      "alkaline earth mineral"
+    ],
+    [ "An aggregate score",
       "approximating your ability to conduct investigation",
       "into scientific and magical phenomena,",
       "and apply findings to the material plane."
