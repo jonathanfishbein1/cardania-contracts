@@ -6,3 +6,6 @@ mint-using-plutus/metadata/*
 mint-using-plutus/transactions/utxo.json
 mint-using-plutus/transactions/*.body
 mint-using-plutus/transactions/*.tx
+rad-sale-on-chain/transactions/tx.body
+rad-sale-on-chain/transactions/tx.signed
+mint-using-plutus/transactions/protocol.json
