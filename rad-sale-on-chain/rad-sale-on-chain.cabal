@@ -2,6 +2,38 @@ cabal-version: 2.4
 name:          rad-sale-on-chain
 version:       0.1.0.0
 
+flag defer-plugin-errors
+    description:
+        Defer errors from the plugin, useful for things like Haddock that can't handle it.
+
+    default:     False
+    manual:      True
+    
+common lang
+    default-language:   Haskell2010
+    default-extensions:
+        DeriveFoldable
+        DeriveFunctor
+        DeriveGeneric
+        DeriveLift
+        DeriveTraversable
+        ExplicitForAll
+        GeneralizedNewtypeDeriving
+        ImportQualifiedPost
+        ScopedTypeVariables
+        StandaloneDeriving
+
+    ghc-options:
+        -Wall -Wnoncanonical-monad-instances -Wincomplete-uni-patterns
+        -Wincomplete-record-updates -Wredundant-constraints -Widentities
+        -fobject-code -fno-ignore-interface-pragmas
+        -fno-omit-interface-pragmas
+        -Wunused-packages
+
+    -- See Plutus Tx readme
+    if flag(defer-plugin-errors)
+        ghc-options: -fplugin-opt PlutusTx.Plugin:defer-errors
+
 executable rad-sale-on-chain
     main-is:          Main.hs
     other-modules:    Script
@@ -55,3 +87,47 @@ executable emulator
         playground-common,
         freer-extras,
         data-default
+
+
+executable plutus-pab-nami-demo
+  import: lang
+  main-is: Main.hs
+  hs-source-dirs: demo/pab-nami/pab/app
+  other-modules:
+    DemoContract
+  ghc-options:
+    -threaded
+  build-depends:
+    aeson -any,
+    base >= 4.9 && < 5,
+    openapi3 -any,
+    plutus-contract -any,
+    plutus-pab -any,
+    plutus-pab-executables -any,
+    playground-common -any,
+    prettyprinter -any,
+    purescript-bridge -any,
+    plutus-ledger -any,
+    plutus-ledger-constraints -any,
+
+executable plutus-pab-nami-demo-generator
+  import: lang
+  main-is: Generator.hs
+  hs-source-dirs: demo/pab-nami/pab/app
+  other-modules:
+    DemoContract
+  ghc-options:
+    -threaded
+  build-depends:
+    aeson -any,
+    base >= 4.9 && < 5,
+    openapi3 -any,
+    optparse-applicative -any,
+    plutus-contract -any,
+    plutus-pab -any,
+    plutus-pab-executables -any,
+    playground-common -any,
+    prettyprinter -any,
+    purescript-bridge -any,
+    plutus-ledger -any,
+    plutus-ledger-constraints -any,
