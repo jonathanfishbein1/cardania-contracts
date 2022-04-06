@@ -92,7 +92,7 @@ executable emulator
 executable plutus-pab-nami-demo
   import: lang
   main-is: Main.hs
-  hs-source-dirs: demo/pab-nami/pab/app
+  hs-source-dirs: pab-nami/pab/app
   other-modules:
     DemoContract
   ghc-options:
@@ -113,7 +113,7 @@ executable plutus-pab-nami-demo
 executable plutus-pab-nami-demo-generator
   import: lang
   main-is: Generator.hs
-  hs-source-dirs: demo/pab-nami/pab/app
+  hs-source-dirs: pab-nami/pab/app
   other-modules:
     DemoContract
   ghc-options:
