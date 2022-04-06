@@ -54,8 +54,7 @@ emulatorConfig =
           Data.Map.fromList
             [ ((Wallet.Emulator.Wallet.knownWallet 1), (Ledger.Ada.lovelaceValueOf 100_000_000))
             ],
-      Plutus.Trace._slotConfig = Data.Default.def,
-      Plutus.Trace._feeConfig = Data.Default.def
+      Plutus.Trace._slotConfig = Data.Default.def
     }
 
 myTrace :: Plutus.Trace.EmulatorTrace ()

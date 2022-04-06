@@ -72,8 +72,7 @@ emulatorConfig =
             [ ((Wallet.Emulator.Wallet.knownWallet 1), walletOneValue),
               ((Wallet.Emulator.Wallet.knownWallet 2), walletTwoValue)
             ],
-      Plutus.Trace._slotConfig = Data.Default.def,
-      Plutus.Trace._feeConfig = Data.Default.def
+      Plutus.Trace._slotConfig = Data.Default.def
     }
 
 myTrace :: Plutus.Trace.EmulatorTrace ()
