@@ -15,20 +15,29 @@ module DemoContract(
     DemoContract(..)
     ) where
 
-import Data.Aeson (FromJSON, ToJSON)
-import Data.OpenApi qualified as OpenApi
-import Data.Void (Void)
-import GHC.Generics (Generic)
-import Language.PureScript.Bridge (argonaut, equal, genericShow, mkSumType, order)
-import Ledger (PaymentPubKeyHash, StakePubKeyHash, Value)
-import Ledger.Constraints (adjustUnbalancedTx, mustPayToPubKeyAddress)
-import Playground.Types (FunctionSchema)
-import Plutus.Contract (ContractError, Endpoint, Promise, endpoint, logInfo, mkTxConstraints, yieldUnbalancedTx)
-import Plutus.PAB.Effects.Contract.Builtin (HasDefinitions, SomeBuiltin (SomeBuiltin))
-import Plutus.PAB.Effects.Contract.Builtin qualified as Builtin
-import Plutus.PAB.Run.PSGenerator (HasPSTypes (..))
-import Prettyprinter (Pretty, pretty, viaShow)
-import Schema (FormSchema, ToSchema)
+import           Data.Aeson                          (FromJSON, ToJSON)
+import qualified Data.OpenApi                        as OpenApi
+import           Data.Void                           (Void)
+import           GHC.Generics                        (Generic)
+import           Language.PureScript.Bridge          (argonaut, equal,
+                                                      genericShow, mkSumType,
+                                                      order)
+import           Ledger                              (PaymentPubKeyHash,
+                                                      StakePubKeyHash, Value)
+import           Ledger.Constraints                  (adjustUnbalancedTx,
+                                                      mustPayToPubKeyAddress)
+import           Playground.Types                    (FunctionSchema)
+import           Plutus.Contract                     (ContractError, Endpoint,
+                                                      Promise, endpoint,
+                                                      logInfo, mkTxConstraints,
+                                                      yieldUnbalancedTx)
+import           Plutus.PAB.Effects.Contract.Builtin (HasDefinitions,
+                                                      SomeBuiltin (SomeBuiltin))
+import qualified Plutus.PAB.Effects.Contract.Builtin as Builtin
+import           Plutus.PAB.Run.PSGenerator          (HasPSTypes (..))
+import           Prettyprinter                       (Pretty, pretty, viaShow)
+import           Schema                              (FormSchema, ToSchema)
+import qualified Script
 
 data DemoContract = DemoContract
     deriving (Eq, Ord, Show, Generic)
