@@ -30,6 +30,6 @@
   , "web-events"
   , "web-uievents"
   ]
-, packages = ../../../../packages.dhall
+, packages = ../../../packages.dhall
 , sources = [ "src/**/*.purs", "test/**/*.purs" ]
 }
