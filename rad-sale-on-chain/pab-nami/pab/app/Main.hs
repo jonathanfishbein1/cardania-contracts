@@ -9,8 +9,9 @@ where
 import qualified DemoContract
 import qualified Plutus.PAB.Effects.Contract.Builtin
 import qualified Plutus.PAB.Run
+import qualified Prelude
 
-main :: IO ()
+main :: Prelude.IO ()
 main = do
   Plutus.PAB.Run.runWith (Plutus.PAB.Effects.Contract.Builtin.handleBuiltin @DemoContract.DemoContract)
 
