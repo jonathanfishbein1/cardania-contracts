@@ -1,4 +1,10 @@
 let
-  plutus-apps-shell = import ../plutus-apps/shell.nix { };
+  project = import ./project.nix;
 in
-plutus-apps-shell
+project.shellFor {
+  tools = {
+    cabal = "3.6.0.0";
+    hlint = "latest"; # Selects the latest version in the hackage.nix snapshot
+    haskell-language-server = "latest";
+  };
+}
