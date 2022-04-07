@@ -1,27 +1,36 @@
 {-# LANGUAGE OverloadedStrings #-}
-{-# LANGUAGE TypeApplications  #-}
+{-# LANGUAGE TypeApplications #-}
 
 module Main
-    ( main
-    ) where
+  ( main,
+  )
+where
 
-import Data.Proxy
-import DemoContract (DemoContract)
-import Options.Applicative
-import Plutus.PAB.Run.PSGenerator qualified as PSGenerator
+import qualified Data.Proxy
+import qualified DemoContract
+import qualified Options.Applicative
+import qualified Plutus.PAB.Run.PSGenerator
+import qualified Prelude
 
-parseOptions :: IO FilePath
-parseOptions = customExecParser
-    (prefs $ disambiguate <> showHelpOnEmpty <> showHelpOnError)
-    (info (helper <*> psGenOutputDirParser) idm)
+parseOptions :: Prelude.IO Prelude.FilePath
+parseOptions =
+  Options.Applicative.customExecParser
+    ( Options.Applicative.prefs Prelude.$
+        Options.Applicative.disambiguate Prelude.<> Options.Applicative.showHelpOnEmpty
+          Prelude.<> Options.Applicative.showHelpOnError
+    )
+    (Options.Applicative.info (Options.Applicative.helper Prelude.<*> psGenOutputDirParser) Options.Applicative.idm)
 
-psGenOutputDirParser :: Parser FilePath
-psGenOutputDirParser = option str
-    (long "output-dir" <>
-     metavar "OUTPUT_DIR" <>
-     help "Output directory to write PureScript files to.")
+psGenOutputDirParser :: Options.Applicative.Parser Prelude.FilePath
+psGenOutputDirParser =
+  Options.Applicative.option
+    Options.Applicative.str
+    ( Options.Applicative.long "output-dir"
+        Prelude.<> Options.Applicative.metavar "OUTPUT_DIR"
+        Prelude.<> Options.Applicative.help "Output directory to write PureScript files to."
+    )
 
-main :: IO ()
+main :: Prelude.IO ()
 main = do
-    psGenOutputDir <- parseOptions
-    PSGenerator.generateAPIModule (Proxy :: Proxy DemoContract) psGenOutputDir
+  psGenOutputDir <- parseOptions
+  Plutus.PAB.Run.PSGenerator.generateAPIModule (Data.Proxy.Proxy :: Data.Proxy.Proxy DemoContract.DemoContract) psGenOutputDir
