@@ -58,6 +58,7 @@ library
         cardano-ledger-shelley,
         playground-common,
         freer-extras,
+        openapi3 -any,
 
 executable rad-sale-on-chain
     main-is:          Main.hs
@@ -84,7 +85,8 @@ executable rad-sale-on-chain
         cardano-ledger-shelley,
         playground-common,
         freer-extras,
-        serialize-to-cardano-api
+        serialize-to-cardano-api,
+        openapi3 -any,
 
 executable emulator
     main-is:          Emulator.hs
@@ -111,15 +113,15 @@ executable emulator
         cardano-ledger-shelley,
         playground-common,
         freer-extras,
-        data-default
-
+        data-default,
+        openapi3 -any,
 
 executable plutus-pab-nami-demo
   import: lang
   main-is: Main.hs
   hs-source-dirs: pab-nami/pab/app
   other-modules:
-    DemoContract
+    RadSaleContracts
   ghc-options:
     -threaded
   build-depends:
@@ -134,14 +136,15 @@ executable plutus-pab-nami-demo
     purescript-bridge -any,
     plutus-ledger -any,
     plutus-ledger-constraints -any,
-    rad-sale-on-chain
-    
+    rad-sale-on-chain,
+    plutus-ledger-api,
+
 executable plutus-pab-nami-demo-generator
   import: lang
   main-is: Generator.hs
   hs-source-dirs: pab-nami/pab/app
   other-modules:
-    DemoContract
+    RadSaleContracts
   ghc-options:
     -threaded
   build-depends:
@@ -157,4 +160,5 @@ executable plutus-pab-nami-demo-generator
     purescript-bridge -any,
     plutus-ledger -any,
     plutus-ledger-constraints -any,
-    rad-sale-on-chain
+    rad-sale-on-chain,
+    plutus-ledger-api,

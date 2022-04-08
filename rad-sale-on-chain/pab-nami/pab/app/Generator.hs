@@ -7,9 +7,9 @@ module Main
 where
 
 import qualified Data.Proxy
-import qualified DemoContract
 import qualified Options.Applicative
 import qualified Plutus.PAB.Run.PSGenerator
+import qualified RadSaleContracts
 import qualified Prelude
 
 parseOptions :: Prelude.IO Prelude.FilePath
@@ -33,4 +33,4 @@ psGenOutputDirParser =
 main :: Prelude.IO ()
 main = do
   psGenOutputDir <- parseOptions
-  Plutus.PAB.Run.PSGenerator.generateAPIModule (Data.Proxy.Proxy :: Data.Proxy.Proxy DemoContract.DemoContract) psGenOutputDir
+  Plutus.PAB.Run.PSGenerator.generateAPIModule (Data.Proxy.Proxy :: Data.Proxy.Proxy RadSaleContracts.RadSaleContracts) psGenOutputDir

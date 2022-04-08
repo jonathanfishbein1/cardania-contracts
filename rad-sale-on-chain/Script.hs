@@ -1,6 +1,7 @@
 {-# LANGUAGE DataKinds #-}
 {-# LANGUAGE DeriveAnyClass #-}
 {-# LANGUAGE DeriveGeneric #-}
+{-# LANGUAGE DerivingStrategies #-}
 {-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE MultiParamTypeClasses #-}
 {-# LANGUAGE NumericUnderscores #-}
@@ -23,6 +24,10 @@ module Script
       ),
     minLovelace,
     endpoints,
+    SaleSchema,
+    start,
+    buy,
+    close,
   )
 where
 
@@ -36,6 +41,7 @@ import qualified Data.ByteString.Short
 import qualified Data.Functor
 import qualified Data.Map
 import qualified Data.Monoid
+import qualified Data.OpenApi
 import qualified Data.Semigroup
 import qualified Data.Text
 import qualified Data.Void
@@ -79,12 +85,8 @@ data TokenSaleParam = TokenSaleParam
     tokenName :: !Plutus.V1.Ledger.Api.TokenName,
     sellerPubKeyHash :: !Ledger.PubKeyHash
   }
-  deriving
-    ( Data.Aeson.FromJSON,
-      Data.Aeson.ToJSON,
-      Schema.ToSchema,
-      GHC.Generics.Generic
-    )
+  deriving (Prelude.Eq, Prelude.Ord, Prelude.Show, GHC.Generics.Generic, Schema.ToSchema)
+  deriving anyclass (Data.Aeson.FromJSON, Data.Aeson.ToJSON, Data.OpenApi.ToSchema)
 
 PlutusTx.unstableMakeIsData ''TokenSaleParam
 PlutusTx.makeLift ''TokenSaleParam
@@ -325,9 +327,8 @@ type SaleSchema =
     Plutus.Contract..\/ Plutus.Contract.Endpoint "close" TokenSaleParam
 
 start ::
-  Plutus.Contract.AsContractError e =>
   TokenSaleParam ->
-  Plutus.Contract.Contract w s e ()
+  Plutus.Contract.Contract () SaleSchema Data.Text.Text ()
 start tokenSaleParam = do
   let v =
         Plutus.V1.Ledger.Api.singleton
@@ -357,10 +358,8 @@ scrAddress tokenSaleParam =
     (validator tokenSaleParam)
 
 buy ::
-  forall w s e.
-  (Plutus.Contract.AsContractError e) =>
   TokenSaleParam ->
-  Plutus.Contract.Contract w s e ()
+  Plutus.Contract.Contract () SaleSchema Data.Text.Text ()
 buy tokenSaleParam = do
   pkh <- Plutus.Contract.ownPaymentPubKeyHash
   scriptUtxos <-
@@ -423,10 +422,8 @@ buy tokenSaleParam = do
         PlutusTx.Prelude.>= 1
 
 close ::
-  forall w s e.
-  (Plutus.Contract.AsContractError e) =>
   TokenSaleParam ->
-  Plutus.Contract.Contract w s e ()
+  Plutus.Contract.Contract () SaleSchema Data.Text.Text ()
 close tokenSaleParam = do
   pkh <- Plutus.Contract.ownPaymentPubKeyHash
   scriptUtxos <- Plutus.Contract.utxosAt (scrAddress tokenSaleParam)
@@ -488,7 +485,7 @@ endpoints =
     buy' = Plutus.Contract.endpoint @"buy" buy
     close' = Plutus.Contract.endpoint @"close" close
 
-Playground.Contract.mkSchemaDefinitions ''SaleSchema
+-- Playground.Contract.mkSchemaDefinitions ''SaleSchema
 
 myToken :: Playground.Contract.KnownCurrency
 myToken =

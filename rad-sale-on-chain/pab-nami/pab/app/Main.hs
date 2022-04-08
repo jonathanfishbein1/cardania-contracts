@@ -6,14 +6,14 @@ module Main
   )
 where
 
-import qualified DemoContract
 import qualified Plutus.PAB.Effects.Contract.Builtin
 import qualified Plutus.PAB.Run
+import qualified RadSaleContracts
 import qualified Prelude
 
 main :: Prelude.IO ()
 main = do
-  Plutus.PAB.Run.runWith (Plutus.PAB.Effects.Contract.Builtin.handleBuiltin @DemoContract.DemoContract)
+  Plutus.PAB.Run.runWith (Plutus.PAB.Effects.Contract.Builtin.handleBuiltin @RadSaleContracts.RadSaleContracts)
 
 -- Keep this here for now. Eventually, This function will call the `migrate`
 -- command before running the webserver.
