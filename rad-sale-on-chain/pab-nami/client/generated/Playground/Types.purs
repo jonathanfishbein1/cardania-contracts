@@ -30,16 +30,16 @@ import Data.Map as Map
 
 data ContractCall a
   = CallEndpoint
-      { caller :: WalletNumber
-      , argumentValues :: FunctionSchema a
-      }
+    { caller :: WalletNumber
+    , argumentValues :: FunctionSchema a
+    }
   | AddBlocks { blocks :: BigInt }
   | AddBlocksUntil { slot :: Slot }
   | PayToWallet
-      { sender :: WalletNumber
-      , recipient :: WalletNumber
-      , amount :: Value
-      }
+    { sender :: WalletNumber
+    , recipient :: WalletNumber
+    , amount :: Value
+    }
 
 instance (Show a) => Show (ContractCall a) where
   show a = genericShow a
@@ -48,20 +48,20 @@ derive instance (Eq a) => Eq (ContractCall a)
 
 instance (EncodeJson a) => EncodeJson (ContractCall a) where
   encodeJson = defer \_ -> case _ of
-    CallEndpoint { caller, argumentValues } -> encodeJson
+    CallEndpoint {caller, argumentValues} -> encodeJson
       { tag: "CallEndpoint"
       , caller: flip E.encode caller E.value
       , argumentValues: flip E.encode argumentValues E.value
       }
-    AddBlocks { blocks } -> encodeJson
+    AddBlocks {blocks} -> encodeJson
       { tag: "AddBlocks"
       , blocks: flip E.encode blocks E.value
       }
-    AddBlocksUntil { slot } -> encodeJson
+    AddBlocksUntil {slot} -> encodeJson
       { tag: "AddBlocksUntil"
       , slot: flip E.encode slot E.value
       }
-    PayToWallet { sender, recipient, amount } -> encodeJson
+    PayToWallet {sender, recipient, amount} -> encodeJson
       { tag: "PayToWallet"
       , sender: flip E.encode sender E.value
       , recipient: flip E.encode recipient E.value
@@ -70,45 +70,40 @@ instance (EncodeJson a) => EncodeJson (ContractCall a) where
 
 instance (DecodeJson a) => DecodeJson (ContractCall a) where
   decodeJson = defer \_ -> D.decode
-    $ D.sumType "ContractCall"
-    $ Map.fromFoldable
-        [ "CallEndpoint" /\
-            ( CallEndpoint <$> D.object "CallEndpoint"
-                { caller: D.value :: _ WalletNumber
-                , argumentValues: D.value :: _ (FunctionSchema a)
-                }
-            )
-        , "AddBlocks" /\ (AddBlocks <$> D.object "AddBlocks" { blocks: D.value :: _ BigInt })
-        , "AddBlocksUntil" /\ (AddBlocksUntil <$> D.object "AddBlocksUntil" { slot: D.value :: _ Slot })
-        , "PayToWallet" /\
-            ( PayToWallet <$> D.object "PayToWallet"
-                { sender: D.value :: _ WalletNumber
-                , recipient: D.value :: _ WalletNumber
-                , amount: D.value :: _ Value
-                }
-            )
-        ]
+    $ D.sumType "ContractCall" $ Map.fromFoldable
+      [ "CallEndpoint" /\ (CallEndpoint <$> D.object "CallEndpoint"
+        { caller: D.value :: _ WalletNumber
+        , argumentValues: D.value :: _ (FunctionSchema a)
+        })
+      , "AddBlocks" /\ (AddBlocks <$> D.object "AddBlocks" { blocks: D.value :: _ BigInt })
+      , "AddBlocksUntil" /\ (AddBlocksUntil <$> D.object "AddBlocksUntil" { slot: D.value :: _ Slot })
+      , "PayToWallet" /\ (PayToWallet <$> D.object "PayToWallet"
+        { sender: D.value :: _ WalletNumber
+        , recipient: D.value :: _ WalletNumber
+        , amount: D.value :: _ Value
+        })
+      ]
 
 derive instance Generic (ContractCall a) _
 
 --------------------------------------------------------------------------------
 
-_CallEndpoint :: forall a. Prism' (ContractCall a) { caller :: WalletNumber, argumentValues :: FunctionSchema a }
+_CallEndpoint :: forall a. Prism' (ContractCall a) {caller :: WalletNumber, argumentValues :: FunctionSchema a}
 _CallEndpoint = prism' CallEndpoint case _ of
   (CallEndpoint a) -> Just a
   _ -> Nothing
 
-_AddBlocks :: forall a. Prism' (ContractCall a) { blocks :: BigInt }
+_AddBlocks :: forall a. Prism' (ContractCall a) {blocks :: BigInt}
 _AddBlocks = prism' AddBlocks case _ of
   (AddBlocks a) -> Just a
   _ -> Nothing
 
-_AddBlocksUntil :: forall a. Prism' (ContractCall a) { slot :: Slot }
+_AddBlocksUntil :: forall a. Prism' (ContractCall a) {slot :: Slot}
 _AddBlocksUntil = prism' AddBlocksUntil case _ of
   (AddBlocksUntil a) -> Just a
   _ -> Nothing
 
-_PayToWallet :: forall a. Prism' (ContractCall a) { sender :: WalletNumber, recipient :: WalletNumber, amount :: Value }
+_PayToWallet :: forall a. Prism' (ContractCall a) {sender :: WalletNumber, recipient :: WalletNumber, amount :: Value}
 _PayToWallet = prism' PayToWallet case _ of
   (PayToWallet a) -> Just a
   _ -> Nothing
@@ -128,20 +123,16 @@ instance (Show a) => Show (FunctionSchema a) where
 derive instance (Eq a) => Eq (FunctionSchema a)
 
 instance (EncodeJson a) => EncodeJson (FunctionSchema a) where
-  encodeJson = defer \_ -> E.encode $ unwrap >$<
-    ( E.record
-        { endpointDescription: E.value :: _ EndpointDescription
-        , argument: E.value :: _ a
-        }
-    )
+  encodeJson = defer \_ -> E.encode $ unwrap >$< (E.record
+                                                   { endpointDescription: E.value :: _ EndpointDescription
+                                                   , argument: E.value :: _ a
+                                                   })
 
 instance (DecodeJson a) => DecodeJson (FunctionSchema a) where
-  decodeJson = defer \_ -> D.decode $
-    ( FunctionSchema <$> D.record "FunctionSchema"
-        { endpointDescription: D.value :: _ EndpointDescription
-        , argument: D.value :: _ a
-        }
-    )
+  decodeJson = defer \_ -> D.decode $ (FunctionSchema <$> D.record "FunctionSchema"
+      { endpointDescription: D.value :: _ EndpointDescription
+      , argument: D.value :: _ a
+      })
 
 derive instance Generic (FunctionSchema a) _
 
@@ -149,7 +140,7 @@ derive instance Newtype (FunctionSchema a) _
 
 --------------------------------------------------------------------------------
 
-_FunctionSchema :: forall a. Iso' (FunctionSchema a) { endpointDescription :: EndpointDescription, argument :: a }
+_FunctionSchema :: forall a. Iso' (FunctionSchema a) {endpointDescription :: EndpointDescription, argument :: a}
 _FunctionSchema = _Newtype
 
 --------------------------------------------------------------------------------
@@ -166,22 +157,18 @@ instance Show KnownCurrency where
 derive instance Eq KnownCurrency
 
 instance EncodeJson KnownCurrency where
-  encodeJson = defer \_ -> E.encode $ unwrap >$<
-    ( E.record
-        { hash: E.value :: _ String
-        , friendlyName: E.value :: _ String
-        , knownTokens: E.value :: _ (NonEmptyList TokenName)
-        }
-    )
+  encodeJson = defer \_ -> E.encode $ unwrap >$< (E.record
+                                                   { hash: E.value :: _ String
+                                                   , friendlyName: E.value :: _ String
+                                                   , knownTokens: E.value :: _ (NonEmptyList TokenName)
+                                                   })
 
 instance DecodeJson KnownCurrency where
-  decodeJson = defer \_ -> D.decode $
-    ( KnownCurrency <$> D.record "KnownCurrency"
-        { hash: D.value :: _ String
-        , friendlyName: D.value :: _ String
-        , knownTokens: D.value :: _ (NonEmptyList TokenName)
-        }
-    )
+  decodeJson = defer \_ -> D.decode $ (KnownCurrency <$> D.record "KnownCurrency"
+      { hash: D.value :: _ String
+      , friendlyName: D.value :: _ String
+      , knownTokens: D.value :: _ (NonEmptyList TokenName)
+      })
 
 derive instance Generic KnownCurrency _
 
@@ -189,5 +176,5 @@ derive instance Newtype KnownCurrency _
 
 --------------------------------------------------------------------------------
 
-_KnownCurrency :: Iso' KnownCurrency { hash :: String, friendlyName :: String, knownTokens :: NonEmptyList TokenName }
+_KnownCurrency :: Iso' KnownCurrency {hash :: String, friendlyName :: String, knownTokens :: NonEmptyList TokenName}
 _KnownCurrency = _Newtype

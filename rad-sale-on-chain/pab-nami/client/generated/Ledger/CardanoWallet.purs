@@ -31,10 +31,8 @@ instance Show WalletNumber where
   show a = genericShow a
 
 instance EncodeJson WalletNumber where
-  encodeJson = defer \_ -> E.encode $ unwrap >$<
-    ( E.record
-        { getWallet: E.value :: _ BigInt }
-    )
+  encodeJson = defer \_ -> E.encode $ unwrap >$< (E.record
+                                                 { getWallet: E.value :: _ BigInt })
 
 instance DecodeJson WalletNumber where
   decodeJson = defer \_ -> D.decode $ (WalletNumber <$> D.record "WalletNumber" { getWallet: D.value :: _ BigInt })
@@ -45,5 +43,5 @@ derive instance Newtype WalletNumber _
 
 --------------------------------------------------------------------------------
 
-_WalletNumber :: Iso' WalletNumber { getWallet :: BigInt }
+_WalletNumber :: Iso' WalletNumber {getWallet :: BigInt}
 _WalletNumber = _Newtype

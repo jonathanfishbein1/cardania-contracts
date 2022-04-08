@@ -46,12 +46,11 @@ instance EncodeJson CardanoTx where
 
 instance DecodeJson CardanoTx where
   decodeJson = defer \_ -> D.decode
-    $ D.sumType "CardanoTx"
-    $ Map.fromFoldable
-        [ "EmulatorTx" /\ D.content (EmulatorTx <$> D.value)
-        , "CardanoApiTx" /\ D.content (CardanoApiTx <$> D.value)
-        , "Both" /\ D.content (D.tuple $ Both </$\> D.value </*\> D.value)
-        ]
+    $ D.sumType "CardanoTx" $ Map.fromFoldable
+      [ "EmulatorTx" /\ D.content (EmulatorTx <$> D.value)
+      , "CardanoApiTx" /\ D.content (CardanoApiTx <$> D.value)
+      , "Both" /\ D.content (D.tuple $ Both </$\>D.value </*\> D.value)
+      ]
 
 derive instance Generic CardanoTx _
 
@@ -67,24 +66,24 @@ _CardanoApiTx = prism' CardanoApiTx case _ of
   (CardanoApiTx a) -> Just a
   _ -> Nothing
 
-_Both :: Prism' CardanoTx { a :: Tx, b :: RawJson }
-_Both = prism' (\{ a, b } -> (Both a b)) case _ of
-  (Both a b) -> Just { a, b }
+_Both :: Prism' CardanoTx {a :: Tx, b :: RawJson}
+_Both = prism' (\{a, b} -> (Both a b)) case _ of
+  (Both a b) -> Just {a, b}
   _ -> Nothing
 
 --------------------------------------------------------------------------------
 
 data ChainIndexTxOut
   = PublicKeyChainIndexTxOut
-      { _ciTxOutAddress :: Address
-      , _ciTxOutValue :: Value
-      }
+    { _ciTxOutAddress :: Address
+    , _ciTxOutValue :: Value
+    }
   | ScriptChainIndexTxOut
-      { _ciTxOutAddress :: Address
-      , _ciTxOutValidator :: Either String Validator
-      , _ciTxOutDatum :: Either DatumHash String
-      , _ciTxOutValue :: Value
-      }
+    { _ciTxOutAddress :: Address
+    , _ciTxOutValidator :: Either String Validator
+    , _ciTxOutDatum :: Either DatumHash String
+    , _ciTxOutValue :: Value
+    }
 
 derive instance Eq ChainIndexTxOut
 
@@ -93,12 +92,12 @@ instance Show ChainIndexTxOut where
 
 instance EncodeJson ChainIndexTxOut where
   encodeJson = defer \_ -> case _ of
-    PublicKeyChainIndexTxOut { _ciTxOutAddress, _ciTxOutValue } -> encodeJson
+    PublicKeyChainIndexTxOut {_ciTxOutAddress, _ciTxOutValue} -> encodeJson
       { tag: "PublicKeyChainIndexTxOut"
       , _ciTxOutAddress: flip E.encode _ciTxOutAddress E.value
       , _ciTxOutValue: flip E.encode _ciTxOutValue E.value
       }
-    ScriptChainIndexTxOut { _ciTxOutAddress, _ciTxOutValidator, _ciTxOutDatum, _ciTxOutValue } -> encodeJson
+    ScriptChainIndexTxOut {_ciTxOutAddress, _ciTxOutValidator, _ciTxOutDatum, _ciTxOutValue} -> encodeJson
       { tag: "ScriptChainIndexTxOut"
       , _ciTxOutAddress: flip E.encode _ciTxOutAddress E.value
       , _ciTxOutValidator: flip E.encode _ciTxOutValidator (E.either E.value E.value)
@@ -108,34 +107,29 @@ instance EncodeJson ChainIndexTxOut where
 
 instance DecodeJson ChainIndexTxOut where
   decodeJson = defer \_ -> D.decode
-    $ D.sumType "ChainIndexTxOut"
-    $ Map.fromFoldable
-        [ "PublicKeyChainIndexTxOut" /\
-            ( PublicKeyChainIndexTxOut <$> D.object "PublicKeyChainIndexTxOut"
-                { _ciTxOutAddress: D.value :: _ Address
-                , _ciTxOutValue: D.value :: _ Value
-                }
-            )
-        , "ScriptChainIndexTxOut" /\
-            ( ScriptChainIndexTxOut <$> D.object "ScriptChainIndexTxOut"
-                { _ciTxOutAddress: D.value :: _ Address
-                , _ciTxOutValidator: (D.either D.value D.value) :: _ (Either String Validator)
-                , _ciTxOutDatum: (D.either D.value D.value) :: _ (Either DatumHash String)
-                , _ciTxOutValue: D.value :: _ Value
-                }
-            )
-        ]
+    $ D.sumType "ChainIndexTxOut" $ Map.fromFoldable
+      [ "PublicKeyChainIndexTxOut" /\ (PublicKeyChainIndexTxOut <$> D.object "PublicKeyChainIndexTxOut"
+        { _ciTxOutAddress: D.value :: _ Address
+        , _ciTxOutValue: D.value :: _ Value
+        })
+      , "ScriptChainIndexTxOut" /\ (ScriptChainIndexTxOut <$> D.object "ScriptChainIndexTxOut"
+        { _ciTxOutAddress: D.value :: _ Address
+        , _ciTxOutValidator: (D.either D.value D.value) :: _ (Either String Validator)
+        , _ciTxOutDatum: (D.either D.value D.value) :: _ (Either DatumHash String)
+        , _ciTxOutValue: D.value :: _ Value
+        })
+      ]
 
 derive instance Generic ChainIndexTxOut _
 
 --------------------------------------------------------------------------------
 
-_PublicKeyChainIndexTxOut :: Prism' ChainIndexTxOut { _ciTxOutAddress :: Address, _ciTxOutValue :: Value }
+_PublicKeyChainIndexTxOut :: Prism' ChainIndexTxOut {_ciTxOutAddress :: Address, _ciTxOutValue :: Value}
 _PublicKeyChainIndexTxOut = prism' PublicKeyChainIndexTxOut case _ of
   (PublicKeyChainIndexTxOut a) -> Just a
   _ -> Nothing
 
-_ScriptChainIndexTxOut :: Prism' ChainIndexTxOut { _ciTxOutAddress :: Address, _ciTxOutValidator :: Either String Validator, _ciTxOutDatum :: Either DatumHash String, _ciTxOutValue :: Value }
+_ScriptChainIndexTxOut :: Prism' ChainIndexTxOut {_ciTxOutAddress :: Address, _ciTxOutValidator :: Either String Validator, _ciTxOutDatum :: Either DatumHash String, _ciTxOutValue :: Value}
 _ScriptChainIndexTxOut = prism' ScriptChainIndexTxOut case _ of
   (ScriptChainIndexTxOut a) -> Just a
   _ -> Nothing

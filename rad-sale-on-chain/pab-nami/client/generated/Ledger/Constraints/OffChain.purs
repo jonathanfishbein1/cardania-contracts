@@ -61,19 +61,18 @@ instance EncodeJson MkTxError where
 
 instance DecodeJson MkTxError where
   decodeJson = defer \_ -> D.decode
-    $ D.sumType "MkTxError"
-    $ Map.fromFoldable
-        [ "TypeCheckFailed" /\ D.content (TypeCheckFailed <$> D.value)
-        , "TxOutRefNotFound" /\ D.content (TxOutRefNotFound <$> D.value)
-        , "TxOutRefWrongType" /\ D.content (TxOutRefWrongType <$> D.value)
-        , "DatumNotFound" /\ D.content (DatumNotFound <$> D.value)
-        , "MintingPolicyNotFound" /\ D.content (MintingPolicyNotFound <$> D.value)
-        , "ValidatorHashNotFound" /\ D.content (ValidatorHashNotFound <$> D.value)
-        , "OwnPubKeyMissing" /\ pure OwnPubKeyMissing
-        , "TypedValidatorMissing" /\ pure TypedValidatorMissing
-        , "DatumWrongHash" /\ D.content (D.tuple $ DatumWrongHash </$\> D.value </*\> D.value)
-        , "CannotSatisfyAny" /\ pure CannotSatisfyAny
-        ]
+    $ D.sumType "MkTxError" $ Map.fromFoldable
+      [ "TypeCheckFailed" /\ D.content (TypeCheckFailed <$> D.value)
+      , "TxOutRefNotFound" /\ D.content (TxOutRefNotFound <$> D.value)
+      , "TxOutRefWrongType" /\ D.content (TxOutRefWrongType <$> D.value)
+      , "DatumNotFound" /\ D.content (DatumNotFound <$> D.value)
+      , "MintingPolicyNotFound" /\ D.content (MintingPolicyNotFound <$> D.value)
+      , "ValidatorHashNotFound" /\ D.content (ValidatorHashNotFound <$> D.value)
+      , "OwnPubKeyMissing" /\ pure OwnPubKeyMissing
+      , "TypedValidatorMissing" /\ pure TypedValidatorMissing
+      , "DatumWrongHash" /\ D.content (D.tuple $ DatumWrongHash </$\>D.value </*\> D.value)
+      , "CannotSatisfyAny" /\ pure CannotSatisfyAny
+      ]
 
 derive instance Generic MkTxError _
 
@@ -119,9 +118,9 @@ _TypedValidatorMissing = prism' (const TypedValidatorMissing) case _ of
   TypedValidatorMissing -> Just unit
   _ -> Nothing
 
-_DatumWrongHash :: Prism' MkTxError { a :: DatumHash, b :: String }
-_DatumWrongHash = prism' (\{ a, b } -> (DatumWrongHash a b)) case _ of
-  (DatumWrongHash a b) -> Just { a, b }
+_DatumWrongHash :: Prism' MkTxError {a :: DatumHash, b :: String}
+_DatumWrongHash = prism' (\{a, b} -> (DatumWrongHash a b)) case _ of
+  (DatumWrongHash a b) -> Just {a, b}
   _ -> Nothing
 
 _CannotSatisfyAny :: Prism' MkTxError Unit
@@ -144,24 +143,20 @@ instance Show UnbalancedTx where
   show a = genericShow a
 
 instance EncodeJson UnbalancedTx where
-  encodeJson = defer \_ -> E.encode $ unwrap >$<
-    ( E.record
-        { unBalancedTxTx: E.value :: _ Tx
-        , unBalancedTxRequiredSignatories: (E.dictionary E.value (E.maybe E.value)) :: _ (Map PaymentPubKeyHash (Maybe PaymentPubKey))
-        , unBalancedTxUtxoIndex: (E.dictionary E.value E.value) :: _ (Map TxOutRef TxOut)
-        , unBalancedTxValidityTimeRange: E.value :: _ (Interval POSIXTime)
-        }
-    )
+  encodeJson = defer \_ -> E.encode $ unwrap >$< (E.record
+                                                   { unBalancedTxTx: E.value :: _ Tx
+                                                   , unBalancedTxRequiredSignatories: (E.dictionary E.value (E.maybe E.value)) :: _ (Map PaymentPubKeyHash (Maybe PaymentPubKey))
+                                                   , unBalancedTxUtxoIndex: (E.dictionary E.value E.value) :: _ (Map TxOutRef TxOut)
+                                                   , unBalancedTxValidityTimeRange: E.value :: _ (Interval POSIXTime)
+                                                   })
 
 instance DecodeJson UnbalancedTx where
-  decodeJson = defer \_ -> D.decode $
-    ( UnbalancedTx <$> D.record "UnbalancedTx"
-        { unBalancedTxTx: D.value :: _ Tx
-        , unBalancedTxRequiredSignatories: (D.dictionary D.value (D.maybe D.value)) :: _ (Map PaymentPubKeyHash (Maybe PaymentPubKey))
-        , unBalancedTxUtxoIndex: (D.dictionary D.value D.value) :: _ (Map TxOutRef TxOut)
-        , unBalancedTxValidityTimeRange: D.value :: _ (Interval POSIXTime)
-        }
-    )
+  decodeJson = defer \_ -> D.decode $ (UnbalancedTx <$> D.record "UnbalancedTx"
+      { unBalancedTxTx: D.value :: _ Tx
+      , unBalancedTxRequiredSignatories: (D.dictionary D.value (D.maybe D.value)) :: _ (Map PaymentPubKeyHash (Maybe PaymentPubKey))
+      , unBalancedTxUtxoIndex: (D.dictionary D.value D.value) :: _ (Map TxOutRef TxOut)
+      , unBalancedTxValidityTimeRange: D.value :: _ (Interval POSIXTime)
+      })
 
 derive instance Generic UnbalancedTx _
 
@@ -169,5 +164,5 @@ derive instance Newtype UnbalancedTx _
 
 --------------------------------------------------------------------------------
 
-_UnbalancedTx :: Iso' UnbalancedTx { unBalancedTxTx :: Tx, unBalancedTxRequiredSignatories :: Map PaymentPubKeyHash (Maybe PaymentPubKey), unBalancedTxUtxoIndex :: Map TxOutRef TxOut, unBalancedTxValidityTimeRange :: Interval POSIXTime }
+_UnbalancedTx :: Iso' UnbalancedTx {unBalancedTxTx :: Tx, unBalancedTxRequiredSignatories :: Map PaymentPubKeyHash (Maybe PaymentPubKey), unBalancedTxUtxoIndex :: Map TxOutRef TxOut, unBalancedTxValidityTimeRange :: Interval POSIXTime}
 _UnbalancedTx = _Newtype

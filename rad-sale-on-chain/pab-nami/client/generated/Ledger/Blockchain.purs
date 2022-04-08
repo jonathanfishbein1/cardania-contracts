@@ -33,10 +33,8 @@ instance Show BlockId where
   show a = genericShow a
 
 instance EncodeJson BlockId where
-  encodeJson = defer \_ -> E.encode $ unwrap >$<
-    ( E.record
-        { getBlockId: E.value :: _ String }
-    )
+  encodeJson = defer \_ -> E.encode $ unwrap >$< (E.record
+                                                 { getBlockId: E.value :: _ String })
 
 instance DecodeJson BlockId where
   decodeJson = defer \_ -> D.decode $ (BlockId <$> D.record "BlockId" { getBlockId: D.value :: _ String })
@@ -47,7 +45,7 @@ derive instance Newtype BlockId _
 
 --------------------------------------------------------------------------------
 
-_BlockId :: Iso' BlockId { getBlockId :: String }
+_BlockId :: Iso' BlockId {getBlockId :: String}
 _BlockId = _Newtype
 
 --------------------------------------------------------------------------------
@@ -68,11 +66,10 @@ instance EncodeJson OnChainTx where
 
 instance DecodeJson OnChainTx where
   decodeJson = defer \_ -> D.decode
-    $ D.sumType "OnChainTx"
-    $ Map.fromFoldable
-        [ "Invalid" /\ D.content (Invalid <$> D.value)
-        , "Valid" /\ D.content (Valid <$> D.value)
-        ]
+    $ D.sumType "OnChainTx" $ Map.fromFoldable
+      [ "Invalid" /\ D.content (Invalid <$> D.value)
+      , "Valid" /\ D.content (Valid <$> D.value)
+      ]
 
 derive instance Generic OnChainTx _
 

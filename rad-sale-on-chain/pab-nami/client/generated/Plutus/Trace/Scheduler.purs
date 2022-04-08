@@ -86,24 +86,20 @@ instance Show SchedulerLog where
   show a = genericShow a
 
 instance EncodeJson SchedulerLog where
-  encodeJson = defer \_ -> E.encode $ unwrap >$<
-    ( E.record
-        { slEvent: E.value :: _ ThreadEvent
-        , slThread: E.value :: _ ThreadId
-        , slTag: E.value :: _ Tag
-        , slPrio: E.value :: _ Priority
-        }
-    )
+  encodeJson = defer \_ -> E.encode $ unwrap >$< (E.record
+                                                   { slEvent: E.value :: _ ThreadEvent
+                                                   , slThread: E.value :: _ ThreadId
+                                                   , slTag: E.value :: _ Tag
+                                                   , slPrio: E.value :: _ Priority
+                                                   })
 
 instance DecodeJson SchedulerLog where
-  decodeJson = defer \_ -> D.decode $
-    ( SchedulerLog <$> D.record "SchedulerLog"
-        { slEvent: D.value :: _ ThreadEvent
-        , slThread: D.value :: _ ThreadId
-        , slTag: D.value :: _ Tag
-        , slPrio: D.value :: _ Priority
-        }
-    )
+  decodeJson = defer \_ -> D.decode $ (SchedulerLog <$> D.record "SchedulerLog"
+      { slEvent: D.value :: _ ThreadEvent
+      , slThread: D.value :: _ ThreadId
+      , slTag: D.value :: _ Tag
+      , slPrio: D.value :: _ Priority
+      })
 
 derive instance Generic SchedulerLog _
 
@@ -111,7 +107,7 @@ derive instance Newtype SchedulerLog _
 
 --------------------------------------------------------------------------------
 
-_SchedulerLog :: Iso' SchedulerLog { slEvent :: ThreadEvent, slThread :: ThreadId, slTag :: Tag, slPrio :: Priority }
+_SchedulerLog :: Iso' SchedulerLog {slEvent :: ThreadEvent, slThread :: ThreadId, slTag :: Tag, slPrio :: Priority}
 _SchedulerLog = _Newtype
 
 --------------------------------------------------------------------------------
@@ -179,14 +175,13 @@ instance EncodeJson ThreadEvent where
 
 instance DecodeJson ThreadEvent where
   decodeJson = defer \_ -> D.decode
-    $ D.sumType "ThreadEvent"
-    $ Map.fromFoldable
-        [ "Stopped" /\ D.content (Stopped <$> D.value)
-        , "Resumed" /\ pure Resumed
-        , "Suspended" /\ pure Suspended
-        , "Started" /\ pure Started
-        , "Thawed" /\ pure Thawed
-        ]
+    $ D.sumType "ThreadEvent" $ Map.fromFoldable
+      [ "Stopped" /\ D.content (Stopped <$> D.value)
+      , "Resumed" /\ pure Resumed
+      , "Suspended" /\ pure Suspended
+      , "Started" /\ pure Started
+      , "Thawed" /\ pure Thawed
+      ]
 
 derive instance Generic ThreadEvent _
 
@@ -227,10 +222,8 @@ instance Show ThreadId where
   show a = genericShow a
 
 instance EncodeJson ThreadId where
-  encodeJson = defer \_ -> E.encode $ unwrap >$<
-    ( E.record
-        { unThreadId: E.value :: _ Int }
-    )
+  encodeJson = defer \_ -> E.encode $ unwrap >$< (E.record
+                                                 { unThreadId: E.value :: _ Int })
 
 instance DecodeJson ThreadId where
   decodeJson = defer \_ -> D.decode $ (ThreadId <$> D.record "ThreadId" { unThreadId: D.value :: _ Int })
@@ -241,5 +234,5 @@ derive instance Newtype ThreadId _
 
 --------------------------------------------------------------------------------
 
-_ThreadId :: Iso' ThreadId { unThreadId :: Int }
+_ThreadId :: Iso' ThreadId {unThreadId :: Int}
 _ThreadId = _Newtype

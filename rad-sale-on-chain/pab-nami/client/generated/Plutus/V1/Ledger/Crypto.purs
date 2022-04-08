@@ -32,10 +32,8 @@ instance Show PubKey where
   show a = genericShow a
 
 instance EncodeJson PubKey where
-  encodeJson = defer \_ -> E.encode $ unwrap >$<
-    ( E.record
-        { getPubKey: E.value :: _ String }
-    )
+  encodeJson = defer \_ -> E.encode $ unwrap >$< (E.record
+                                                 { getPubKey: E.value :: _ String })
 
 instance DecodeJson PubKey where
   decodeJson = defer \_ -> D.decode $ (PubKey <$> D.record "PubKey" { getPubKey: D.value :: _ String })
@@ -46,7 +44,7 @@ derive instance Newtype PubKey _
 
 --------------------------------------------------------------------------------
 
-_PubKey :: Iso' PubKey { getPubKey :: String }
+_PubKey :: Iso' PubKey {getPubKey :: String}
 _PubKey = _Newtype
 
 --------------------------------------------------------------------------------
@@ -61,10 +59,8 @@ instance Show PubKeyHash where
   show a = genericShow a
 
 instance EncodeJson PubKeyHash where
-  encodeJson = defer \_ -> E.encode $ unwrap >$<
-    ( E.record
-        { getPubKeyHash: E.value :: _ String }
-    )
+  encodeJson = defer \_ -> E.encode $ unwrap >$< (E.record
+                                                 { getPubKeyHash: E.value :: _ String })
 
 instance DecodeJson PubKeyHash where
   decodeJson = defer \_ -> D.decode $ (PubKeyHash <$> D.record "PubKeyHash" { getPubKeyHash: D.value :: _ String })
@@ -75,7 +71,7 @@ derive instance Newtype PubKeyHash _
 
 --------------------------------------------------------------------------------
 
-_PubKeyHash :: Iso' PubKeyHash { getPubKeyHash :: String }
+_PubKeyHash :: Iso' PubKeyHash {getPubKeyHash :: String}
 _PubKeyHash = _Newtype
 
 --------------------------------------------------------------------------------
@@ -90,10 +86,8 @@ derive instance Eq Signature
 derive instance Ord Signature
 
 instance EncodeJson Signature where
-  encodeJson = defer \_ -> E.encode $ unwrap >$<
-    ( E.record
-        { getSignature: E.value :: _ String }
-    )
+  encodeJson = defer \_ -> E.encode $ unwrap >$< (E.record
+                                                 { getSignature: E.value :: _ String })
 
 instance DecodeJson Signature where
   decodeJson = defer \_ -> D.decode $ (Signature <$> D.record "Signature" { getSignature: D.value :: _ String })
@@ -104,5 +98,5 @@ derive instance Newtype Signature _
 
 --------------------------------------------------------------------------------
 
-_Signature :: Iso' Signature { getSignature :: String }
+_Signature :: Iso' Signature {getSignature :: String}
 _Signature = _Newtype

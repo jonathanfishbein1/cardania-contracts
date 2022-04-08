@@ -33,20 +33,16 @@ instance Show WalletInfo where
   show a = genericShow a
 
 instance EncodeJson WalletInfo where
-  encodeJson = defer \_ -> E.encode $ unwrap >$<
-    ( E.record
-        { wiWallet: E.value :: _ Wallet
-        , wiPaymentPubKeyHash: E.value :: _ PaymentPubKeyHash
-        }
-    )
+  encodeJson = defer \_ -> E.encode $ unwrap >$< (E.record
+                                                   { wiWallet: E.value :: _ Wallet
+                                                   , wiPaymentPubKeyHash: E.value :: _ PaymentPubKeyHash
+                                                   })
 
 instance DecodeJson WalletInfo where
-  decodeJson = defer \_ -> D.decode $
-    ( WalletInfo <$> D.record "WalletInfo"
-        { wiWallet: D.value :: _ Wallet
-        , wiPaymentPubKeyHash: D.value :: _ PaymentPubKeyHash
-        }
-    )
+  decodeJson = defer \_ -> D.decode $ (WalletInfo <$> D.record "WalletInfo"
+      { wiWallet: D.value :: _ Wallet
+      , wiPaymentPubKeyHash: D.value :: _ PaymentPubKeyHash
+      })
 
 derive instance Generic WalletInfo _
 
@@ -54,5 +50,5 @@ derive instance Newtype WalletInfo _
 
 --------------------------------------------------------------------------------
 
-_WalletInfo :: Iso' WalletInfo { wiWallet :: Wallet, wiPaymentPubKeyHash :: PaymentPubKeyHash }
+_WalletInfo :: Iso' WalletInfo {wiWallet :: Wallet, wiPaymentPubKeyHash :: PaymentPubKeyHash}
 _WalletInfo = _Newtype

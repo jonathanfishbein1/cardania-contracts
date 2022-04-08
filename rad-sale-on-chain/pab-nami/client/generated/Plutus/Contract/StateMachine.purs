@@ -35,20 +35,16 @@ instance (Show a, Show b) => Show (InvalidTransition a b) where
   show a = genericShow a
 
 instance (EncodeJson a, EncodeJson b) => EncodeJson (InvalidTransition a b) where
-  encodeJson = defer \_ -> E.encode $ unwrap >$<
-    ( E.record
-        { tfState: (E.maybe E.value) :: _ (Maybe (State a))
-        , tfInput: E.value :: _ b
-        }
-    )
+  encodeJson = defer \_ -> E.encode $ unwrap >$< (E.record
+                                                   { tfState: (E.maybe E.value) :: _ (Maybe (State a))
+                                                   , tfInput: E.value :: _ b
+                                                   })
 
 instance (DecodeJson a, DecodeJson b) => DecodeJson (InvalidTransition a b) where
-  decodeJson = defer \_ -> D.decode $
-    ( InvalidTransition <$> D.record "InvalidTransition"
-        { tfState: (D.maybe D.value) :: _ (Maybe (State a))
-        , tfInput: D.value :: _ b
-        }
-    )
+  decodeJson = defer \_ -> D.decode $ (InvalidTransition <$> D.record "InvalidTransition"
+      { tfState: (D.maybe D.value) :: _ (Maybe (State a))
+      , tfInput: D.value :: _ b
+      })
 
 derive instance Generic (InvalidTransition a b) _
 
@@ -56,7 +52,7 @@ derive instance Newtype (InvalidTransition a b) _
 
 --------------------------------------------------------------------------------
 
-_InvalidTransition :: forall a b. Iso' (InvalidTransition a b) { tfState :: Maybe (State a), tfInput :: b }
+_InvalidTransition :: forall a b. Iso' (InvalidTransition a b) {tfState :: Maybe (State a), tfInput :: b}
 _InvalidTransition = _Newtype
 
 --------------------------------------------------------------------------------
@@ -79,12 +75,11 @@ instance EncodeJson SMContractError where
 
 instance DecodeJson SMContractError where
   decodeJson = defer \_ -> D.decode
-    $ D.sumType "SMContractError"
-    $ Map.fromFoldable
-        [ "ChooserError" /\ D.content (ChooserError <$> D.value)
-        , "UnableToExtractTransition" /\ pure UnableToExtractTransition
-        , "SMCContractError" /\ D.content (SMCContractError <$> D.value)
-        ]
+    $ D.sumType "SMContractError" $ Map.fromFoldable
+      [ "ChooserError" /\ D.content (ChooserError <$> D.value)
+      , "UnableToExtractTransition" /\ pure UnableToExtractTransition
+      , "SMCContractError" /\ D.content (SMCContractError <$> D.value)
+      ]
 
 derive instance Generic SMContractError _
 

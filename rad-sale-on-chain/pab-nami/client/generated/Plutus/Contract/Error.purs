@@ -36,10 +36,8 @@ instance Show AssertionError where
   show a = genericShow a
 
 instance EncodeJson AssertionError where
-  encodeJson = defer \_ -> E.encode $ unwrap >$<
-    ( E.record
-        { unAssertionError: E.value :: _ String }
-    )
+  encodeJson = defer \_ -> E.encode $ unwrap >$< (E.record
+                                                 { unAssertionError: E.value :: _ String })
 
 instance DecodeJson AssertionError where
   decodeJson = defer \_ -> D.decode $ (GenericAssertion <$> D.record "GenericAssertion" { unAssertionError: D.value :: _ String })
@@ -50,7 +48,7 @@ derive instance Newtype AssertionError _
 
 --------------------------------------------------------------------------------
 
-_GenericAssertion :: Iso' AssertionError { unAssertionError :: String }
+_GenericAssertion :: Iso' AssertionError {unAssertionError :: String}
 _GenericAssertion = _Newtype
 
 --------------------------------------------------------------------------------
@@ -63,10 +61,10 @@ data ContractError
   | ResumableContractError MatchingError
   | CCheckpointContractError CheckpointError
   | EndpointDecodeContractError
-      { eeEndpointDescription :: EndpointDescription
-      , eeEndpointValue :: EndpointValue RawJson
-      , eeErrorMessage :: String
-      }
+    { eeEndpointDescription :: EndpointDescription
+    , eeEndpointValue :: EndpointValue RawJson
+    , eeErrorMessage :: String
+    }
   | OtherContractError String
 
 derive instance Eq ContractError
@@ -82,7 +80,7 @@ instance EncodeJson ContractError where
     ConstraintResolutionContractError a -> E.encodeTagged "ConstraintResolutionContractError" a E.value
     ResumableContractError a -> E.encodeTagged "ResumableContractError" a E.value
     CCheckpointContractError a -> E.encodeTagged "CCheckpointContractError" a E.value
-    EndpointDecodeContractError { eeEndpointDescription, eeEndpointValue, eeErrorMessage } -> encodeJson
+    EndpointDecodeContractError {eeEndpointDescription, eeEndpointValue, eeErrorMessage} -> encodeJson
       { tag: "EndpointDecodeContractError"
       , eeEndpointDescription: flip E.encode eeEndpointDescription E.value
       , eeEndpointValue: flip E.encode eeEndpointValue E.value
@@ -92,23 +90,20 @@ instance EncodeJson ContractError where
 
 instance DecodeJson ContractError where
   decodeJson = defer \_ -> D.decode
-    $ D.sumType "ContractError"
-    $ Map.fromFoldable
-        [ "WalletContractError" /\ D.content (WalletContractError <$> D.value)
-        , "ChainIndexContractError" /\ D.content (D.tuple $ ChainIndexContractError </$\> D.value </*\> D.value)
-        , "EmulatorAssertionContractError" /\ D.content (EmulatorAssertionContractError <$> D.value)
-        , "ConstraintResolutionContractError" /\ D.content (ConstraintResolutionContractError <$> D.value)
-        , "ResumableContractError" /\ D.content (ResumableContractError <$> D.value)
-        , "CCheckpointContractError" /\ D.content (CCheckpointContractError <$> D.value)
-        , "EndpointDecodeContractError" /\
-            ( EndpointDecodeContractError <$> D.object "EndpointDecodeContractError"
-                { eeEndpointDescription: D.value :: _ EndpointDescription
-                , eeEndpointValue: D.value :: _ (EndpointValue RawJson)
-                , eeErrorMessage: D.value :: _ String
-                }
-            )
-        , "OtherContractError" /\ D.content (OtherContractError <$> D.value)
-        ]
+    $ D.sumType "ContractError" $ Map.fromFoldable
+      [ "WalletContractError" /\ D.content (WalletContractError <$> D.value)
+      , "ChainIndexContractError" /\ D.content (D.tuple $ ChainIndexContractError </$\>D.value </*\> D.value)
+      , "EmulatorAssertionContractError" /\ D.content (EmulatorAssertionContractError <$> D.value)
+      , "ConstraintResolutionContractError" /\ D.content (ConstraintResolutionContractError <$> D.value)
+      , "ResumableContractError" /\ D.content (ResumableContractError <$> D.value)
+      , "CCheckpointContractError" /\ D.content (CCheckpointContractError <$> D.value)
+      , "EndpointDecodeContractError" /\ (EndpointDecodeContractError <$> D.object "EndpointDecodeContractError"
+        { eeEndpointDescription: D.value :: _ EndpointDescription
+        , eeEndpointValue: D.value :: _ (EndpointValue RawJson)
+        , eeErrorMessage: D.value :: _ String
+        })
+      , "OtherContractError" /\ D.content (OtherContractError <$> D.value)
+      ]
 
 derive instance Generic ContractError _
 
@@ -119,9 +114,9 @@ _WalletContractError = prism' WalletContractError case _ of
   (WalletContractError a) -> Just a
   _ -> Nothing
 
-_ChainIndexContractError :: Prism' ContractError { a :: String, b :: ChainIndexResponse }
-_ChainIndexContractError = prism' (\{ a, b } -> (ChainIndexContractError a b)) case _ of
-  (ChainIndexContractError a b) -> Just { a, b }
+_ChainIndexContractError :: Prism' ContractError {a :: String, b :: ChainIndexResponse}
+_ChainIndexContractError = prism' (\{a, b} -> (ChainIndexContractError a b)) case _ of
+  (ChainIndexContractError a b) -> Just {a, b}
   _ -> Nothing
 
 _EmulatorAssertionContractError :: Prism' ContractError AssertionError
@@ -144,7 +139,7 @@ _CCheckpointContractError = prism' CCheckpointContractError case _ of
   (CCheckpointContractError a) -> Just a
   _ -> Nothing
 
-_EndpointDecodeContractError :: Prism' ContractError { eeEndpointDescription :: EndpointDescription, eeEndpointValue :: EndpointValue RawJson, eeErrorMessage :: String }
+_EndpointDecodeContractError :: Prism' ContractError {eeEndpointDescription :: EndpointDescription, eeEndpointValue :: EndpointValue RawJson, eeErrorMessage :: String}
 _EndpointDecodeContractError = prism' EndpointDecodeContractError case _ of
   (EndpointDecodeContractError a) -> Just a
   _ -> Nothing
@@ -164,10 +159,8 @@ instance Show MatchingError where
   show a = genericShow a
 
 instance EncodeJson MatchingError where
-  encodeJson = defer \_ -> E.encode $ unwrap >$<
-    ( E.record
-        { unWrongVariantError: E.value :: _ String }
-    )
+  encodeJson = defer \_ -> E.encode $ unwrap >$< (E.record
+                                                 { unWrongVariantError: E.value :: _ String })
 
 instance DecodeJson MatchingError where
   decodeJson = defer \_ -> D.decode $ (WrongVariantError <$> D.record "WrongVariantError" { unWrongVariantError: D.value :: _ String })
@@ -178,5 +171,5 @@ derive instance Newtype MatchingError _
 
 --------------------------------------------------------------------------------
 
-_WrongVariantError :: Iso' MatchingError { unWrongVariantError :: String }
+_WrongVariantError :: Iso' MatchingError {unWrongVariantError :: String}
 _WrongVariantError = _Newtype

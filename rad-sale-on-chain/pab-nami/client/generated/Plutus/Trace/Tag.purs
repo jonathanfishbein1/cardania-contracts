@@ -30,10 +30,8 @@ instance Show Tag where
   show a = genericShow a
 
 instance EncodeJson Tag where
-  encodeJson = defer \_ -> E.encode $ unwrap >$<
-    ( E.record
-        { unTag: E.value :: _ String }
-    )
+  encodeJson = defer \_ -> E.encode $ unwrap >$< (E.record
+                                                 { unTag: E.value :: _ String })
 
 instance DecodeJson Tag where
   decodeJson = defer \_ -> D.decode $ (Tag <$> D.record "Tag" { unTag: D.value :: _ String })
@@ -44,5 +42,5 @@ derive instance Newtype Tag _
 
 --------------------------------------------------------------------------------
 
-_Tag :: Iso' Tag { unTag :: String }
+_Tag :: Iso' Tag {unTag :: String}
 _Tag = _Newtype

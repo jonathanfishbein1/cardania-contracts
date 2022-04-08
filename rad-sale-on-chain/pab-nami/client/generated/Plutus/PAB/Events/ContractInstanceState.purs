@@ -39,26 +39,22 @@ instance (Show a) => Show (PartiallyDecodedResponse a) where
   show a = genericShow a
 
 instance (EncodeJson a) => EncodeJson (PartiallyDecodedResponse a) where
-  encodeJson = defer \_ -> E.encode $ unwrap >$<
-    ( E.record
-        { hooks: E.value :: _ (Array (Request a))
-        , logs: E.value :: _ (Array (LogMessage RawJson))
-        , lastLogs: E.value :: _ (Array (LogMessage RawJson))
-        , err: (E.maybe E.value) :: _ (Maybe RawJson)
-        , observableState: E.value :: _ RawJson
-        }
-    )
+  encodeJson = defer \_ -> E.encode $ unwrap >$< (E.record
+                                                   { hooks: E.value :: _ (Array (Request a))
+                                                   , logs: E.value :: _ (Array (LogMessage RawJson))
+                                                   , lastLogs: E.value :: _ (Array (LogMessage RawJson))
+                                                   , err: (E.maybe E.value) :: _ (Maybe RawJson)
+                                                   , observableState: E.value :: _ RawJson
+                                                   })
 
 instance (DecodeJson a) => DecodeJson (PartiallyDecodedResponse a) where
-  decodeJson = defer \_ -> D.decode $
-    ( PartiallyDecodedResponse <$> D.record "PartiallyDecodedResponse"
-        { hooks: D.value :: _ (Array (Request a))
-        , logs: D.value :: _ (Array (LogMessage RawJson))
-        , lastLogs: D.value :: _ (Array (LogMessage RawJson))
-        , err: (D.maybe D.value) :: _ (Maybe RawJson)
-        , observableState: D.value :: _ RawJson
-        }
-    )
+  decodeJson = defer \_ -> D.decode $ (PartiallyDecodedResponse <$> D.record "PartiallyDecodedResponse"
+      { hooks: D.value :: _ (Array (Request a))
+      , logs: D.value :: _ (Array (LogMessage RawJson))
+      , lastLogs: D.value :: _ (Array (LogMessage RawJson))
+      , err: (D.maybe D.value) :: _ (Maybe RawJson)
+      , observableState: D.value :: _ RawJson
+      })
 
 derive instance Generic (PartiallyDecodedResponse a) _
 
@@ -66,5 +62,5 @@ derive instance Newtype (PartiallyDecodedResponse a) _
 
 --------------------------------------------------------------------------------
 
-_PartiallyDecodedResponse :: forall a. Iso' (PartiallyDecodedResponse a) { hooks :: Array (Request a), logs :: Array (LogMessage RawJson), lastLogs :: Array (LogMessage RawJson), err :: Maybe RawJson, observableState :: RawJson }
+_PartiallyDecodedResponse :: forall a. Iso' (PartiallyDecodedResponse a) {hooks :: Array (Request a), logs :: Array (LogMessage RawJson), lastLogs :: Array (LogMessage RawJson), err :: Maybe RawJson, observableState :: RawJson}
 _PartiallyDecodedResponse = _Newtype

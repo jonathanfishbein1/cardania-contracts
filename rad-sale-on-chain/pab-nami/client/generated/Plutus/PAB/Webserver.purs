@@ -15,8 +15,8 @@ import Data.HTTP.Method (Method(..))
 import Data.Maybe (Maybe(..))
 import Data.RawJson (RawJson)
 import Data.Tuple (Tuple(..))
-import DemoContract (DemoContract)
 import Plutus.PAB.Webserver.Types (ContractActivationArgs, ContractInstanceClientState, ContractSignatureResponse, FullReport)
+import RadSaleContracts (RadSaleContracts)
 import Servant.PureScript (class MonadAjax, flagQueryPairs, paramListQueryPairs, paramQueryPairs, request, toHeader, toPathSegment)
 import URI (PathAbsolute(..), RelativePart(..), RelativeRef(..))
 import URI.Path.Segment (segmentNZFromString)
@@ -26,10 +26,10 @@ import Data.Argonaut.Decode.Aeson as D
 import Data.Argonaut.Encode.Aeson as E
 import Data.String.NonEmpty as NES
 
-getApiHealthcheck
-  :: forall e m
-   . MonadAjax JsonDecodeError Json e m
-  => ExceptT e m Unit
+getApiHealthcheck ::
+  forall e m.
+  MonadAjax JsonDecodeError Json e m =>
+  ExceptT e m Unit
 getApiHealthcheck =
   request req
   where
@@ -50,10 +50,10 @@ getApiHealthcheck =
     ]
   query = Nothing
 
-getApiFullreport
-  :: forall e m
-   . MonadAjax JsonDecodeError Json e m
-  => ExceptT e m (FullReport DemoContract)
+getApiFullreport ::
+  forall e m.
+  MonadAjax JsonDecodeError Json e m =>
+  ExceptT e m (FullReport RadSaleContracts)
 getApiFullreport =
   request req
   where
@@ -74,11 +74,11 @@ getApiFullreport =
     ]
   query = Nothing
 
-postApiContractActivate
-  :: forall e m
-   . MonadAjax JsonDecodeError Json e m
-  => ContractActivationArgs DemoContract
-  -> ExceptT e m ContractInstanceId
+postApiContractActivate ::
+  forall e m.
+  MonadAjax JsonDecodeError Json e m =>
+  ContractActivationArgs RadSaleContracts ->
+  ExceptT e m ContractInstanceId
 postApiContractActivate reqBody =
   request req
   where
@@ -100,11 +100,11 @@ postApiContractActivate reqBody =
     ]
   query = Nothing
 
-getApiContractInstanceByContractinstanceidStatus
-  :: forall e m
-   . MonadAjax JsonDecodeError Json e m
-  => ContractInstanceId
-  -> ExceptT e m (ContractInstanceClientState DemoContract)
+getApiContractInstanceByContractinstanceidStatus ::
+  forall e m.
+  MonadAjax JsonDecodeError Json e m =>
+  ContractInstanceId ->
+  ExceptT e m (ContractInstanceClientState RadSaleContracts)
 getApiContractInstanceByContractinstanceidStatus contract_instance_id =
   request req
   where
@@ -128,11 +128,11 @@ getApiContractInstanceByContractinstanceidStatus contract_instance_id =
     ]
   query = Nothing
 
-getApiContractInstanceByContractinstanceidSchema
-  :: forall e m
-   . MonadAjax JsonDecodeError Json e m
-  => ContractInstanceId
-  -> ExceptT e m (ContractSignatureResponse DemoContract)
+getApiContractInstanceByContractinstanceidSchema ::
+  forall e m.
+  MonadAjax JsonDecodeError Json e m =>
+  ContractInstanceId ->
+  ExceptT e m (ContractSignatureResponse RadSaleContracts)
 getApiContractInstanceByContractinstanceidSchema contract_instance_id =
   request req
   where
@@ -156,17 +156,16 @@ getApiContractInstanceByContractinstanceidSchema contract_instance_id =
     ]
   query = Nothing
 
-postApiContractInstanceByContractinstanceidEndpointByEndpointname
-  :: forall e m
-   . MonadAjax JsonDecodeError Json e m
-  => RawJson
-  -> ContractInstanceId
-  -> String
-  -> ExceptT e m Unit
-postApiContractInstanceByContractinstanceidEndpointByEndpointname
-  reqBody
-  contract_instance_id
-  endpoint_name =
+postApiContractInstanceByContractinstanceidEndpointByEndpointname ::
+  forall e m.
+  MonadAjax JsonDecodeError Json e m =>
+  RawJson ->
+  ContractInstanceId ->
+  String ->
+  ExceptT e m Unit
+postApiContractInstanceByContractinstanceidEndpointByEndpointname reqBody
+                                                                  contract_instance_id
+                                                                  endpoint_name =
   request req
   where
   req = { method, uri, headers, content, encode, decode }
@@ -190,11 +189,11 @@ postApiContractInstanceByContractinstanceidEndpointByEndpointname
     ]
   query = Nothing
 
-putApiContractInstanceByContractinstanceidStop
-  :: forall e m
-   . MonadAjax JsonDecodeError Json e m
-  => ContractInstanceId
-  -> ExceptT e m Unit
+putApiContractInstanceByContractinstanceidStop ::
+  forall e m.
+  MonadAjax JsonDecodeError Json e m =>
+  ContractInstanceId ->
+  ExceptT e m Unit
 putApiContractInstanceByContractinstanceidStop contract_instance_id =
   request req
   where
@@ -218,12 +217,12 @@ putApiContractInstanceByContractinstanceidStop contract_instance_id =
     ]
   query = Nothing
 
-getApiContractInstancesWalletByWalletid
-  :: forall e m
-   . MonadAjax JsonDecodeError Json e m
-  => String
-  -> Maybe String
-  -> ExceptT e m (Array (ContractInstanceClientState DemoContract))
+getApiContractInstancesWalletByWalletid ::
+  forall e m.
+  MonadAjax JsonDecodeError Json e m =>
+  String ->
+  Maybe String ->
+  ExceptT e m (Array (ContractInstanceClientState RadSaleContracts))
 getApiContractInstancesWalletByWalletid wallet_id status =
   request req
   where
@@ -249,11 +248,11 @@ getApiContractInstancesWalletByWalletid wallet_id status =
     [ paramQueryPairs "status" status
     ]
 
-getApiContractInstances
-  :: forall e m
-   . MonadAjax JsonDecodeError Json e m
-  => Maybe String
-  -> ExceptT e m (Array (ContractInstanceClientState DemoContract))
+getApiContractInstances ::
+  forall e m.
+  MonadAjax JsonDecodeError Json e m =>
+  Maybe String ->
+  ExceptT e m (Array (ContractInstanceClientState RadSaleContracts))
 getApiContractInstances status =
   request req
   where
@@ -277,10 +276,10 @@ getApiContractInstances status =
     [ paramQueryPairs "status" status
     ]
 
-getApiContractDefinitions
-  :: forall e m
-   . MonadAjax JsonDecodeError Json e m
-  => ExceptT e m (Array (ContractSignatureResponse DemoContract))
+getApiContractDefinitions ::
+  forall e m.
+  MonadAjax JsonDecodeError Json e m =>
+  ExceptT e m (Array (ContractSignatureResponse RadSaleContracts))
 getApiContractDefinitions =
   request req
   where

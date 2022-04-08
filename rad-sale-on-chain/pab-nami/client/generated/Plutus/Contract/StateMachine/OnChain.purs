@@ -34,20 +34,16 @@ instance (Show a) => Show (State a) where
   show a = genericShow a
 
 instance (EncodeJson a) => EncodeJson (State a) where
-  encodeJson = defer \_ -> E.encode $ unwrap >$<
-    ( E.record
-        { stateData: E.value :: _ a
-        , stateValue: E.value :: _ Value
-        }
-    )
+  encodeJson = defer \_ -> E.encode $ unwrap >$< (E.record
+                                                   { stateData: E.value :: _ a
+                                                   , stateValue: E.value :: _ Value
+                                                   })
 
 instance (DecodeJson a) => DecodeJson (State a) where
-  decodeJson = defer \_ -> D.decode $
-    ( State <$> D.record "State"
-        { stateData: D.value :: _ a
-        , stateValue: D.value :: _ Value
-        }
-    )
+  decodeJson = defer \_ -> D.decode $ (State <$> D.record "State"
+      { stateData: D.value :: _ a
+      , stateValue: D.value :: _ Value
+      })
 
 derive instance Generic (State a) _
 
@@ -55,5 +51,5 @@ derive instance Newtype (State a) _
 
 --------------------------------------------------------------------------------
 
-_State :: forall a. Iso' (State a) { stateData :: a, stateValue :: Value }
+_State :: forall a. Iso' (State a) {stateData :: a, stateValue :: Value}
 _State = _Newtype

@@ -88,10 +88,8 @@ instance Show ContractInstanceId where
   show a = genericShow a
 
 instance EncodeJson ContractInstanceId where
-  encodeJson = defer \_ -> E.encode $ unwrap >$<
-    ( E.record
-        { unContractInstanceId: E.value :: _ UUID }
-    )
+  encodeJson = defer \_ -> E.encode $ unwrap >$< (E.record
+                                                 { unContractInstanceId: E.value :: _ UUID })
 
 instance DecodeJson ContractInstanceId where
   decodeJson = defer \_ -> D.decode $ (ContractInstanceId <$> D.record "ContractInstanceId" { unContractInstanceId: D.value :: _ UUID })
@@ -102,7 +100,7 @@ derive instance Newtype ContractInstanceId _
 
 --------------------------------------------------------------------------------
 
-_ContractInstanceId :: Iso' ContractInstanceId { unContractInstanceId :: UUID }
+_ContractInstanceId :: Iso' ContractInstanceId {unContractInstanceId :: UUID}
 _ContractInstanceId = _Newtype
 
 --------------------------------------------------------------------------------
@@ -117,10 +115,8 @@ derive instance Eq EndpointDescription
 derive instance Ord EndpointDescription
 
 instance EncodeJson EndpointDescription where
-  encodeJson = defer \_ -> E.encode $ unwrap >$<
-    ( E.record
-        { getEndpointDescription: E.value :: _ String }
-    )
+  encodeJson = defer \_ -> E.encode $ unwrap >$< (E.record
+                                                 { getEndpointDescription: E.value :: _ String })
 
 instance DecodeJson EndpointDescription where
   decodeJson = defer \_ -> D.decode $ (EndpointDescription <$> D.record "EndpointDescription" { getEndpointDescription: D.value :: _ String })
@@ -131,7 +127,7 @@ derive instance Newtype EndpointDescription _
 
 --------------------------------------------------------------------------------
 
-_EndpointDescription :: Iso' EndpointDescription { getEndpointDescription :: String }
+_EndpointDescription :: Iso' EndpointDescription {getEndpointDescription :: String}
 _EndpointDescription = _Newtype
 
 --------------------------------------------------------------------------------
@@ -144,10 +140,8 @@ instance (Show a) => Show (EndpointValue a) where
   show a = genericShow a
 
 instance (EncodeJson a) => EncodeJson (EndpointValue a) where
-  encodeJson = defer \_ -> E.encode $ unwrap >$<
-    ( E.record
-        { unEndpointValue: E.value :: _ a }
-    )
+  encodeJson = defer \_ -> E.encode $ unwrap >$< (E.record
+                                                 { unEndpointValue: E.value :: _ a })
 
 instance (DecodeJson a) => DecodeJson (EndpointValue a) where
   decodeJson = defer \_ -> D.decode $ (EndpointValue <$> D.record "EndpointValue" { unEndpointValue: D.value :: _ a })
@@ -158,7 +152,7 @@ derive instance Newtype (EndpointValue a) _
 
 --------------------------------------------------------------------------------
 
-_EndpointValue :: forall a. Iso' (EndpointValue a) { unEndpointValue :: a }
+_EndpointValue :: forall a. Iso' (EndpointValue a) {unEndpointValue :: a}
 _EndpointValue = _Newtype
 
 --------------------------------------------------------------------------------
@@ -175,22 +169,18 @@ instance Show Notification where
   show a = genericShow a
 
 instance EncodeJson Notification where
-  encodeJson = defer \_ -> E.encode $ unwrap >$<
-    ( E.record
-        { notificationContractID: E.value :: _ ContractInstanceId
-        , notificationContractEndpoint: E.value :: _ EndpointDescription
-        , notificationContractArg: E.value :: _ RawJson
-        }
-    )
+  encodeJson = defer \_ -> E.encode $ unwrap >$< (E.record
+                                                   { notificationContractID: E.value :: _ ContractInstanceId
+                                                   , notificationContractEndpoint: E.value :: _ EndpointDescription
+                                                   , notificationContractArg: E.value :: _ RawJson
+                                                   })
 
 instance DecodeJson Notification where
-  decodeJson = defer \_ -> D.decode $
-    ( Notification <$> D.record "Notification"
-        { notificationContractID: D.value :: _ ContractInstanceId
-        , notificationContractEndpoint: D.value :: _ EndpointDescription
-        , notificationContractArg: D.value :: _ RawJson
-        }
-    )
+  decodeJson = defer \_ -> D.decode $ (Notification <$> D.record "Notification"
+      { notificationContractID: D.value :: _ ContractInstanceId
+      , notificationContractEndpoint: D.value :: _ EndpointDescription
+      , notificationContractArg: D.value :: _ RawJson
+      })
 
 derive instance Generic Notification _
 
@@ -198,7 +188,7 @@ derive instance Newtype Notification _
 
 --------------------------------------------------------------------------------
 
-_Notification :: Iso' Notification { notificationContractID :: ContractInstanceId, notificationContractEndpoint :: EndpointDescription, notificationContractArg :: RawJson }
+_Notification :: Iso' Notification {notificationContractID :: ContractInstanceId, notificationContractEndpoint :: EndpointDescription, notificationContractArg :: RawJson}
 _Notification = _Newtype
 
 --------------------------------------------------------------------------------
@@ -223,26 +213,25 @@ instance EncodeJson NotificationError where
 
 instance DecodeJson NotificationError where
   decodeJson = defer \_ -> D.decode
-    $ D.sumType "NotificationError"
-    $ Map.fromFoldable
-        [ "EndpointNotAvailable" /\ D.content (D.tuple $ EndpointNotAvailable </$\> D.value </*\> D.value)
-        , "MoreThanOneEndpointAvailable" /\ D.content (D.tuple $ MoreThanOneEndpointAvailable </$\> D.value </*\> D.value)
-        , "InstanceDoesNotExist" /\ D.content (InstanceDoesNotExist <$> D.value)
-        , "NotificationJSONDecodeError" /\ D.content (D.tuple $ NotificationJSONDecodeError </$\> D.value </*\> D.value </*\> D.value)
-        ]
+    $ D.sumType "NotificationError" $ Map.fromFoldable
+      [ "EndpointNotAvailable" /\ D.content (D.tuple $ EndpointNotAvailable </$\>D.value </*\> D.value)
+      , "MoreThanOneEndpointAvailable" /\ D.content (D.tuple $ MoreThanOneEndpointAvailable </$\>D.value </*\> D.value)
+      , "InstanceDoesNotExist" /\ D.content (InstanceDoesNotExist <$> D.value)
+      , "NotificationJSONDecodeError" /\ D.content (D.tuple $ NotificationJSONDecodeError </$\>D.value </*\> D.value </*\> D.value)
+      ]
 
 derive instance Generic NotificationError _
 
 --------------------------------------------------------------------------------
 
-_EndpointNotAvailable :: Prism' NotificationError { a :: ContractInstanceId, b :: EndpointDescription }
-_EndpointNotAvailable = prism' (\{ a, b } -> (EndpointNotAvailable a b)) case _ of
-  (EndpointNotAvailable a b) -> Just { a, b }
+_EndpointNotAvailable :: Prism' NotificationError {a :: ContractInstanceId, b :: EndpointDescription}
+_EndpointNotAvailable = prism' (\{a, b} -> (EndpointNotAvailable a b)) case _ of
+  (EndpointNotAvailable a b) -> Just {a, b}
   _ -> Nothing
 
-_MoreThanOneEndpointAvailable :: Prism' NotificationError { a :: ContractInstanceId, b :: EndpointDescription }
-_MoreThanOneEndpointAvailable = prism' (\{ a, b } -> (MoreThanOneEndpointAvailable a b)) case _ of
-  (MoreThanOneEndpointAvailable a b) -> Just { a, b }
+_MoreThanOneEndpointAvailable :: Prism' NotificationError {a :: ContractInstanceId, b :: EndpointDescription}
+_MoreThanOneEndpointAvailable = prism' (\{a, b} -> (MoreThanOneEndpointAvailable a b)) case _ of
+  (MoreThanOneEndpointAvailable a b) -> Just {a, b}
   _ -> Nothing
 
 _InstanceDoesNotExist :: Prism' NotificationError ContractInstanceId
@@ -250,7 +239,7 @@ _InstanceDoesNotExist = prism' InstanceDoesNotExist case _ of
   (InstanceDoesNotExist a) -> Just a
   _ -> Nothing
 
-_NotificationJSONDecodeError :: Prism' NotificationError { a :: EndpointDescription, b :: RawJson, c :: String }
-_NotificationJSONDecodeError = prism' (\{ a, b, c } -> (NotificationJSONDecodeError a b c)) case _ of
-  (NotificationJSONDecodeError a b c) -> Just { a, b, c }
+_NotificationJSONDecodeError :: Prism' NotificationError {a :: EndpointDescription, b :: RawJson, c :: String}
+_NotificationJSONDecodeError = prism' (\{a, b, c} -> (NotificationJSONDecodeError a b c)) case _ of
+  (NotificationJSONDecodeError a b c) -> Just {a, b, c}
   _ -> Nothing

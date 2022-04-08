@@ -83,10 +83,8 @@ instance Show CheckpointStore where
   show a = genericShow a
 
 instance EncodeJson CheckpointStore where
-  encodeJson = defer \_ -> E.encode $ unwrap >$<
-    ( E.record
-        { unCheckpointStore: (E.dictionary E.value E.value) :: _ (Map CheckpointKey (CheckpointStoreItem RawJson)) }
-    )
+  encodeJson = defer \_ -> E.encode $ unwrap >$< (E.record
+                                                 { unCheckpointStore: (E.dictionary E.value E.value) :: _ (Map CheckpointKey (CheckpointStoreItem RawJson)) })
 
 instance DecodeJson CheckpointStore where
   decodeJson = defer \_ -> D.decode $ (CheckpointStore <$> D.record "CheckpointStore" { unCheckpointStore: (D.dictionary D.value D.value) :: _ (Map CheckpointKey (CheckpointStoreItem RawJson)) })
@@ -97,7 +95,7 @@ derive instance Newtype CheckpointStore _
 
 --------------------------------------------------------------------------------
 
-_CheckpointStore :: Iso' CheckpointStore { unCheckpointStore :: Map CheckpointKey (CheckpointStoreItem RawJson) }
+_CheckpointStore :: Iso' CheckpointStore {unCheckpointStore :: Map CheckpointKey (CheckpointStoreItem RawJson)}
 _CheckpointStore = _Newtype
 
 --------------------------------------------------------------------------------
@@ -113,20 +111,16 @@ instance (Show a) => Show (CheckpointStoreItem a) where
   show a = genericShow a
 
 instance (EncodeJson a) => EncodeJson (CheckpointStoreItem a) where
-  encodeJson = defer \_ -> E.encode $ unwrap >$<
-    ( E.record
-        { csValue: E.value :: _ a
-        , csNewKey: E.value :: _ CheckpointKey
-        }
-    )
+  encodeJson = defer \_ -> E.encode $ unwrap >$< (E.record
+                                                   { csValue: E.value :: _ a
+                                                   , csNewKey: E.value :: _ CheckpointKey
+                                                   })
 
 instance (DecodeJson a) => DecodeJson (CheckpointStoreItem a) where
-  decodeJson = defer \_ -> D.decode $
-    ( CheckpointStoreItem <$> D.record "CheckpointStoreItem"
-        { csValue: D.value :: _ a
-        , csNewKey: D.value :: _ CheckpointKey
-        }
-    )
+  decodeJson = defer \_ -> D.decode $ (CheckpointStoreItem <$> D.record "CheckpointStoreItem"
+      { csValue: D.value :: _ a
+      , csNewKey: D.value :: _ CheckpointKey
+      })
 
 derive instance Generic (CheckpointStoreItem a) _
 
@@ -134,5 +128,5 @@ derive instance Newtype (CheckpointStoreItem a) _
 
 --------------------------------------------------------------------------------
 
-_CheckpointStoreItem :: forall a. Iso' (CheckpointStoreItem a) { csValue :: a, csNewKey :: CheckpointKey }
+_CheckpointStoreItem :: forall a. Iso' (CheckpointStoreItem a) {csValue :: a, csNewKey :: CheckpointKey}
 _CheckpointStoreItem = _Newtype

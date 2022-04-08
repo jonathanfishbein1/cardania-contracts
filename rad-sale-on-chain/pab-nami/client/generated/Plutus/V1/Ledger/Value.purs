@@ -35,10 +35,8 @@ derive instance Eq AssetClass
 derive instance Ord AssetClass
 
 instance EncodeJson AssetClass where
-  encodeJson = defer \_ -> E.encode $ unwrap >$<
-    ( E.record
-        { unAssetClass: (E.tuple (E.value >/\< E.value)) :: _ (Tuple CurrencySymbol TokenName) }
-    )
+  encodeJson = defer \_ -> E.encode $ unwrap >$< (E.record
+                                                 { unAssetClass: (E.tuple (E.value >/\< E.value)) :: _ (Tuple CurrencySymbol TokenName) })
 
 instance DecodeJson AssetClass where
   decodeJson = defer \_ -> D.decode $ (AssetClass <$> D.record "AssetClass" { unAssetClass: (D.tuple (D.value </\> D.value)) :: _ (Tuple CurrencySymbol TokenName) })
@@ -49,7 +47,7 @@ derive instance Newtype AssetClass _
 
 --------------------------------------------------------------------------------
 
-_AssetClass :: Iso' AssetClass { unAssetClass :: Tuple CurrencySymbol TokenName }
+_AssetClass :: Iso' AssetClass {unAssetClass :: Tuple CurrencySymbol TokenName}
 _AssetClass = _Newtype
 
 --------------------------------------------------------------------------------
@@ -64,10 +62,8 @@ derive instance Eq CurrencySymbol
 derive instance Ord CurrencySymbol
 
 instance EncodeJson CurrencySymbol where
-  encodeJson = defer \_ -> E.encode $ unwrap >$<
-    ( E.record
-        { unCurrencySymbol: E.value :: _ String }
-    )
+  encodeJson = defer \_ -> E.encode $ unwrap >$< (E.record
+                                                 { unCurrencySymbol: E.value :: _ String })
 
 instance DecodeJson CurrencySymbol where
   decodeJson = defer \_ -> D.decode $ (CurrencySymbol <$> D.record "CurrencySymbol" { unCurrencySymbol: D.value :: _ String })
@@ -78,7 +74,7 @@ derive instance Newtype CurrencySymbol _
 
 --------------------------------------------------------------------------------
 
-_CurrencySymbol :: Iso' CurrencySymbol { unCurrencySymbol :: String }
+_CurrencySymbol :: Iso' CurrencySymbol {unCurrencySymbol :: String}
 _CurrencySymbol = _Newtype
 
 --------------------------------------------------------------------------------
@@ -93,10 +89,8 @@ derive instance Eq TokenName
 derive instance Ord TokenName
 
 instance EncodeJson TokenName where
-  encodeJson = defer \_ -> E.encode $ unwrap >$<
-    ( E.record
-        { unTokenName: E.value :: _ String }
-    )
+  encodeJson = defer \_ -> E.encode $ unwrap >$< (E.record
+                                                 { unTokenName: E.value :: _ String })
 
 instance DecodeJson TokenName where
   decodeJson = defer \_ -> D.decode $ (TokenName <$> D.record "TokenName" { unTokenName: D.value :: _ String })
@@ -107,7 +101,7 @@ derive instance Newtype TokenName _
 
 --------------------------------------------------------------------------------
 
-_TokenName :: Iso' TokenName { unTokenName :: String }
+_TokenName :: Iso' TokenName {unTokenName :: String}
 _TokenName = _Newtype
 
 --------------------------------------------------------------------------------
@@ -120,10 +114,8 @@ instance Show Value where
   show a = genericShow a
 
 instance EncodeJson Value where
-  encodeJson = defer \_ -> E.encode $ unwrap >$<
-    ( E.record
-        { getValue: E.value :: _ (Map CurrencySymbol (Map TokenName BigInt)) }
-    )
+  encodeJson = defer \_ -> E.encode $ unwrap >$< (E.record
+                                                 { getValue: E.value :: _ (Map CurrencySymbol (Map TokenName BigInt)) })
 
 instance DecodeJson Value where
   decodeJson = defer \_ -> D.decode $ (Value <$> D.record "Value" { getValue: D.value :: _ (Map CurrencySymbol (Map TokenName BigInt)) })
@@ -134,5 +126,5 @@ derive instance Newtype Value _
 
 --------------------------------------------------------------------------------
 
-_Value :: Iso' Value { getValue :: Map CurrencySymbol (Map TokenName BigInt) }
+_Value :: Iso' Value {getValue :: Map CurrencySymbol (Map TokenName BigInt)}
 _Value = _Newtype
