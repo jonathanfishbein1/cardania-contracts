@@ -9,3 +9,5 @@ mint-using-plutus/transactions/*.tx
 rad-sale-on-chain/transactions/tx.body
 rad-sale-on-chain/transactions/tx.signed
 mint-using-plutus/transactions/protocol.json
+rad-sale-on-chain/transactions/tx.body
+rad-sale-on-chain/transactions/tx.signed
