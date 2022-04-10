@@ -138,6 +138,7 @@ executable plutus-pab-nami-demo
     plutus-ledger-constraints -any,
     rad-sale-on-chain,
     plutus-ledger-api,
+    plutus-tx
 
 executable plutus-pab-nami-demo-generator
   import: lang
@@ -162,3 +163,4 @@ executable plutus-pab-nami-demo-generator
     plutus-ledger-constraints -any,
     rad-sale-on-chain,
     plutus-ledger-api,
+    plutus-tx
