@@ -11,3 +11,4 @@ rad-sale-on-chain/transactions/tx.signed
 mint-using-plutus/transactions/protocol.json
 rad-sale-on-chain/transactions/tx.body
 rad-sale-on-chain/transactions/tx.signed
+rad-sale-on-chain/pab-nami/client/generated/*
