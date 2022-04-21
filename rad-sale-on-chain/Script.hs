@@ -130,14 +130,13 @@ mkRadSaleOnChainValidator tkSaleParam () redeemer context =
     Close ->
       Ledger.txSignedBy
         info
-        ((sellerPubKeyHash tkSaleParam))
+        (sellerPubKeyHash tkSaleParam)
     Buy ->
-      case ( PlutusTx.Applicative.pure isValid
-               PlutusTx.Applicative.<*> isTxToSeller
-               PlutusTx.Applicative.<*> isTxToBuyer
-               PlutusTx.Applicative.<*> correctOutputDatum
-               PlutusTx.Applicative.<*> correctScriptOutputValue
-           ) of
+      case PlutusTx.Applicative.pure isValid
+        PlutusTx.Applicative.<*> isTxToSeller
+        PlutusTx.Applicative.<*> isTxToBuyer
+        PlutusTx.Applicative.<*> correctOutputDatum
+        PlutusTx.Applicative.<*> correctScriptOutputValue of
         PlutusTx.Either.Right PlutusTx.Prelude.True -> PlutusTx.Prelude.True
         PlutusTx.Either.Left error ->
           PlutusTx.Prelude.traceIfFalse error PlutusTx.Prelude.False
@@ -234,11 +233,9 @@ mkRadSaleOnChainValidator tkSaleParam () redeemer context =
     scriptInputValue :: PlutusTx.Prelude.Maybe Plutus.V1.Ledger.Value.Value
     scriptInputValue =
       Plutus.V1.Ledger.Contexts.findOwnInput context
-        PlutusTx.Prelude.>>= ( \txInInfo ->
-                                 PlutusTx.Prelude.Just
-                                   ( Plutus.V1.Ledger.Contexts.txOutValue
-                                       (Plutus.V1.Ledger.Contexts.txInInfoResolved txInInfo)
-                                   )
+        PlutusTx.Prelude.>>= ( PlutusTx.Prelude.Just
+                                 PlutusTx.Prelude.. Plutus.V1.Ledger.Contexts.txOutValue
+                                 PlutusTx.Prelude.. Plutus.V1.Ledger.Contexts.txInInfoResolved
                              )
 
     flippedAssetClassValueOf ::
@@ -370,7 +367,7 @@ buy tokenSaleParam = do
       utxoOref = PlutusTx.Prelude.fst (PlutusTx.Prelude.head utxosList)
       redeemer =
         Plutus.V1.Ledger.Scripts.Redeemer PlutusTx.Prelude.$
-          PlutusTx.toBuiltinData PlutusTx.Prelude.$ Buy
+          PlutusTx.toBuiltinData Buy
       lookups =
         Data.Monoid.mconcat
           [ Ledger.Constraints.typedValidatorLookups (typedValidator tokenSaleParam),
@@ -438,7 +435,7 @@ close tokenSaleParam = do
           scriptUtxos
       redeemer =
         Plutus.V1.Ledger.Scripts.Redeemer PlutusTx.Prelude.$
-          PlutusTx.toBuiltinData PlutusTx.Prelude.$ Close
+          PlutusTx.toBuiltinData Close
       lookups =
         Data.Monoid.mconcat
           [ Ledger.Constraints.typedValidatorLookups (typedValidator tokenSaleParam),
@@ -458,8 +455,7 @@ close tokenSaleParam = do
               ),
             Ledger.Constraints.mustPayToPubKey
               pkh
-              ( totalValue
-              )
+              totalValue
           ]
   ledgerTx <-
     Plutus.Contract.submitTxConstraintsWith lookups tx
