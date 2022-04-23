@@ -17,37 +17,29 @@ module RadSaleContracts
   )
 where
 
-import qualified Data.Aeson
-import qualified Data.OpenApi
-import qualified Data.Void
-import qualified GHC.Generics
-import qualified Language.PureScript.Bridge
-import qualified Ledger
-import qualified Ledger.Constraints
-import qualified Playground.Types
-import qualified Plutus.Contract
-import qualified Plutus.PAB.Effects.Contract.Builtin
-import qualified Plutus.PAB.Run.PSGenerator
-import qualified Plutus.V1.Ledger.Api
-import qualified PlutusTx.Builtins.Class
-import qualified Prettyprinter
-import qualified Schema
-import qualified Script
-import qualified Prelude
-
-data TokenSaleParamPAB = TokenSaleParamPAB
-  { tokenCost :: !Prelude.Integer,
-    currencySymbol :: !Prelude.String,
-    tokenName :: !Prelude.String,
-    sellerPubKeyHash :: !Prelude.String
-  }
-  deriving (Prelude.Eq, Prelude.Ord, Prelude.Show, GHC.Generics.Generic, Schema.ToSchema)
-  deriving anyclass (Data.Aeson.FromJSON, Data.Aeson.ToJSON, Data.OpenApi.ToSchema)
+import Data.Aeson qualified
+import Data.OpenApi qualified
+import Data.String qualified
+import Data.Void qualified
+import GHC.Generics qualified
+import Language.PureScript.Bridge qualified
+import Ledger qualified
+import Ledger.Constraints qualified
+import Playground.Types qualified
+import Plutus.Contract qualified
+import Plutus.PAB.Effects.Contract.Builtin qualified
+import Plutus.PAB.Run.PSGenerator qualified
+import Plutus.V1.Ledger.Api qualified
+import PlutusTx.Builtins.Class qualified
+import Prettyprinter qualified
+import Schema qualified
+import Script qualified
+import Prelude qualified
 
 data RadSaleContracts
-  = Start TokenSaleParamPAB
-  | Buy TokenSaleParamPAB
-  | Close TokenSaleParamPAB
+  = Start Script.TokenSaleParam
+  | Buy Script.TokenSaleParam
+  | Close Script.TokenSaleParam
   deriving (Prelude.Eq, Prelude.Ord, Prelude.Show, GHC.Generics.Generic)
   deriving anyclass (Data.Aeson.FromJSON, Data.Aeson.ToJSON, Data.OpenApi.ToSchema)
 
@@ -63,20 +55,20 @@ instance Plutus.PAB.Run.PSGenerator.HasPSTypes RadSaleContracts where
         Prelude.$ Language.PureScript.Bridge.mkSumType @RadSaleContracts
     ]
 
-tokenSaleParamPAB :: TokenSaleParamPAB
-tokenSaleParamPAB =
-  TokenSaleParamPAB
-    { tokenCost = 100,
-      currencySymbol = "",
-      tokenName = "",
-      sellerPubKeyHash = ""
+tokenSaleParam :: Script.TokenSaleParam
+tokenSaleParam =
+  Script.TokenSaleParam
+    { Script.tokenCost = 100,
+      Script.currencySymbol = "",
+      Script.tokenName = "",
+      Script.sellerPubKeyHash = ""
     }
 
 instance Plutus.PAB.Effects.Contract.Builtin.HasDefinitions RadSaleContracts where
   getDefinitions =
-    [ Start tokenSaleParamPAB,
-      Buy tokenSaleParamPAB,
-      Close tokenSaleParamPAB
+    [ Start tokenSaleParam,
+      Buy tokenSaleParam,
+      Close tokenSaleParam
     ]
   getContract = getRadSaleContract
   getSchema = getRadSaleContractSchema
@@ -92,50 +84,8 @@ getRadSaleContract :: RadSaleContracts -> Plutus.PAB.Effects.Contract.Builtin.So
 getRadSaleContract contract =
   case contract of
     Start paramPAB ->
-      let param =
-            Script.TokenSaleParam
-              { Script.tokenCost = 100,
-                Script.currencySymbol =
-                  Plutus.V1.Ledger.Api.CurrencySymbol
-                    (PlutusTx.Builtins.Class.stringToBuiltinByteString (currencySymbol paramPAB)),
-                Script.tokenName =
-                  Plutus.V1.Ledger.Api.TokenName
-                    ( PlutusTx.Builtins.Class.stringToBuiltinByteString (tokenName paramPAB)
-                    ),
-                Script.sellerPubKeyHash =
-                  Ledger.PubKeyHash
-                    (PlutusTx.Builtins.Class.stringToBuiltinByteString (sellerPubKeyHash paramPAB))
-              }
-       in Plutus.PAB.Effects.Contract.Builtin.SomeBuiltin Prelude.$ Script.start param
+      Plutus.PAB.Effects.Contract.Builtin.SomeBuiltin Prelude.$ Script.start paramPAB
     Buy paramPAB ->
-      let param =
-            Script.TokenSaleParam
-              { Script.tokenCost = 100,
-                Script.currencySymbol =
-                  Plutus.V1.Ledger.Api.CurrencySymbol
-                    (PlutusTx.Builtins.Class.stringToBuiltinByteString (currencySymbol paramPAB)),
-                Script.tokenName =
-                  Plutus.V1.Ledger.Api.TokenName
-                    ( PlutusTx.Builtins.Class.stringToBuiltinByteString (tokenName paramPAB)
-                    ),
-                Script.sellerPubKeyHash =
-                  Ledger.PubKeyHash
-                    (PlutusTx.Builtins.Class.stringToBuiltinByteString (sellerPubKeyHash paramPAB))
-              }
-       in Plutus.PAB.Effects.Contract.Builtin.SomeBuiltin Prelude.$ Script.buy param
+      Plutus.PAB.Effects.Contract.Builtin.SomeBuiltin Prelude.$ Script.buy paramPAB
     Close paramPAB ->
-      let param =
-            Script.TokenSaleParam
-              { Script.tokenCost = 100,
-                Script.currencySymbol =
-                  Plutus.V1.Ledger.Api.CurrencySymbol
-                    (PlutusTx.Builtins.Class.stringToBuiltinByteString (currencySymbol paramPAB)),
-                Script.tokenName =
-                  Plutus.V1.Ledger.Api.TokenName
-                    ( PlutusTx.Builtins.Class.stringToBuiltinByteString (tokenName paramPAB)
-                    ),
-                Script.sellerPubKeyHash =
-                  Ledger.PubKeyHash
-                    (PlutusTx.Builtins.Class.stringToBuiltinByteString (sellerPubKeyHash paramPAB))
-              }
-       in Plutus.PAB.Effects.Contract.Builtin.SomeBuiltin Prelude.$ Script.close param
+      Plutus.PAB.Effects.Contract.Builtin.SomeBuiltin Prelude.$ Script.close paramPAB

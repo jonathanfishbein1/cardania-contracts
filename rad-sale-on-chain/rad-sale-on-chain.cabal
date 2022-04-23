@@ -117,7 +117,7 @@ executable emulator
         data-default,
         openapi3 -any,
 
-executable plutus-pab-nami-demo
+executable plutus-pab-nami-rad
   import: lang
   main-is: Main.hs
   hs-source-dirs: pab-nami/pab/app
