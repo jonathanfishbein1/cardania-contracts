@@ -12,12 +12,14 @@ pabWebserverConfig:
   endpointTimeout: 5
 
 walletServerConfig:
-  tag: RemoteWalletConfig
-
+  tag: LocalWalletConfig
+  walletSettings:
+    baseUrl: http://localhost:8090
+    
 # Unfortunately, the 'nodeServerConfig' is mandatory in the PAB, even though we don't use it
 nodeServerConfig:
   pscBaseUrl: http://localhost:9082
-  pscSocketPath: /home/jonathan/Documents/cardano-node/state-node-testnet/node.socket
+  pscSocketPath: /home/jonathan/Documents/plutus-apps/state-testnet/node.sock
   pscKeptBlocks: 100
   pscNetworkId: "1097911063" # Testnet network ID (main net = empty string)
   pscSlotConfig:
@@ -45,7 +47,7 @@ developmentOptions:
   pabResumeFrom:
     # tag: PointAtGenesis
       { "tag" : "Point"
-      , "pointBlockId" : "d40711d3756bf8a5dcc0d33c4cbb95fbd4bc16cfa20bf1b2b8fa52a68b74215f"
-      , "pointSlot" : {"getSlot" : 54826673}
+      , "pointBlockId" : "5a6e74a58349886d16507941068a4c1fb28cddae3b4f490c2ab20cc388324bf7"
+      , "pointSlot" : {"getSlot" : 56293492}
       }
   pabRollbackHistory: null
