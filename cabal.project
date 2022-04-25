@@ -56,7 +56,7 @@ package cardano-wallet-core-integration
 source-repository-package
   type: git
   location: https://github.com/input-output-hk/plutus-apps
-  tag: 14bed17e8608162ee81969e482c1815fb78bd7b0
+  tag: e4062bca213f233cdf9822833b07aa69dff6d22a
   subdir:
     freer-extras
     playground-common
@@ -72,7 +72,7 @@ source-repository-package
     plutus-use-cases
     quickcheck-dynamic
     web-ghc
-  --sha256:1l24wcmd8g0854bbnxsi03gr9jv96r337hjailg5rgb7gmchrias
+  --sha256:13yg3vb6a6gmjawlfa3wam5c6krqm7lip4w1p0j30hflca23x2h2
 
 --
 -- In particular we rely on the code from this PR:
@@ -172,6 +172,7 @@ source-repository-package
     cardano-cli
     cardano-git-rev
     cardano-node
+    cardano-submit-api
     cardano-testnet
     trace-dispatcher
     trace-forward
