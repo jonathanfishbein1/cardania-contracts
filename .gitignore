@@ -13,4 +13,4 @@ rad-sale-on-chain/transactions/tx.body
 rad-sale-on-chain/transactions/tx.signed
 rad-sale-on-chain/pab-nami/client/generated/*
 rad-sale-on-chain/transactions/testwallet
-state-testnet/*
+state-testnet/
