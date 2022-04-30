@@ -4,13 +4,13 @@ module Main
 
 import qualified Spec.Test01TokenIsBought
 import qualified Spec.Test02NoBuyerTokenReturns
-import           Test.Tasty
+import qualified Test.Tasty
 
-main :: IO ()
-main = defaultMain tests
+main :: Prelude.IO ()
+main = Test.Tasty.defaultMain tests
 
-tests :: TestTree
-tests = testGroup "RAD sale on chains test"
+tests :: Test.Tasty.TestTree
+tests = Test.Tasty.testGroup "RAD sale on chains test"
     [ 
         Spec.Test01TokenIsBought.tests,
         Spec.Test02NoBuyerTokenReturns.tests
