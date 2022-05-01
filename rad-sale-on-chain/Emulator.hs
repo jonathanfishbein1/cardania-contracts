@@ -56,7 +56,7 @@ walletOneValue =
   Plutus.V1.Ledger.Api.singleton
     "641593ca39c5cbd3eb314533841d53e61ebf6ee7a0ec7c391652f31e"
     "CardaniaFounderWhite"
-    1
+    2
     PlutusTx.Prelude.<> Ledger.Ada.lovelaceValueOf 100_000_000
 
 walletTwoValue :: Plutus.V1.Ledger.Value.Value
@@ -85,6 +85,9 @@ myTrace = do
     Plutus.Trace.activateContractWallet
       (Wallet.Emulator.Wallet.knownWallet 2)
       Script.endpoints
+  Plutus.Trace.callEndpoint @"start" h1 PlutusTx.Prelude.$
+    tokenSaleParam
+  s <- Plutus.Trace.Emulator.waitNSlots 2
   Plutus.Trace.callEndpoint @"start" h1 PlutusTx.Prelude.$
     tokenSaleParam
   s <- Plutus.Trace.Emulator.waitNSlots 2

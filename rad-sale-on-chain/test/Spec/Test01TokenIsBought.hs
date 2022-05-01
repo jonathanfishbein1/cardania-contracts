@@ -67,7 +67,7 @@ initialDistribution =
     where
         v1 :: Ledger.Value.Value 
         v1 = Ledger.Ada.lovelaceValueOf 100_000_000 Prelude.<>
-            Ledger.Value.singleton currSym tokNam 1
+            Ledger.Value.singleton currSym tokNam 4
         
         v2 :: Ledger.Value.Value 
         v2 = Ledger.Ada.lovelaceValueOf 100_000_000 
@@ -87,9 +87,11 @@ myTrace = do
     h2 <- Plutus.Trace.Emulator.activateContractWallet Plutus.Contract.Test.w2 Script.endpoints 
     Plutus.Trace.Emulator.callEndpoint @"start" h1 tokenSaleParam
     Control.Monad.void Prelude.$ Plutus.Trace.Emulator.waitNSlots 1
+    Plutus.Trace.Emulator.callEndpoint @"start" h1 tokenSaleParam
+    Control.Monad.void Prelude.$ Plutus.Trace.Emulator.waitNSlots 1
     Plutus.Trace.Emulator.callEndpoint @"buy" h2 tokenSaleParam
     Control.Monad.void Prelude.$ Plutus.Trace.Emulator.waitNSlots 1
-    Plutus.Trace.Emulator.callEndpoint @"close" h1 tokenSaleParam
+    -- Plutus.Trace.Emulator.callEndpoint @"close" h1 tokenSaleParam
     Control.Monad.void Prelude.$ Plutus.Trace.Emulator.waitNSlots 1
     Control.Monad.void Prelude.$ Control.Monad.Freer.Extras.logInfo @Prelude.String "Trace finished"
 

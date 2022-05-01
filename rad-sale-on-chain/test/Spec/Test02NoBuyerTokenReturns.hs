@@ -46,8 +46,7 @@ myOptions = defaultCheckOptions & emulatorConfig .~ emCfg
 
 myPredicate :: TracePredicate
 myPredicate =
-    walletFundsChange w1 (Ada.lovelaceValueOf   0  <> assetClassValue token  0) .&&.
-    walletFundsChange w2 (Ada.lovelaceValueOf   0 <> assetClassValue token   0)
+    walletFundsChange w1 (Ada.lovelaceValueOf   0  <> assetClassValue token  0)
    
 
 runMyTrace :: IO ()
@@ -68,16 +67,12 @@ token = AssetClass (currSym, tokNam)
 initialDistribution :: InitialDistribution 
 initialDistribution = 
     Map.fromList [
-        (w1, v1),
-        (w2, v2)
+        (w1, v1)
     ]
     where
         v1 :: Value 
         v1 = Ada.lovelaceValueOf 100_000_000 <>
             singleton currSym tokNam 1
-        
-        v2 :: Value 
-        v2 = Ada.lovelaceValueOf 100_000_000 
 
 tokenSaleParam :: TokenSaleParam
 tokenSaleParam =
@@ -90,8 +85,7 @@ tokenSaleParam =
 
 myTrace :: EmulatorTrace ()
 myTrace = do
-    h1 <- activateContractWallet w1 endpoints 
-    h2 <- activateContractWallet w2 endpoints 
+    h1 <- activateContractWallet w1 endpoints
     callEndpoint @"start" h1 tokenSaleParam
     void $ waitNSlots 1
     callEndpoint @"close" h1 tokenSaleParam
