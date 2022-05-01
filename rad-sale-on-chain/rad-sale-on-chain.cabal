@@ -169,8 +169,6 @@ executable plutus-pab-nami-demo-generator
 test-suite rad-sale-on-chain-tests
   type: exitcode-stdio-1.0
   main-is: Spec.hs
-  other-modules:      Spec.Test01TokenIsBought
-                      , Spec.Test02NoBuyerTokenReturns
   hs-source-dirs: test
   default-language: Haskell2010
   ghc-options:         -Wall -fobject-code -fno-ignore-interface-pragmas -fno-omit-interface-pragmas
