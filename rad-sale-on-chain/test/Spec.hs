@@ -41,33 +41,39 @@ tests =
 testBuy :: Test.Tasty.TestTree
 testBuy =
   Plutus.Contract.Test.checkPredicateOptions
-    myOptions
+    options
     "token is bought successful"
-    myPredicate
-    myTrace
+    buyPredicate
+    buyTrace
 
-myOptions :: Plutus.Contract.Test.CheckOptions
-myOptions = Plutus.Contract.Test.defaultCheckOptions Control.Lens.& Plutus.Contract.Test.emulatorConfig Control.Lens..~ emCfg
+options :: Plutus.Contract.Test.CheckOptions
+options =
+  Plutus.Contract.Test.defaultCheckOptions
+    Control.Lens.& Plutus.Contract.Test.emulatorConfig Control.Lens..~ buyEmulatorConfig
 
-myPredicate :: Plutus.Contract.Test.TracePredicate
-myPredicate =
-  Plutus.Contract.Test.walletFundsChange Plutus.Contract.Test.w1 (Ledger.Ada.lovelaceValueOf 10_000_000 Prelude.<> Ledger.Value.assetClassValue token (-1))
-    Plutus.Contract.Test..&&. Plutus.Contract.Test.walletFundsChange Plutus.Contract.Test.w2 (Ledger.Ada.lovelaceValueOf (-10_000_000) Prelude.<> Ledger.Value.assetClassValue token 1)
+buyPredicate :: Plutus.Contract.Test.TracePredicate
+buyPredicate =
+  Plutus.Contract.Test.walletFundsChange
+    Plutus.Contract.Test.w1
+    (Ledger.Ada.lovelaceValueOf 10_000_000 Prelude.<> Ledger.Value.assetClassValue token (-1))
+    Plutus.Contract.Test..&&. Plutus.Contract.Test.walletFundsChange
+      Plutus.Contract.Test.w2
+      (Ledger.Ada.lovelaceValueOf (-10_000_000) Prelude.<> Ledger.Value.assetClassValue token 1)
 
-runMyTrace :: Prelude.IO ()
-runMyTrace = Plutus.Trace.Emulator.runEmulatorTraceIO' Data.Default.def emCfg myTrace
+runBuyTrace :: Prelude.IO ()
+runBuyTrace = Plutus.Trace.Emulator.runEmulatorTraceIO' Data.Default.def buyEmulatorConfig buyTrace
 
-emCfg :: Plutus.Trace.Emulator.EmulatorConfig
-emCfg = Plutus.Trace.Emulator.EmulatorConfig (Prelude.Left initialDistribution) Data.Default.def
+buyEmulatorConfig :: Plutus.Trace.Emulator.EmulatorConfig
+buyEmulatorConfig = Plutus.Trace.Emulator.EmulatorConfig (Prelude.Left initialDistribution) Data.Default.def
 
-currSym :: Ledger.Value.CurrencySymbol
-currSym = "641593ca39c5cbd3eb314533841d53e61ebf6ee7a0ec7c391652f31e"
+currencySymbol :: Ledger.Value.CurrencySymbol
+currencySymbol = "641593ca39c5cbd3eb314533841d53e61ebf6ee7a0ec7c391652f31e"
 
-tokNam :: Ledger.Value.TokenName
-tokNam = "CardaniaFounderWhite"
+tokenName :: Ledger.Value.TokenName
+tokenName = "CardaniaFounderWhite"
 
 token :: Ledger.Value.AssetClass
-token = Ledger.Value.AssetClass (currSym, tokNam)
+token = Ledger.Value.AssetClass (currencySymbol, tokenName)
 
 initialDistribution :: Plutus.Contract.Test.InitialDistribution
 initialDistribution =
@@ -79,7 +85,7 @@ initialDistribution =
     v1 :: Ledger.Value.Value
     v1 =
       Ledger.Ada.lovelaceValueOf 100_000_000
-        Prelude.<> Ledger.Value.singleton currSym tokNam 4
+        Prelude.<> Ledger.Value.singleton currencySymbol tokenName 4
 
     v2 :: Ledger.Value.Value
     v2 = Ledger.Ada.lovelaceValueOf 100_000_000
@@ -93,8 +99,8 @@ tokenSaleParam =
       Script.sellerPubKeyHash = Ledger.unPaymentPubKeyHash Prelude.$ Plutus.Contract.Test.mockWalletPaymentPubKeyHash Prelude.$ Plutus.Contract.Test.knownWallet 1
     }
 
-myTrace :: Plutus.Trace.Emulator.EmulatorTrace ()
-myTrace = do
+buyTrace :: Plutus.Trace.Emulator.EmulatorTrace ()
+buyTrace = do
   h1 <- Plutus.Trace.Emulator.activateContractWallet Plutus.Contract.Test.w1 Script.endpoints
   h2 <- Plutus.Trace.Emulator.activateContractWallet Plutus.Contract.Test.w2 Script.endpoints
   Plutus.Trace.Emulator.callEndpoint @"start" h1 tokenSaleParam
@@ -116,10 +122,10 @@ initialDistributionClose =
     v1 :: Ledger.Value.Value
     v1 =
       Ledger.Ada.lovelaceValueOf 100_000_000
-        PlutusTx.Prelude.<> Ledger.Value.singleton currSym tokNam 1
+        PlutusTx.Prelude.<> Ledger.Value.singleton currencySymbol tokenName 1
 
-myTraceClose :: Plutus.Trace.Emulator.EmulatorTrace ()
-myTraceClose = do
+closeTrace :: Plutus.Trace.Emulator.EmulatorTrace ()
+closeTrace = do
   h1 <- Plutus.Trace.Emulator.activateContractWallet Plutus.Contract.Test.w1 Script.endpoints
   Plutus.Trace.Emulator.callEndpoint @"start" h1 tokenSaleParam
   Control.Monad.void PlutusTx.Prelude.$ Plutus.Trace.Emulator.waitNSlots 1
@@ -130,14 +136,17 @@ myTraceClose = do
 testsClose :: Test.Tasty.TestTree
 testsClose =
   Plutus.Contract.Test.checkPredicateOptions
-    myOptions
+    options
     "The contract is open but nobody buy the token"
-    myPredicateClose
-    myTraceClose
+    closePredicate
+    closeTrace
 
-myPredicateClose :: Plutus.Contract.Test.TracePredicate
-myPredicateClose =
+closePredicate :: Plutus.Contract.Test.TracePredicate
+closePredicate =
   Plutus.Contract.Test.walletFundsChange Plutus.Contract.Test.w1 (Ledger.Ada.lovelaceValueOf 0 PlutusTx.Prelude.<> Ledger.Value.assetClassValue token 0)
 
-runMyTraceClose :: Prelude.IO ()
-runMyTraceClose = Plutus.Trace.Emulator.runEmulatorTraceIO' Data.Default.def emCfg myTraceClose
+closeEmulatorConfig :: Plutus.Trace.Emulator.EmulatorConfig
+closeEmulatorConfig = Plutus.Trace.Emulator.EmulatorConfig (Prelude.Left initialDistributionClose) Data.Default.def
+
+runCloseTrace :: Prelude.IO ()
+runCloseTrace = Plutus.Trace.Emulator.runEmulatorTraceIO' Data.Default.def closeEmulatorConfig closeTrace
