@@ -9,6 +9,7 @@
 
 module Main
   ( main,
+    runCloseTrace,
   )
 where
 
@@ -58,7 +59,7 @@ startPredicate :: Plutus.Contract.Test.TracePredicate
 startPredicate =
   Plutus.Contract.Test.walletFundsChange
     Plutus.Contract.Test.w1
-    (Ledger.Ada.lovelaceValueOf (-20_000_000) Prelude.<> Ledger.Value.assetClassValue token (-1))
+    (Ledger.Ada.lovelaceValueOf (-2_000_000) Prelude.<> Ledger.Value.assetClassValue token (-1))
 
 testBuy :: Test.Tasty.TestTree
 testBuy =
@@ -144,7 +145,7 @@ initialDistributionClose =
     v1 :: Ledger.Value.Value
     v1 =
       Ledger.Ada.lovelaceValueOf 100_000_000
-        PlutusTx.Prelude.<> Ledger.Value.singleton currencySymbol tokenName 1
+        PlutusTx.Prelude.<> Ledger.Value.singleton currencySymbol tokenName 3
 
 closeTrace :: Plutus.Trace.Emulator.EmulatorTrace ()
 closeTrace = do
