@@ -34,9 +34,31 @@ tests :: Test.Tasty.TestTree
 tests =
   Test.Tasty.testGroup
     "RAD sale on chains test"
-    [ testBuy,
+    [ testStart,
+      testBuy,
       testsClose
     ]
+
+testStart :: Test.Tasty.TestTree
+testStart =
+  Plutus.Contract.Test.checkPredicateOptions
+    options
+    "start contract is started successfully"
+    startPredicate
+    startTrace
+
+startTrace :: Plutus.Trace.Emulator.EmulatorTrace ()
+startTrace = do
+  h1 <- Plutus.Trace.Emulator.activateContractWallet Plutus.Contract.Test.w1 Script.endpoints
+  Plutus.Trace.Emulator.callEndpoint @"start" h1 tokenSaleParam
+  Control.Monad.void Prelude.$ Plutus.Trace.Emulator.waitNSlots 1
+  Control.Monad.void Prelude.$ Control.Monad.Freer.Extras.logInfo @Prelude.String "Trace finished"
+
+startPredicate :: Plutus.Contract.Test.TracePredicate
+startPredicate =
+  Plutus.Contract.Test.walletFundsChange
+    Plutus.Contract.Test.w1
+    (Ledger.Ada.lovelaceValueOf (-20_000_000) Prelude.<> Ledger.Value.assetClassValue token (-1))
 
 testBuy :: Test.Tasty.TestTree
 testBuy =
