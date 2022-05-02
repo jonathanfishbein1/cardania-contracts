@@ -18,6 +18,7 @@ import qualified Control.Monad
 import qualified Control.Monad.Freer.Extras
 import qualified Data.Default
 import qualified Data.Map
+import qualified Data.Monoid
 import qualified Ledger
 import qualified Ledger.Ada
 import qualified Ledger.Value
@@ -190,7 +191,7 @@ testsClose =
 
 closePredicate :: Plutus.Contract.Test.TracePredicate
 closePredicate =
-  Plutus.Contract.Test.walletFundsChange Plutus.Contract.Test.w1 (Ledger.Ada.lovelaceValueOf 0 PlutusTx.Prelude.<> Ledger.Value.assetClassValue token 0)
+  Plutus.Contract.Test.walletFundsChange Plutus.Contract.Test.w1 Data.Monoid.mempty
 
 closeEmulatorConfig :: Plutus.Trace.Emulator.EmulatorConfig
 closeEmulatorConfig = Plutus.Trace.Emulator.EmulatorConfig (Prelude.Left initialDistributionClose) Data.Default.def
