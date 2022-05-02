@@ -40,10 +40,29 @@ tests =
       testsClose
     ]
 
+initialDistributionStart :: Plutus.Contract.Test.InitialDistribution
+initialDistributionStart =
+  Data.Map.fromList
+    [ (Plutus.Contract.Test.w1, v1)
+    ]
+  where
+    v1 :: Ledger.Value.Value
+    v1 =
+      Ledger.Ada.lovelaceValueOf 100_000_000
+        PlutusTx.Prelude.<> Ledger.Value.singleton currencySymbol tokenName 1
+
+startEmulatorConfig :: Plutus.Trace.Emulator.EmulatorConfig
+startEmulatorConfig = Plutus.Trace.Emulator.EmulatorConfig (Prelude.Left initialDistributionStart) Data.Default.def
+
+startOptions :: Plutus.Contract.Test.CheckOptions
+startOptions =
+  Plutus.Contract.Test.defaultCheckOptions
+    Control.Lens.& Plutus.Contract.Test.emulatorConfig Control.Lens..~ startEmulatorConfig
+
 testStart :: Test.Tasty.TestTree
 testStart =
   Plutus.Contract.Test.checkPredicateOptions
-    options
+    startOptions
     "start contract is started successfully"
     startPredicate
     startTrace
@@ -64,13 +83,13 @@ startPredicate =
 testBuy :: Test.Tasty.TestTree
 testBuy =
   Plutus.Contract.Test.checkPredicateOptions
-    options
+    buyOptions
     "token is bought successful"
     buyPredicate
     buyTrace
 
-options :: Plutus.Contract.Test.CheckOptions
-options =
+buyOptions :: Plutus.Contract.Test.CheckOptions
+buyOptions =
   Plutus.Contract.Test.defaultCheckOptions
     Control.Lens.& Plutus.Contract.Test.emulatorConfig Control.Lens..~ buyEmulatorConfig
 
@@ -78,7 +97,7 @@ buyPredicate :: Plutus.Contract.Test.TracePredicate
 buyPredicate =
   Plutus.Contract.Test.walletFundsChange
     Plutus.Contract.Test.w1
-    (Ledger.Ada.lovelaceValueOf 10_000_000 Prelude.<> Ledger.Value.assetClassValue token (-1))
+    (Ledger.Ada.lovelaceValueOf 6_000_000 Prelude.<> Ledger.Value.assetClassValue token (-2))
     Plutus.Contract.Test..&&. Plutus.Contract.Test.walletFundsChange
       Plutus.Contract.Test.w2
       (Ledger.Ada.lovelaceValueOf (-10_000_000) Prelude.<> Ledger.Value.assetClassValue token 1)
@@ -145,7 +164,7 @@ initialDistributionClose =
     v1 :: Ledger.Value.Value
     v1 =
       Ledger.Ada.lovelaceValueOf 100_000_000
-        PlutusTx.Prelude.<> Ledger.Value.singleton currencySymbol tokenName 3
+        PlutusTx.Prelude.<> Ledger.Value.singleton currencySymbol tokenName 1
 
 closeTrace :: Plutus.Trace.Emulator.EmulatorTrace ()
 closeTrace = do
@@ -156,10 +175,15 @@ closeTrace = do
   Control.Monad.void PlutusTx.Prelude.$ Plutus.Trace.Emulator.waitNSlots 1
   Control.Monad.void PlutusTx.Prelude.$ Control.Monad.Freer.Extras.logInfo @Prelude.String "Trace finished"
 
+closeOptions :: Plutus.Contract.Test.CheckOptions
+closeOptions =
+  Plutus.Contract.Test.defaultCheckOptions
+    Control.Lens.& Plutus.Contract.Test.emulatorConfig Control.Lens..~ closeEmulatorConfig
+
 testsClose :: Test.Tasty.TestTree
 testsClose =
   Plutus.Contract.Test.checkPredicateOptions
-    options
+    closeOptions
     "The contract is open but nobody buy the token"
     closePredicate
     closeTrace
