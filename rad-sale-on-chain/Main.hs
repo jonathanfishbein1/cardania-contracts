@@ -25,9 +25,9 @@ import qualified PlutusTx.Builtins
 import qualified PlutusTx.Builtins.Class
 import qualified PlutusTx.Prelude
 import qualified Script
+import qualified SerializeToCardanoApi
 import qualified System.Environment
 import qualified Prelude
-import qualified SerializeToCardanoApi
 
 main :: Prelude.IO ()
 main =
@@ -44,9 +44,11 @@ main =
               Script.tokenName = Data.String.fromString tokenName,
               Script.sellerPubKeyHash = pubKeyCredential
             }
+    writeRedeemer <- SerializeToCardanoApi.writeJSON "/home/jonathan/Documents/cardania-contracts/rad-sale-on-chain/transactions/redeemer.json" Script.Close
+
     result <-
       Cardano.Api.writeFileTextEnvelope
-        "./transactions/result.plutus"
+        "/home/jonathan/Documents/cardania-contracts/rad-sale-on-chain/transactions/result.plutus"
         PlutusTx.Prelude.Nothing
         (Script.radSaleOnChainSerialised tokenSaleParam)
     case result of
