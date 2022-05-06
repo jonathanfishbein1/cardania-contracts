@@ -8,7 +8,6 @@
 module SerializeToCardanoApi
   ( dataToScriptData,
     writeJSON,
-    writeRedeemer,
     unsafePaymentPubKeyHash,
     unsafeReadAddress,
     unsafeTokenNameToHex,
@@ -57,8 +56,8 @@ writeJSON file =
     PlutusTx.Prelude.. dataToScriptData
     PlutusTx.Prelude.. PlutusTx.toData
 
-writeRedeemer :: Prelude.IO ()
-writeRedeemer = writeJSON "transactions/redeemer.json" ()
+writeUnit :: Prelude.IO ()
+writeUnit = writeJSON "/home/jonathan/Documents/cardania-contracts/rad-sale-on-chain/transactions/unit.json" ()
 
 credentialLedgerToPlutus ::
   Cardano.Ledger.Credential.Credential a Cardano.Ledger.Crypto.StandardCrypto ->
