@@ -1,5 +1,5 @@
 dbConfig:
-    dbConfigFile: pab-core.db
+    dbConfigFile: ./rad-sale-on-chain/pab-nami/pab/pab-core.db
     dbConfigPoolSize: 20
 
 pabWebserverConfig:
@@ -19,7 +19,7 @@ walletServerConfig:
 # Unfortunately, the 'nodeServerConfig' is mandatory in the PAB, even though we don't use it
 nodeServerConfig:
   pscBaseUrl: http://localhost:9082
-  pscSocketPath: /home/jonathan/Documents/plutus-apps/state-testnet/node.sock
+  pscSocketPath: ./rad-sale-on-chain/pab-nami/pab/node.sock
   pscKeptBlocks: 100
   pscNetworkId: "1097911063" # Testnet network ID (main net = empty string)
   pscSlotConfig:
