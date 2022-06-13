@@ -5,7 +5,7 @@ transactionsPath=/home/jonathan/Documents/cardania-contracts/mint-using-plutus/t
 
 cardano-cli query protocol-parameters --testnet-magic 1097911063 --out-file "${transactionsPath}protocol.json"
 
-mintingWalletAddress="addr_test1vrh0kkuahtz28qpfdhsx2hm2eekf06des8h03xnm757u65sd6egwy"
+mintingWalletAddress="addr1v8h0kkuahtz28qpfdhsx2hm2eekf06des8h03xnm757u65skjd5pp⏎"
 wallettxOut="$mintingWalletAddress+1500000"
 policyFile="${transactionsPath}result.plutus"
 policyId=$(cardano-cli transaction policyid --script-file $policyFile)
