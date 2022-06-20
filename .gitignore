@@ -21,3 +21,5 @@ rad-sale-on-chain/transactions/tx.body
 rad-sale-on-chain/transactions/tx.signed
 rad-sale-on-chain/transactions/wallets.json
 rad-sale-on-chain/transactions/walletTXs.json
+tx.body
+tx.signed
