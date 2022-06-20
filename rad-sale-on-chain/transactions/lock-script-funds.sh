@@ -1,3 +1,4 @@
+#!/usr/bin/env fish
 set utxoskey ../octoberFestMetaData/minting.skey
 
 set sellerAddress "addr_test1vrh0kkuahtz28qpfdhsx2hm2eekf06des8h03xnm757u65sd6egwy"
