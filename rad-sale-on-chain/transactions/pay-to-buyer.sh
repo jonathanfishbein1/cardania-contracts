@@ -1,6 +1,6 @@
 #!/usr/bin/env fish
 
-set utxoskey ../octoberFestMetaData/minting.skey
+set utxoskey /home/jonathan/Documents/octoberFestMetaData/minting.skey
 
 set addresOne "addr_test1vrtmnwrqfnwgnl35y8kg0e8euuqn7yyl5th700k3ezuz30q8hrt37"
 set addresTwo "addr_test1vrh0kkuahtz28qpfdhsx2hm2eekf06des8h03xnm757u65sd6egwy"

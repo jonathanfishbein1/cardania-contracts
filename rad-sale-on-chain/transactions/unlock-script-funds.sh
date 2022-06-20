@@ -1,5 +1,5 @@
 #!/usr/bin/env fish
-set utxoskey ../octoberFestMetaData/buyer.skey
+set utxoskey /home/jonathan/Documents/octoberFestMetaData/buyer.skey
 
 set buyerAddress "addr_test1vrtmnwrqfnwgnl35y8kg0e8euuqn7yyl5th700k3ezuz30q8hrt37"
 set buyerTxOut "$buyerAddress+2000000 + 1 641593ca39c5cbd3eb314533841d53e61ebf6ee7a0ec7c391652f31e.43617264616e6961466f756e6465725768697465"

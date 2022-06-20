@@ -1,5 +1,5 @@
 #!/usr/bin/env fish
-set utxoskey ../octoberFestMetaData/minting.skey
+set utxoskey /home/jonathan/Documents/octoberFestMetaData/minting.skey
 
 set sellerAddress "addr_test1vrh0kkuahtz28qpfdhsx2hm2eekf06des8h03xnm757u65sd6egwy"
 set scriptAddress (eval cardano-cli address build --payment-script-file /home/jonathan/Documents/cardania-contracts/rad-sale-on-chain/transactions/result.plutus --testnet-magic 1097911063)
