@@ -1,6 +1,6 @@
 cabal-version: 2.4
 name:          rad-sale-on-chain
-version:       0.1.0.0
+version:       0.2.0.0
 
 flag defer-plugin-errors
     description:

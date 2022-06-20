@@ -44,7 +44,8 @@ main =
               Script.tokenName = Data.String.fromString tokenName,
               Script.sellerPubKeyHash = pubKeyCredential
             }
-    writeRedeemer <- SerializeToCardanoApi.writeJSON "/home/jonathan/Documents/cardania-contracts/rad-sale-on-chain/transactions/redeemer.json" Script.Close
+    writeBuyRedeemer <- SerializeToCardanoApi.writeJSON "/home/jonathan/Documents/cardania-contracts/rad-sale-on-chain/transactions/buy-redeemer.json" Script.Buy
+    writeCloseRedeemer <- SerializeToCardanoApi.writeJSON "/home/jonathan/Documents/cardania-contracts/rad-sale-on-chain/transactions/close-redeemer.json" Script.Close
 
     result <-
       Cardano.Api.writeFileTextEnvelope
