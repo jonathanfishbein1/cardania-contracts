@@ -10,18 +10,18 @@ cardano-cli transaction build \
   --alonzo-era \
   --cardano-mode \
   --testnet-magic 1097911063 \
-  --tx-in "961012755cd73683ca51ec8ed796ab10134266b0817a75579d22b36c92ce355b#2" \
+  --tx-in "a0897c2c8debb9ff93404044cbbfee5a5228ad3d28110e8f13d886bad7c1569b#1" \
   --tx-out $addressTwoTxOut \
   --change-address $addresTwo \
   --protocol-params-file /home/jonathan/Documents/cardania-contracts/rad-sale-on-chain/transactions/protocol.json \
-  --out-file "tx.body"
+  --out-file /home/jonathan/Documents/cardania-contracts/rad-sale-on-chain/transactions/tx.body
 
 cardano-cli transaction sign \
-  --tx-body-file "tx.body" \
+  --tx-body-file /home/jonathan/Documents/cardania-contracts/rad-sale-on-chain/transactions/tx.body \
   --testnet-magic 1097911063 \
   --signing-key-file $utxoskey \
-  --out-file "tx.signed"
+  --out-file /home/jonathan/Documents/cardania-contracts/rad-sale-on-chain/transactions/tx.signed
 
 cardano-cli transaction submit \
   --testnet-magic 1097911063 \
-  --tx-file "tx.signed"
+  --tx-file /home/jonathan/Documents/cardania-contracts/rad-sale-on-chain/transactions/tx.signed
