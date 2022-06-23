@@ -1,9 +1,10 @@
 import './style.css'
 import {
     hasWallet, getWallet
-    , getRewardAddress, buyTo
+    , getRewardAddress
+    //, buyTo
+    , getCollateral
 } from '@jonathanfishbein1/cardano-wallet-browser-extensions-interface'
-import camelcaseKeys from 'camelcase-keys'
 
 const
     connectButton = document.getElementById('connect'),
@@ -16,50 +17,49 @@ const
 
 
 
-const protocolParametersSnakeCase = await fetch('https://cardano-mainnet.blockfrost.io/api/v0/epochs/latest/parameters'
+const protocolParameters = await fetch('https://cardano-mainnet.blockfrost.io/api/v0/epochs/latest/parameters'
     , { headers: { project_id: bk } })
     .then(res => res.json())
-const protocolParameters = camelcaseKeys(protocolParametersSnakeCase)
 console.log('protocolParameters' + protocolParameters)
 const sumnPool = await fetch('https://cardano-mainnet.blockfrost.io/api/v0/pools/pool1m3gg43uhtetn4hmw79u8836dyq8qe4cex8qnn6mks5egza7n6tp'
     , { headers: { project_id: bk } })
     .then(res => res.json())
 console.log(sumnPool)
-// if (hasWallet('nami') == true) {
-//     const wallet = await getWallet('nami')
-//     console.log(wallet)
-//     const rewardAddress = await getRewardAddress(wallet)
-//     const accountSnakeCase = await fetch(`https://cardano-mainnet.blockfrost.io/api/v0/accounts/${rewardAddress}/`
-//         , { headers: { project_id: bk } })
-//         .then(res => res.json())
-//     const account = camelcaseKeys(accountSnakeCase)
-//     const transaction = await buyTo(wallet, poolId, protocolParameters, account)
-//     console.log('Transaction Hash', transaction)
-// }
+if (hasWallet('nami') == true) {
+    const wallet = await getWallet('nami')
+    wallet.name = 'Nami'
+    console.log(wallet)
+    console.log(await getCollateral(wallet))
+    const rewardAddress = await getRewardAddress(wallet)
+    const account = await fetch(`https://cardano-mainnet.blockfrost.io/api/v0/accounts/${rewardAddress}/`
+        , { headers: { project_id: bk } })
+        .then(res => res.json())
+    //const transaction = await buyTo(wallet, poolId, protocolParameters, account)
+    //console.log('Transaction Hash', transaction)
+}
 
-if (hasWallet('eternl') == true) {
-    const wallet = await getWallet('eternl')
-        , rewardAddress = await getRewardAddress(wallet)
-        , accountSnakeCase = await fetch(`https://cardano-mainnet.blockfrost.io/api/v0/accounts/${rewardAddress}/`
-            , { headers: { project_id: bk } })
-            .then(res => res.json())
-        , account = camelcaseKeys(accountSnakeCase)
-    console.log('account ', account)
-    if (account.active)
-        connectButton!.innerText = successMessage
-    else {
-        connectButton!.innerText = connectMessage
-        connectButton?.addEventListener('click', async () => {
-            connectButton!.innerText = buyMessage
-            connectButton?.addEventListener('click', async () => {
-                connectButton!.innerText = buyingMessage
-                const transaction = await buyTo(wallet, poolId, protocolParameters, account)
-                transaction ?
-                    connectButton!.innerText = successMessage
-                    :
-                    console.log('Transaction Hash', transaction)
-            })
-        })
+// if (hasWallet('eternl') == true) {
+//     const wallet = await getWallet('eternl')
+//         , rewardAddress = await getRewardAddress(wallet)
+//         , account = await fetch(`https://cardano-mainnet.blockfrost.io/api/v0/accounts/${rewardAddress}/`
+//             , { headers: { project_id: bk } })
+//             .then(res => res.json())
+//     console.log('account ', account)
+//     if (account.active)
+//         connectButton!.innerText = successMessage
+//     else {
+//         connectButton!.innerText = connectMessage
+//         connectButton?.addEventListener('click', async () => {
+//             connectButton!.innerText = buyMessage
+//             connectButton?.addEventListener('click', async () => {
+//                 connectButton!.innerText = buyingMessage
+//                 const transaction = await buyTo(wallet, poolId, protocolParameters, account)
+//                 transaction ?
+//                     connectButton!.innerText = successMessage
+//                     :
+//                     console.log('Transaction Hash', transaction)
+//             })
+//         })
 
 //     }
 // }
@@ -68,10 +68,9 @@ if (hasWallet('eternl') == true) {
 //         const wallet = await getWallet('Flint')
 //         console.log(wallet)
 //         const rewardAddress = await getRewardAddress(wallet)
-//         const accountSnakeCase = await fetch(`https://cardano-mainnet.blockfrost.io/api/v0/accounts/${rewardAddress}/`
+//         const account = await fetch(`https://cardano-mainnet.blockfrost.io/api/v0/accounts/${rewardAddress}/`
 //             , { headers: { project_id: bk } })
 //             .then(res => res.json())
-//         const account = camelcaseKeys(accountSnakeCase)
 //         const transaction = await buyTo(wallet, poolId, protocolParameters, account)
 //         console.log('Transaction Hash', transaction)
 //     }
@@ -80,10 +79,9 @@ if (hasWallet('eternl') == true) {
 //         const wallet = await getWallet('Typhon')
 //         console.log(wallet)
 //         const rewardAddress = await getRewardAddress(wallet)
-//         const accountSnakeCase = await fetch(`https://cardano-mainnet.blockfrost.io/api/v0/accounts/${rewardAddress}/`
+//         const account = await fetch(`https://cardano-mainnet.blockfrost.io/api/v0/accounts/${rewardAddress}/`
 //             , { headers: { project_id: bk } })
 //             .then(res => res.json())
-//         const account = camelcaseKeys(accountSnakeCase)
 //         const transaction = await buyTo(wallet, poolId, protocolParameters, account)
 //         console.log('Transaction Hash', transaction)
 //     }
@@ -92,22 +90,20 @@ if (hasWallet('eternl') == true) {
 //     const wallet = await getWallet('GeroWallet')
 //     console.log(wallet)
 //     const rewardAddress = await getRewardAddress(wallet)
-//     const accountSnakeCase = await fetch(`https://cardano-mainnet.blockfrost.io/api/v0/accounts/${rewardAddress}/`
+//     const account = await fetch(`https://cardano-mainnet.blockfrost.io/api/v0/accounts/${rewardAddress}/`
 //         , { headers: { project_id: bk } })
 //         .then(res => res.json())
-//     const account = camelcaseKeys(accountSnakeCase)
 //     const transaction = await buyTo(wallet, poolId, protocolParameters, account)
 //     console.log('Transaction Hash', transaction)
 // }
-//else 
-// if (hasWallet('yoroi') == true) {
-//     const wallet = await getWallet('yoroi')
-//     console.log(wallet)
-//     const rewardAddress = await getRewardAddress(wallet)
-//     const accountSnakeCase = await fetch(`https://cardano-mainnet.blockfrost.io/api/v0/accounts/${rewardAddress}/`
-//         , { headers: { project_id: bk } })
-//         .then(res => res.json())
-//     const account = camelcaseKeys(accountSnakeCase)
-//     const transaction = await buyTo(wallet, poolId, protocolParameters, account)
-//     console.log('Transaction Hash', transaction)
-// }
+// else
+//     if (hasWallet('yoroi') == true) {
+//         const wallet = await getWallet('yoroi')
+//         console.log(wallet)
+//         const rewardAddress = await getRewardAddress(wallet)
+//         const account = await fetch(`https://cardano-mainnet.blockfrost.io/api/v0/accounts/${rewardAddress}/`
+//             , { headers: { project_id: bk } })
+//             .then(res => res.json())
+//         const transaction = await buyTo(wallet, poolId, protocolParameters, account)
+//         console.log('Transaction Hash', transaction)
+//     }
