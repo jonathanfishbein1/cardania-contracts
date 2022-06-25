@@ -1,11 +1,10 @@
-let
-  project = import ./project.nix;
-in
-project.shellFor {
-  buildInputs = [ (import <nixpkgs> {}).git ];
-  tools = {
-    cabal = "3.6.0.0";
-    hlint = "latest"; # Selects the latest version in the hackage.nix snapshot
-    haskell-language-server = "latest";
-  };
-}
+(import
+  (
+    let lock = builtins.fromJSON (builtins.readFile ./flake.lock); in
+    fetchTarball {
+      url = "https://github.com/edolstra/flake-compat/archive/${lock.nodes.flake-compat.locked.rev}.tar.gz";
+      sha256 = lock.nodes.flake-compat.locked.narHash;
+    }
+  )
+  { src = ./.; }
+).shellNix

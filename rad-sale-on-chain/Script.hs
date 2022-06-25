@@ -35,6 +35,8 @@ module Script
     correctOutputDatum,
     correctScriptOutputValue,
     mkRadSaleOnChainValidator,
+    radSaleHash,
+    scrAddress,
     SaleAction (..),
   )
 where

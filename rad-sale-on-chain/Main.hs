@@ -47,6 +47,8 @@ main =
     writeBuyRedeemer <- SerializeToCardanoApi.writeJSON "/home/jonathan/Documents/cardania-contracts/rad-sale-on-chain/transactions/buy-redeemer.json" Script.Buy
     writeCloseRedeemer <- SerializeToCardanoApi.writeJSON "/home/jonathan/Documents/cardania-contracts/rad-sale-on-chain/transactions/close-redeemer.json" Script.Close
 
+    Prelude.print (Script.radSaleHash tokenSaleParam)
+    Prelude.print (Script.scrAddress tokenSaleParam)
     result <-
       Cardano.Api.writeFileTextEnvelope
         "/home/jonathan/Documents/cardania-contracts/rad-sale-on-chain/transactions/result.plutus"
