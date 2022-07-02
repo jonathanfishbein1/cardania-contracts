@@ -41,6 +41,11 @@
 >   )
 > where
 
+This is a Plutus Contract that enables native token sales.
+The tokens need to have already been minted.
+The token cost, token currency symbol, token name, and seller
+public key hash are runtime parameters
+
 > import qualified Cardano.Api
 > import qualified Cardano.Api.Shelley
 > import qualified Codec.Serialise
