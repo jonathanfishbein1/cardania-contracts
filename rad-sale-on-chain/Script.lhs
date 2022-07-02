@@ -1,3 +1,13 @@
+This is a Plutus Contract that enables native token sales.
+The tokens need to have already been minted.
+The token cost, token currency symbol, token name, and seller
+public key hash are runtime parameters
+
+The general structure of the Contract is as follows
+Compiler Extensions are enabled
+Module exports are listed
+Module imports are listed qualified
+
 > {-# LANGUAGE DataKinds #-}
 > {-# LANGUAGE DeriveAnyClass #-}
 > {-# LANGUAGE DeriveGeneric #-}
@@ -41,10 +51,8 @@
 >   )
 > where
 
-This is a Plutus Contract that enables native token sales.
-The tokens need to have already been minted.
-The token cost, token currency symbol, token name, and seller
-public key hash are runtime parameters
+
+
 
 > import qualified Cardano.Api
 > import qualified Cardano.Api.Shelley
@@ -91,6 +99,10 @@ public key hash are runtime parameters
 > import qualified Wallet.Emulator.Wallet
 > import qualified Prelude
 
+In the following a series of Types are declared inlcuding the
+datum as unit, the redeemer as SaleAction TokenSaleParam as the runtime
+parameters to the contract and additionally a minLovelace constant.
+
 SaleAction is the Redeemer type.  It has two data constructors.
 Buy for purchasing the token for sale and Close for closing the sale.
 
@@ -129,6 +141,9 @@ The parameters are
 >   type RedeemerType RadSaleOnChain = SaleAction
 >   type DatumType RadSaleOnChain = ()
 
+In the following the main validation logic is defined including
+addtional helper functions.
+
 The isValid function is the compositional root of the contract logic.
 The contract verifies the following
   - the transaction to the seller of the token is valid
@@ -153,6 +168,8 @@ The contract verifies the following
 >       PlutusTx.Prelude.&& outputDatum
 >       PlutusTx.Prelude.&& scriptOutputValue
 >       PlutusTx.Prelude.== PlutusTx.Prelude.True
+
+In the following validation logic helper functions are defined
 
 A valid transaction must include the cost of the token 
 value paid to the seller of the token
