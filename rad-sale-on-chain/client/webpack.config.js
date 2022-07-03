@@ -1,5 +1,6 @@
 import path from 'path'
 import HtmlWebPackPlugin from "html-webpack-plugin"
+import webpack from 'webpack'
 const __dirname = path.resolve()
 
 export default {
@@ -40,7 +41,9 @@ export default {
         title: 'index',
         filename: `index.html`,
         template: `./index.html`,
-    })]
+    }),
+    new webpack.ProvidePlugin({ Buffer: ['buffer', 'Buffer'] })
+    ]
     , experiments: {
         asyncWebAssembly: true,
         outputModule: true,
