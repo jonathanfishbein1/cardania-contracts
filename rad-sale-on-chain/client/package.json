@@ -1,5 +1,5 @@
 {
-  "name": "browser-delegate",
+  "name": "browser-buy",
   "private": true,
   "version": "1.0.0",
   "description": "",
@@ -23,6 +23,7 @@
     "webpack-dev-server": "^4.6.0"
   },
   "dependencies": {
+    "lucid-cardano": "^0.3.5",
     "ts-loader": "^9.2.6",
     "typescript": "^4.5.2"
   }
