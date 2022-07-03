@@ -26,7 +26,7 @@ const
     unbuyingMessage = "Unbuying..."
     , successMessage = "Successfully buyd to SUMN!"
     , lucid = await Lucid.new(
-        new Blockfrost('https://cardano-mainnet.blockfrost.io/api/v0', bk), 'Mainnet')
+        new Blockfrost('https://cardano-testnet.blockfrost.io/api/v0', bk), 'Testnet')
 if (hasWallet('eternl') == true) {
     const wallet = await getWalletApi('eternl') as any
     lucid.selectWallet(wallet)
