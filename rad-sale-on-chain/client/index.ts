@@ -40,7 +40,7 @@ if (hasWallet('eternl') == true) {
                 await lucid
                     .newTx()
                     .payToAddress('addr_test1vrh0kkuahtz28qpfdhsx2hm2eekf06des8h03xnm757u65sd6egwy', { lovelace: lovelaceAmount })
-                    .addSigner(wallet.address())
+                    .addSigner(await lucid.wallet.address())
                     .complete()
             transaction.txComplete
             console.log(transaction)
