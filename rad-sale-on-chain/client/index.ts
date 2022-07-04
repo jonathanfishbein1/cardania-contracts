@@ -40,8 +40,9 @@ if (hasWallet('nami') == true) {
                 connectButton!.innerText = buyingMessage
                 const lovelaceAmount = BigInt(Number(10000000))
                 const minLovelaceAmount = BigInt(Number(2000000))
-                const redeemer = Lucid.Data.to(CMLB.PlutusData.new_constr_plutus_data(CMLB.ConstrPlutusData.new(BigNum.zero(), PlutusList.new())))
-                console.log(redeemer.toString())
+                const redeemer = new Lucid.Construct(0, [])
+                const serializedRedeemer = Lucid.Data.to(redeemer)
+                console.log(serializedRedeemer.toString())
                 const transaction =
                     await lucid
                         .newTx()
@@ -57,7 +58,7 @@ if (hasWallet('nami') == true) {
                             },
                             address: 'addr_test1wruumrldke6wh5rjfkyg9f7xztrh7nzvpzum36jqajnextshh0442',
                             datumHash: '923918e403bf43c34b4ef6b48eb2ee04babed17320d8d1b9ff9ad086e86f44ec'
-                        }], redeemer)
+                        }], serializedRedeemer)
                         .payToAddress('addr_test1vrh0kkuahtz28qpfdhsx2hm2eekf06des8h03xnm757u65sd6egwy'
                             , { lovelace: lovelaceAmount })
                         .payToContract('addr_test1wruumrldke6wh5rjfkyg9f7xztrh7nzvpzum36jqajnextshh0442'
