@@ -86,23 +86,13 @@ start tokenSaleParam = do
     Plutus.Contract.awaitTxConfirmed PlutusTx.Prelude.$
       Ledger.getCardanoTxId ledgerTx
   scriptUtxos <-
-    Plutus.Contract.utxosAt (scrAddress tokenSaleParam)
+    Plutus.Contract.utxosAt (Script.scrAddress tokenSaleParam)
   Plutus.Contract.logInfo @Prelude.String PlutusTx.Prelude.$
-    Text.Printf.printf "(scrAddress tokenSaleParam) %s" (Prelude.show (scrAddress tokenSaleParam))
+    Text.Printf.printf "(Script.scrAddress tokenSaleParam) %s" (Prelude.show (Script.scrAddress tokenSaleParam))
   Plutus.Contract.logInfo @Prelude.String PlutusTx.Prelude.$
     Text.Printf.printf "scriptUtxos %s" (Prelude.show scriptUtxos)
   Plutus.Contract.logInfo @Prelude.String PlutusTx.Prelude.$
     Text.Printf.printf "started auction for token %s at end of function" (Prelude.show v)
-
-radSaleHash :: Script.TokenSaleParam -> Ledger.ValidatorHash
-radSaleHash tokenSaleParam =
-  Ledger.Typed.Scripts.validatorHash
-    (Script.typedValidator tokenSaleParam)
-
-scrAddress :: Script.TokenSaleParam -> Ledger.Address
-scrAddress tokenSaleParam =
-  Ledger.Address.scriptAddress
-    (Script.validator tokenSaleParam)
 
 buy ::
   Script.TokenSaleParam ->
@@ -114,9 +104,9 @@ buy tokenSaleParam = do
   Plutus.Contract.logInfo @Prelude.String PlutusTx.Prelude.$
     Text.Printf.printf "pkh %s" (Prelude.show pkh)
   scriptUtxos <-
-    Plutus.Contract.utxosAt (scrAddress tokenSaleParam)
+    Plutus.Contract.utxosAt (Script.scrAddress tokenSaleParam)
   Plutus.Contract.logInfo @Prelude.String PlutusTx.Prelude.$
-    Text.Printf.printf "(scrAddress tokenSaleParam) %s" (Prelude.show (scrAddress tokenSaleParam))
+    Text.Printf.printf "(Script.scrAddress tokenSaleParam) %s" (Prelude.show (Script.scrAddress tokenSaleParam))
   Plutus.Contract.logInfo @Prelude.String PlutusTx.Prelude.$
     Text.Printf.printf "scriptUtxos %s" (Prelude.show scriptUtxos)
   let utxosList = Data.Map.toList scriptUtxos
@@ -200,7 +190,7 @@ close tokenSaleParam = do
     Text.Printf.printf
       "pkh %s"
       (Prelude.show pkh)
-  scriptUtxos <- Plutus.Contract.utxosAt (scrAddress tokenSaleParam)
+  scriptUtxos <- Plutus.Contract.utxosAt (Script.scrAddress tokenSaleParam)
   Plutus.Contract.logInfo @Prelude.String PlutusTx.Prelude.$
     Text.Printf.printf
       "scriptUtxos %s"

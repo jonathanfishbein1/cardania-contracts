@@ -35,6 +35,7 @@ import Prettyprinter qualified
 import Schema qualified
 import Script qualified
 import Prelude qualified
+import OffChain qualified
 
 data RadSaleContracts
   = Start Script.TokenSaleParam
@@ -76,16 +77,16 @@ instance Plutus.PAB.Effects.Contract.Builtin.HasDefinitions RadSaleContracts whe
 getRadSaleContractSchema :: RadSaleContracts -> [Playground.Types.FunctionSchema Schema.FormSchema]
 getRadSaleContractSchema contract =
   case contract of
-    Start param -> Plutus.PAB.Effects.Contract.Builtin.endpointsToSchemas @Script.SaleSchema
-    Buy param -> Plutus.PAB.Effects.Contract.Builtin.endpointsToSchemas @Script.SaleSchema
-    Close param -> Plutus.PAB.Effects.Contract.Builtin.endpointsToSchemas @Script.SaleSchema
+    Start param -> Plutus.PAB.Effects.Contract.Builtin.endpointsToSchemas @OffChain.SaleSchema
+    Buy param -> Plutus.PAB.Effects.Contract.Builtin.endpointsToSchemas @OffChain.SaleSchema
+    Close param -> Plutus.PAB.Effects.Contract.Builtin.endpointsToSchemas @OffChain.SaleSchema
 
 getRadSaleContract :: RadSaleContracts -> Plutus.PAB.Effects.Contract.Builtin.SomeBuiltin
 getRadSaleContract contract =
   case contract of
     Start paramPAB ->
-      Plutus.PAB.Effects.Contract.Builtin.SomeBuiltin Prelude.$ Script.start paramPAB
+      Plutus.PAB.Effects.Contract.Builtin.SomeBuiltin Prelude.$ OffChain.start paramPAB
     Buy paramPAB ->
-      Plutus.PAB.Effects.Contract.Builtin.SomeBuiltin Prelude.$ Script.buy paramPAB
+      Plutus.PAB.Effects.Contract.Builtin.SomeBuiltin Prelude.$ OffChain.buy paramPAB
     Close paramPAB ->
-      Plutus.PAB.Effects.Contract.Builtin.SomeBuiltin Prelude.$ Script.close paramPAB
+      Plutus.PAB.Effects.Contract.Builtin.SomeBuiltin Prelude.$ OffChain.close paramPAB

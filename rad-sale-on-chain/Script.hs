@@ -43,6 +43,8 @@ module Script
     SaleAction (..),
     validator,
     typedValidator,
+    scrAddress,
+    radSaleHash,
   )
 where
 
@@ -341,6 +343,16 @@ validator :: TokenSaleParam -> Plutus.V1.Ledger.Scripts.Validator
 validator =
   Ledger.Typed.Scripts.validatorScript
     PlutusTx.Prelude.. typedValidator
+
+radSaleHash :: Script.TokenSaleParam -> Ledger.ValidatorHash
+radSaleHash tokenSaleParam =
+  Ledger.Typed.Scripts.validatorHash
+    (Script.typedValidator tokenSaleParam)
+
+scrAddress :: Script.TokenSaleParam -> Ledger.Address
+scrAddress tokenSaleParam =
+  Ledger.Address.scriptAddress
+    (Script.validator tokenSaleParam)
 
 radSaleOnChainScript :: TokenSaleParam -> Plutus.V1.Ledger.Scripts.Script
 radSaleOnChainScript =
