@@ -33,7 +33,8 @@ if (hasWallet('nami') == true) {
     const rewardAddress = await lucid.wallet.rewardAddress()
         , utils = new Lucid.Utils(lucid)
     if (rewardAddress !== undefined) {
-        const { address: { address } } = utils.getAddressDetails(rewardAddress)
+        const { address: { address }, paymentCredential
+        } = utils.getAddressDetails(rewardAddress)
         connectButton?.addEventListener('click', async () => {
             connectButton!.innerText = buyMessage
             connectButton?.addEventListener('click', async () => {
@@ -42,6 +43,9 @@ if (hasWallet('nami') == true) {
                 const minLovelaceAmount = BigInt(Number(2000000))
                 const redeemer = new Lucid.Construct(0, [])
                 const serializedRedeemer = Lucid.Data.to(redeemer)
+                console.log(rewardAddress)
+                console.log(address)
+                console.log(await lucid.wallet.address())
                 const transaction =
                     await lucid
                         .newTx()
@@ -63,7 +67,7 @@ if (hasWallet('nami') == true) {
                             address: 'addr_test1wzrx2p5pz3489fsyce88kedgr93v3uzxfkqq3uhuz2qetkq29hr49',
                             datumHash: '923918e403bf43c34b4ef6b48eb2ee04babed17320d8d1b9ff9ad086e86f44ec'
                         }], serializedRedeemer)
-                        .payToAddress(address, {
+                        .payToAddress(await lucid.wallet.address(), {
                             lovelace: minLovelaceAmount
                             , '641593ca39c5cbd3eb314533841d53e61ebf6ee7a0ec7c391652f31e43617264616e6961466f756e6465725768697465': BigInt(Number(1))
                         })
