@@ -35,7 +35,6 @@ module Script
     minLovelace,
     isValid,
     isTxToSeller,
-    tokenBuyerPaymentPubKeyHashEither,
     isTxToBuyer,
     correctOutputDatum,
     correctScriptOutputValue,
@@ -188,21 +187,12 @@ isTxToSeller tkSaleParam info =
 
 -- A valid transaction must include a signature from the buyer of the token
 
-tokenBuyerPaymentPubKeyHashEither ::
-  Plutus.V1.Ledger.Contexts.TxInfo ->
-  PlutusTx.Either.Either
-    PlutusTx.Builtins.Internal.BuiltinString
-    Ledger.Address.PaymentPubKeyHash
-tokenBuyerPaymentPubKeyHashEither info =
-  if PlutusTx.Prelude.length
-    (Plutus.V1.Ledger.Contexts.txInfoSignatories info)
-    PlutusTx.Prelude.> 0
-    then
-      PlutusTx.Either.Right PlutusTx.Prelude.$
-        Ledger.Address.PaymentPubKeyHash PlutusTx.Prelude.$
-          PlutusTx.Prelude.head
-            (Plutus.V1.Ledger.Contexts.txInfoSignatories info)
-    else PlutusTx.Either.Left "No signer"
+tokenBuyerPaymentPubKeyHashsEither info =
+  case (Plutus.V1.Ledger.Contexts.txInfoSignatories info) of
+    [] ->
+      PlutusTx.Either.Left "No signer"
+    signatories ->
+      PlutusTx.Either.Right signatories
 
 -- A valid transaction must include exactly one output to the buyer
 -- consisting of the token with the given currency symbol and
@@ -215,14 +205,18 @@ isTxToBuyer ::
     PlutusTx.Builtins.Internal.BuiltinString
     PlutusTx.Prelude.Bool
 isTxToBuyer tkSaleParam info =
-  tokenBuyerPaymentPubKeyHashEither info
-    PlutusTx.Prelude.>>= ( \tokenBuyerPaymentPubKeyHash ->
+  tokenBuyerPaymentPubKeyHashsEither info
+    PlutusTx.Prelude.>>= ( \signatories ->
                              case PlutusTx.Prelude.filter
                                ( \o ->
-                                   Plutus.V1.Ledger.Contexts.txOutAddress o
-                                     PlutusTx.Prelude.== Ledger.Address.pubKeyHashAddress
-                                       tokenBuyerPaymentPubKeyHash
-                                       PlutusTx.Prelude.Nothing
+                                   PlutusTx.Prelude.any
+                                     ( \signatory ->
+                                         Plutus.V1.Ledger.Contexts.txOutAddress o
+                                           PlutusTx.Prelude.== Ledger.Address.pubKeyHashAddress
+                                             (Ledger.Address.PaymentPubKeyHash signatory)
+                                             PlutusTx.Prelude.Nothing
+                                     )
+                                     signatories
                                )
                                (Plutus.V1.Ledger.Contexts.txInfoOutputs info) of
                                [] ->
