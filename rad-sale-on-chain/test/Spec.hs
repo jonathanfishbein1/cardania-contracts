@@ -42,9 +42,8 @@ tests =
     [ testStart,
       testBuy,
       testsClose,
-      testBuyTwo
-      --,
-      -- testBuyThree
+      testBuyTwo,
+      testBuyThree
     ]
 
 initialDistributionStart :: Plutus.Contract.Test.InitialDistribution
@@ -214,7 +213,7 @@ buyTraceThree = do
   Plutus.Trace.Emulator.callEndpoint @"start" h1 tokenSaleParam
   Control.Monad.void Prelude.$ Plutus.Trace.Emulator.waitNSlots 1
   Plutus.Trace.Emulator.callEndpoint @"buy" h2 tokenSaleParam
-  Control.Monad.void Prelude.$ Plutus.Trace.Emulator.waitNSlots 1000
+  Control.Monad.void Prelude.$ Plutus.Trace.Emulator.waitNSlots 1
   Plutus.Trace.Emulator.callEndpoint @"start" h1 tokenSaleParam
   Control.Monad.void Prelude.$ Plutus.Trace.Emulator.waitNSlots 1
   Plutus.Trace.Emulator.callEndpoint @"buy" h2 tokenSaleParam

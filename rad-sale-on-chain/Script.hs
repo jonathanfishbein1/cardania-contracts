@@ -219,13 +219,10 @@ isTxToBuyer tkSaleParam info =
     PlutusTx.Prelude.>>= ( \tokenBuyerPaymentPubKeyHash ->
                              case PlutusTx.Prelude.filter
                                ( \o ->
-                                   Plutus.V1.Ledger.Value.assetClassValueOf
-                                     (Plutus.V1.Ledger.Contexts.txOutValue o)
-                                     ( Plutus.V1.Ledger.Value.assetClass
-                                         (currencySymbol tkSaleParam)
-                                         (tokenName tkSaleParam)
-                                     )
-                                     PlutusTx.Prelude.== 1
+                                   Plutus.V1.Ledger.Contexts.txOutAddress o
+                                     PlutusTx.Prelude.== Ledger.Address.pubKeyHashAddress
+                                       tokenBuyerPaymentPubKeyHash
+                                       PlutusTx.Prelude.Nothing
                                )
                                (Plutus.V1.Ledger.Contexts.txInfoOutputs info) of
                                [] ->
@@ -233,20 +230,26 @@ isTxToBuyer tkSaleParam info =
                                outputs ->
                                  PlutusTx.Either.Right outputs
                                PlutusTx.Prelude.>>= ( \tokenOutputWithCorrectTokens ->
-                                                        case PlutusTx.Prelude.filter
-                                                          ( \tokenOutputWithCorrectToken ->
-                                                              Plutus.V1.Ledger.Contexts.txOutAddress tokenOutputWithCorrectToken
-                                                                PlutusTx.Prelude.== Ledger.Address.pubKeyHashAddress
-                                                                  tokenBuyerPaymentPubKeyHash
-                                                                  PlutusTx.Prelude.Nothing
-                                                          )
-                                                          tokenOutputWithCorrectTokens of
-                                                          [] ->
-                                                            PlutusTx.Either.Left "No output to the buyers address"
-                                                          [tokenOutput] ->
-                                                            PlutusTx.Either.Right PlutusTx.Prelude.True
-                                                          x : xs ->
-                                                            PlutusTx.Either.Left "Too many outputs to the buyers address"
+                                                        let thing =
+                                                              PlutusTx.Prelude.filter
+                                                                ( \tokenOutputWithCorrectToken ->
+                                                                    ( Plutus.V1.Ledger.Value.assetClassValueOf
+                                                                        (Plutus.V1.Ledger.Contexts.txOutValue tokenOutputWithCorrectToken)
+                                                                        ( Plutus.V1.Ledger.Value.assetClass
+                                                                            (currencySymbol tkSaleParam)
+                                                                            (tokenName tkSaleParam)
+                                                                        )
+                                                                        PlutusTx.Prelude.== 1
+                                                                    )
+                                                                )
+                                                                tokenOutputWithCorrectTokens
+                                                         in case thing of
+                                                              [] ->
+                                                                PlutusTx.Either.Left "No output to the buyers address"
+                                                              [tokenOutput] ->
+                                                                PlutusTx.Either.Right PlutusTx.Prelude.True
+                                                              x : xs ->
+                                                                PlutusTx.Either.Left "Too many outputs to the buyers address"
                                                     )
                          )
 
