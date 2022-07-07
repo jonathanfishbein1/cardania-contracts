@@ -5,14 +5,14 @@ set utxoskey /home/jonathan/Documents/octoberFestMetaData/minting.skey
 set sellerAddress "addr_test1vrh0kkuahtz28qpfdhsx2hm2eekf06des8h03xnm757u65sd6egwy"
 set scriptAddress (eval cardano-cli address build --payment-script-file /home/jonathan/Documents/cardania-contracts/rad-sale-on-chain/transactions/result.plutus --testnet-magic 1097911063)
 set sellerTxOut "$sellerAddress+1000000"
-set sellerCollateralUtxo "fe40f26d6f4e72c845b3c63d359e7a8fab73fe9700e9d2c0a510de625ecc8912#0"
+set sellerCollateralUtxo "9eb0d28f2909d863feedb4ad210c28c28809ff685b21952cc183f6c31d36df5b#0"
 
 cardano-cli transaction build \
-  --alonzo-era \
+  --babbage-era \
   --cardano-mode \
   --testnet-magic 1097911063 \
-  --tx-in "a0d35899eb0407379b47e8bc8893b619be0e61a8a4e785b0454dbe4733f530a1#0" \
-  --tx-in "c3e7f372ec821a654c2472313730a66890e2aa00835a14585a173a30dfc56cec#3" \
+  --tx-in "520d76e815bc796c5c5d8cb6c1de23177573eb0043f16b58fddf54a4d0776f40#0" \
+  --tx-in "9e0938663296e4da86978fb2926885952af4a1bc5da120062e9ccc249fd4d4c8#3" \
   --tx-in-script-file /home/jonathan/Documents/cardania-contracts/rad-sale-on-chain/transactions/result.plutus \
   --tx-in-datum-file /home/jonathan/Documents/cardania-contracts/rad-sale-on-chain/transactions/unit.json \
   --tx-in-redeemer-file /home/jonathan/Documents/cardania-contracts/rad-sale-on-chain/transactions/close-redeemer.json \
