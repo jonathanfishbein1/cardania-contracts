@@ -221,7 +221,7 @@ close tokenSaleParam = do
     Plutus.Contract.awaitTxConfirmed PlutusTx.Prelude.$ Ledger.getCardanoTxId ledgerTx
   Plutus.Contract.logInfo @Prelude.String PlutusTx.Prelude.$
     Text.Printf.printf
-      "closed sale for token (%s, %s), withdraw %s"
+      "closed sale for token (%s, %s)"
       (Prelude.show (Script.currencySymbol tokenSaleParam))
       (Prelude.show (Script.tokenName tokenSaleParam))
 
