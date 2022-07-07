@@ -226,7 +226,7 @@ isTxToBuyer tkSaleParam info =
                                )
                                (Plutus.V1.Ledger.Contexts.txInfoOutputs info) of
                                [] ->
-                                 PlutusTx.Either.Left "No currency symbol and token name output"
+                                 PlutusTx.Either.Left "No output to the buyers address"
                                outputs ->
                                  PlutusTx.Either.Right outputs
                                PlutusTx.Prelude.>>= ( \tokenOutputWithCorrectTokens ->
@@ -245,11 +245,11 @@ isTxToBuyer tkSaleParam info =
                                                                 tokenOutputWithCorrectTokens
                                                          in case thing of
                                                               [] ->
-                                                                PlutusTx.Either.Left "No output to the buyers address"
+                                                                PlutusTx.Either.Left "No currency symbol and token name output"
                                                               [tokenOutput] ->
                                                                 PlutusTx.Either.Right PlutusTx.Prelude.True
                                                               x : xs ->
-                                                                PlutusTx.Either.Left "Too many outputs to the buyers address"
+                                                                PlutusTx.Either.Left "Too many currency symbol and token name outputs"
                                                     )
                          )
 
