@@ -75,6 +75,7 @@ import qualified Plutus.Contract
 import qualified Plutus.Contract.Typed.Tx
 import qualified Plutus.Trace
 import qualified Plutus.V1.Ledger.Ada
+import qualified Plutus.V1.Ledger.Address
 import qualified Plutus.V1.Ledger.Api
 import qualified Plutus.V1.Ledger.Contexts
 import qualified Plutus.V1.Ledger.Crypto
@@ -207,44 +208,21 @@ isTxToBuyer ::
 isTxToBuyer tkSaleParam info =
   tokenBuyerPaymentPubKeyHashsEither info
     PlutusTx.Prelude.>>= ( \signatories ->
-                             case PlutusTx.Prelude.filter
-                               ( \o ->
-                                   PlutusTx.Prelude.any
-                                     ( \signatory ->
-                                         Plutus.V1.Ledger.Contexts.txOutAddress o
-                                           PlutusTx.Prelude.== Ledger.Address.pubKeyHashAddress
-                                             (Ledger.Address.PaymentPubKeyHash signatory)
-                                             PlutusTx.Prelude.Nothing
-                                     )
-                                     signatories
-                               )
-                               (Plutus.V1.Ledger.Contexts.txInfoOutputs info) of
-                               [] ->
-                                 PlutusTx.Either.Left "No output to the buyers address"
-                               outputs ->
-                                 PlutusTx.Either.Right outputs
-                               PlutusTx.Prelude.>>= ( \tokenOutputWithCorrectTokens ->
-                                                        let thing =
-                                                              PlutusTx.Prelude.filter
-                                                                ( \tokenOutputWithCorrectToken ->
-                                                                    ( Plutus.V1.Ledger.Value.assetClassValueOf
-                                                                        (Plutus.V1.Ledger.Contexts.txOutValue tokenOutputWithCorrectToken)
-                                                                        ( Plutus.V1.Ledger.Value.assetClass
-                                                                            (currencySymbol tkSaleParam)
-                                                                            (tokenName tkSaleParam)
-                                                                        )
-                                                                        PlutusTx.Prelude.== 1
-                                                                    )
-                                                                )
-                                                                tokenOutputWithCorrectTokens
-                                                         in case thing of
-                                                              [] ->
-                                                                PlutusTx.Either.Left "No currency symbol and token name output"
-                                                              [tokenOutput] ->
-                                                                PlutusTx.Either.Right PlutusTx.Prelude.True
-                                                              x : xs ->
-                                                                PlutusTx.Either.Left "Too many currency symbol and token name outputs"
-                                                    )
+                             let signer = PlutusTx.Prelude.head signatories
+                                 valuePaidToBuyer =
+                                   Plutus.V1.Ledger.Contexts.valuePaidTo
+                                     info
+                                     signer
+                              in if ( Plutus.V1.Ledger.Value.assetClassValueOf
+                                        valuePaidToBuyer
+                                        ( Plutus.V1.Ledger.Value.assetClass
+                                            (currencySymbol tkSaleParam)
+                                            (tokenName tkSaleParam)
+                                        )
+                                        PlutusTx.Prelude.== 1
+                                    )
+                                   then PlutusTx.Either.Right PlutusTx.Prelude.True
+                                   else PlutusTx.Either.Left "Incorrect Tx to buyer"
                          )
 
 correctOutputDatum ::
