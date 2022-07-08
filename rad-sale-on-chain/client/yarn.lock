@@ -964,9 +964,9 @@ faye-websocket@^0.11.3:
     websocket-driver ">=0.5.1"
 
 fetch-blob@^3.1.2, fetch-blob@^3.1.4:
-  version "3.1.5"
-  resolved "https://registry.yarnpkg.com/fetch-blob/-/fetch-blob-3.1.5.tgz#0077bf5f3fcdbd9d75a0b5362f77dbb743489863"
-  integrity sha512-N64ZpKqoLejlrwkIAnb9iLSA3Vx/kjgzpcDhygcqJ2KKjky8nCgUQ+dzXtbrLaWZGZNmNfQTsiQ0weZ1svglHg==
+  version "3.2.0"
+  resolved "https://registry.yarnpkg.com/fetch-blob/-/fetch-blob-3.2.0.tgz#f09b8d4bbd45adc6f0c20b7e787e793e309dcce9"
+  integrity sha512-7yAQpD2UMJzLi1Dqv7qFYnPbaPx7ZfFK6PiIxQ4PfkGPyNyl2Ugx+a/umUonmKqjhM4DnfbMvdX6otXq83soQQ==
   dependencies:
     node-domexception "^1.0.0"
     web-streams-polyfill "^3.0.3"
@@ -1422,10 +1422,10 @@ lru-cache@^6.0.0:
   dependencies:
     yallist "^4.0.0"
 
-lucid-cardano@^0.3.5:
-  version "0.3.5"
-  resolved "https://registry.yarnpkg.com/lucid-cardano/-/lucid-cardano-0.3.5.tgz#6ae9b2a2514b001625c6d482d5448d8ad8cfefa6"
-  integrity sha512-vrWsTCiSFpolwTXuDRArDGq2Rupi536H6vRM3BllfDtCaT2HX3M48+jzT2hewRt7q8Z7GAl2WylPBUIGgfrQbQ==
+lucid-cardano@^0.5.0:
+  version "0.5.0"
+  resolved "https://registry.yarnpkg.com/lucid-cardano/-/lucid-cardano-0.5.0.tgz#2f8750b46901c713e98b6ca655e45d446a4eb494"
+  integrity sha512-4ZDa9oY1wAq3K0sMo7sjHZDIXU3BhJgbS/sYx1B1kpIgpvFxCcF/Fae63N9T50lVr9D6nkTBGiZ71x6gMnGKxg==
   dependencies:
     node-fetch "^3.2.3"
 
