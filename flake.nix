@@ -16,7 +16,7 @@
             cardaniaContractsProject =
               final.haskell-nix.project' {
                 src = ./.;
-                compiler-nix-name = "ghc8104";
+                compiler-nix-name = "ghc8107";
                 shell.tools = {
                   cabal = { };
                   hlint = { };
