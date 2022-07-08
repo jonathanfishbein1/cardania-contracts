@@ -192,8 +192,10 @@ tokenBuyerPaymentPubKeyHashsEither info =
   case (Plutus.V1.Ledger.Contexts.txInfoSignatories info) of
     [] ->
       PlutusTx.Either.Left "No signer"
-    signatories ->
-      PlutusTx.Either.Right signatories
+    [signatory] ->
+      PlutusTx.Either.Right signatory
+    _ ->
+      PlutusTx.Either.Left "Too many signers"
 
 -- A valid transaction must include exactly one output to the buyer
 -- consisting of the token with the given currency symbol and
@@ -207,12 +209,11 @@ isTxToBuyer ::
     PlutusTx.Prelude.Bool
 isTxToBuyer tkSaleParam info =
   tokenBuyerPaymentPubKeyHashsEither info
-    PlutusTx.Prelude.>>= ( \signatories ->
-                             let signer = PlutusTx.Prelude.head signatories
-                                 valuePaidToBuyer =
+    PlutusTx.Prelude.>>= ( \signatory ->
+                             let valuePaidToBuyer =
                                    Plutus.V1.Ledger.Contexts.valuePaidTo
                                      info
-                                     signer
+                                     signatory
                               in if ( Plutus.V1.Ledger.Value.assetClassValueOf
                                         valuePaidToBuyer
                                         ( Plutus.V1.Ledger.Value.assetClass
