@@ -226,28 +226,40 @@ isTxToBuyer tkSaleParam info =
                                    else PlutusTx.Either.Left "Incorrect Tx to buyer"
                          )
 
+correctNumberOfOutputsToScript ::
+  Plutus.V1.Ledger.Contexts.ScriptContext ->
+  PlutusTx.Either.Either
+    PlutusTx.Builtins.Internal.BuiltinString
+    Plutus.V1.Ledger.Contexts.TxOut
+correctNumberOfOutputsToScript context =
+  case Plutus.V1.Ledger.Contexts.getContinuingOutputs context of
+    [] -> PlutusTx.Either.Left "No continuing output"
+    [o] -> PlutusTx.Either.Right o
+    _ -> PlutusTx.Either.Left "Too many continuing output"
+
 correctOutputDatum ::
   Plutus.V1.Ledger.Contexts.ScriptContext ->
   PlutusTx.Either.Either
     PlutusTx.Builtins.Internal.BuiltinString
     PlutusTx.Prelude.Bool
-correctOutputDatum context = case Plutus.V1.Ledger.Contexts.getContinuingOutputs context of
-  [o] ->
-    let cOutDat =
-          Ledger.txOutDatum o
-            PlutusTx.Prelude.>>= ( \datumHash ->
-                                     Ledger.findDatum datumHash (Plutus.V1.Ledger.Contexts.scriptContextTxInfo context)
-                                       PlutusTx.Prelude.>>= ( \(Plutus.V1.Ledger.Scripts.Datum d) ->
-                                                                (PlutusTx.fromBuiltinData d :: PlutusTx.Prelude.Maybe ())
-                                                                  PlutusTx.Prelude.>>= (\datValue -> PlutusTx.Prelude.Just PlutusTx.Prelude.True)
-                                                            )
-                                 )
-     in case cOutDat of
-          PlutusTx.Prelude.Nothing ->
-            PlutusTx.Either.Left "Error converting txOutDatum to unit"
-          PlutusTx.Prelude.Just val ->
-            PlutusTx.Either.Right val
-  _ -> PlutusTx.Either.Left "No continuing output"
+correctOutputDatum context =
+  correctNumberOfOutputsToScript context
+    PlutusTx.Prelude.>>= ( \continuingScriptOutput ->
+                             let cOutDat =
+                                   Ledger.txOutDatum continuingScriptOutput
+                                     PlutusTx.Prelude.>>= ( \datumHash ->
+                                                              Ledger.findDatum datumHash (Plutus.V1.Ledger.Contexts.scriptContextTxInfo context)
+                                                                PlutusTx.Prelude.>>= ( \(Plutus.V1.Ledger.Scripts.Datum d) ->
+                                                                                         (PlutusTx.fromBuiltinData d :: PlutusTx.Prelude.Maybe ())
+                                                                                           PlutusTx.Prelude.>>= (\datValue -> PlutusTx.Prelude.Just PlutusTx.Prelude.True)
+                                                                                     )
+                                                          )
+                              in case cOutDat of
+                                   PlutusTx.Prelude.Nothing ->
+                                     PlutusTx.Either.Left "Error converting txOutDatum to unit"
+                                   PlutusTx.Prelude.Just _ ->
+                                     PlutusTx.Either.Right PlutusTx.Prelude.True
+                         )
 
 correctScriptOutputValue ::
   TokenSaleParam ->
@@ -256,30 +268,28 @@ correctScriptOutputValue ::
     PlutusTx.Builtins.Internal.BuiltinString
     PlutusTx.Prelude.Bool
 correctScriptOutputValue tokenSaleParam context =
-  if PlutusTx.Prelude.any
-    ( \output ->
-        let info = Plutus.V1.Ledger.Contexts.scriptContextTxInfo context
-            totalValue = Ledger.valueLockedBy info (Ledger.ownHash context)
-            amountOfNativeToken =
-              Plutus.V1.Ledger.Value.assetClassValueOf
-                totalValue
-                ( Plutus.V1.Ledger.Value.assetClass
-                    (currencySymbol tokenSaleParam)
-                    (tokenName tokenSaleParam)
-                )
-            newValueOfNativeToken =
-              Plutus.V1.Ledger.Api.singleton
-                (currencySymbol tokenSaleParam)
-                (tokenName tokenSaleParam)
-                (amountOfNativeToken)
-            adaValue = (Plutus.V1.Ledger.Ada.toValue PlutusTx.Prelude.. Plutus.V1.Ledger.Ada.fromValue) totalValue
-         in Plutus.V1.Ledger.Contexts.txOutValue output
-              PlutusTx.Prelude.== adaValue PlutusTx.Prelude.<> newValueOfNativeToken
-    )
-    (Plutus.V1.Ledger.Contexts.getContinuingOutputs context)
-    PlutusTx.Prelude.== PlutusTx.Prelude.True
-    then PlutusTx.Prelude.Right PlutusTx.Prelude.True
-    else PlutusTx.Prelude.Left "No output to script"
+  correctNumberOfOutputsToScript context
+    PlutusTx.Prelude.>>= ( \continuingScriptOutput ->
+                             let info = Plutus.V1.Ledger.Contexts.scriptContextTxInfo context
+                                 totalValue = Ledger.valueLockedBy info (Ledger.ownHash context)
+                                 amountOfNativeToken =
+                                   Plutus.V1.Ledger.Value.assetClassValueOf
+                                     totalValue
+                                     ( Plutus.V1.Ledger.Value.assetClass
+                                         (currencySymbol tokenSaleParam)
+                                         (tokenName tokenSaleParam)
+                                     )
+                                 newValueOfNativeToken =
+                                   Plutus.V1.Ledger.Api.singleton
+                                     (currencySymbol tokenSaleParam)
+                                     (tokenName tokenSaleParam)
+                                     (amountOfNativeToken)
+                                 adaValue = (Plutus.V1.Ledger.Ada.toValue PlutusTx.Prelude.. Plutus.V1.Ledger.Ada.fromValue) totalValue
+                              in if Plutus.V1.Ledger.Contexts.txOutValue continuingScriptOutput
+                                   PlutusTx.Prelude.== adaValue PlutusTx.Prelude.<> newValueOfNativeToken
+                                   then PlutusTx.Prelude.Right PlutusTx.Prelude.True
+                                   else PlutusTx.Prelude.Left "Wrong Script output value"
+                         )
 
 {-# INLINEABLE mkRadSaleOnChainValidator #-}
 mkRadSaleOnChainValidator ::
