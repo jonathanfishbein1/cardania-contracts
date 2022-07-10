@@ -272,23 +272,30 @@ correctScriptOutputValue tokenSaleParam context =
     PlutusTx.Prelude.>>= ( \continuingScriptOutput ->
                              let info = Plutus.V1.Ledger.Contexts.scriptContextTxInfo context
                                  totalValue = Ledger.valueLockedBy info (Ledger.ownHash context)
-                                 amountOfNativeToken =
-                                   Plutus.V1.Ledger.Value.assetClassValueOf
-                                     totalValue
-                                     ( Plutus.V1.Ledger.Value.assetClass
-                                         (currencySymbol tokenSaleParam)
-                                         (tokenName tokenSaleParam)
-                                     )
-                                 newValueOfNativeToken =
-                                   Plutus.V1.Ledger.Api.singleton
-                                     (currencySymbol tokenSaleParam)
-                                     (tokenName tokenSaleParam)
-                                     (amountOfNativeToken)
-                                 adaValue = (Plutus.V1.Ledger.Ada.toValue PlutusTx.Prelude.. Plutus.V1.Ledger.Ada.fromValue) totalValue
-                              in if Plutus.V1.Ledger.Contexts.txOutValue continuingScriptOutput
-                                   PlutusTx.Prelude.== adaValue PlutusTx.Prelude.<> newValueOfNativeToken
+                                 totalAdaLocked = Ledger.Value.adaOnlyValue totalValue
+                              in if Ledger.Value.adaOnlyValue (Plutus.V1.Ledger.Contexts.txOutValue continuingScriptOutput)
+                                   PlutusTx.Prelude.== totalAdaLocked
                                    then PlutusTx.Prelude.Right PlutusTx.Prelude.True
-                                   else PlutusTx.Prelude.Left "Wrong Script output value"
+                                   else
+                                     PlutusTx.Prelude.Left "Wrong Ada amount to Script output"
+                                       PlutusTx.Prelude.>>= ( \(_ :: PlutusTx.Prelude.Bool) ->
+                                                                let quantityOfNativeTokenBeforeTransaction =
+                                                                      Plutus.V1.Ledger.Value.assetClassValueOf
+                                                                        totalValue
+                                                                        ( Plutus.V1.Ledger.Value.assetClass
+                                                                            (currencySymbol tokenSaleParam)
+                                                                            (tokenName tokenSaleParam)
+                                                                        )
+                                                                    quantityOfOutputValueOfNativeToken =
+                                                                      Plutus.V1.Ledger.Value.valueOf
+                                                                        (Plutus.V1.Ledger.Contexts.txOutValue continuingScriptOutput)
+                                                                        (currencySymbol tokenSaleParam)
+                                                                        (tokenName tokenSaleParam)
+                                                                 in if quantityOfOutputValueOfNativeToken
+                                                                      PlutusTx.Prelude.== (quantityOfNativeTokenBeforeTransaction PlutusTx.Prelude.- 1)
+                                                                      then PlutusTx.Prelude.Right PlutusTx.Prelude.True
+                                                                      else PlutusTx.Prelude.Left "Wrong native token amount to Script output"
+                                                            )
                          )
 
 {-# INLINEABLE mkRadSaleOnChainValidator #-}
