@@ -213,22 +213,21 @@ isTxToBuyer ::
     PlutusTx.Builtins.Internal.BuiltinString
     PlutusTx.Prelude.Bool
 isTxToBuyer tkSaleParam info =
-  tokenBuyerPaymentPubKeyHashsEither info
-    PlutusTx.Prelude.>>= ( \signatory ->
-                             let valuePaidToBuyer =
-                                   Plutus.V1.Ledger.Contexts.valuePaidTo
-                                     info
-                                     signatory
-                              in if Plutus.V1.Ledger.Value.assetClassValueOf
-                                   valuePaidToBuyer
-                                   ( Plutus.V1.Ledger.Value.assetClass
-                                       (currencySymbol tkSaleParam)
-                                       (tokenName tkSaleParam)
-                                   )
-                                   PlutusTx.Prelude.== 1
-                                   then PlutusTx.Either.Right PlutusTx.Prelude.True
-                                   else PlutusTx.Either.Left "Incorrect Tx to buyer"
-                         )
+  do
+    signatory <- tokenBuyerPaymentPubKeyHashsEither info
+    let valuePaidToBuyer =
+          Plutus.V1.Ledger.Contexts.valuePaidTo
+            info
+            signatory
+    if Plutus.V1.Ledger.Value.assetClassValueOf
+      valuePaidToBuyer
+      ( Plutus.V1.Ledger.Value.assetClass
+          (currencySymbol tkSaleParam)
+          (tokenName tkSaleParam)
+      )
+      PlutusTx.Prelude.== 1
+      then PlutusTx.Either.Right PlutusTx.Prelude.True
+      else PlutusTx.Either.Left "Incorrect Tx to buyer"
 
 correctNumberOfOutputsToScript ::
   Plutus.V1.Ledger.Contexts.ScriptContext ->
