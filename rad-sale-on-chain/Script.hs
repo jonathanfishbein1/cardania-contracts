@@ -248,14 +248,11 @@ correctOutputDatum ::
 correctOutputDatum context =
   do
     continuingScriptOutput <- correctNumberOfOutputsToScript context
-    datumValue <- case deserializedDatum context continuingScriptOutput of
+    case deserializedDatum context continuingScriptOutput of
       PlutusTx.Prelude.Nothing ->
         PlutusTx.Either.Left "Error deserializing txOutDatum"
       PlutusTx.Prelude.Just dValue ->
         PlutusTx.Either.Right dValue
-    case datumValue of
-      () -> PlutusTx.Either.Right PlutusTx.Prelude.True
-      _ -> PlutusTx.Either.Left "Error converting txOutDatum to unit"
 
 deserializedDatum ::
   PlutusTx.FromData b =>
