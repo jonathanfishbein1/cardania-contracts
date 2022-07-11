@@ -156,8 +156,8 @@ isValid ::
 isValid
   txToSeller
   txToBuyer
-  outputDatum
-  scriptOutputValue =
+  scriptOutputValue
+  outputDatum =
     txToSeller
       PlutusTx.Prelude.&& txToBuyer
       PlutusTx.Prelude.&& outputDatum
@@ -240,6 +240,17 @@ correctNumberOfOutputsToScript context =
     [o] -> PlutusTx.Either.Right o
     _ -> PlutusTx.Either.Left "Too many continuing output"
 
+deserializedDatum ::
+  PlutusTx.FromData () =>
+  Plutus.V1.Ledger.Contexts.ScriptContext ->
+  Plutus.V1.Ledger.Contexts.TxOut ->
+  Prelude.Maybe ()
+deserializedDatum context continuingScriptOutput =
+  do
+    datumHash <- Ledger.txOutDatum continuingScriptOutput
+    (Plutus.V1.Ledger.Scripts.Datum datum) <- Ledger.findDatum datumHash (Plutus.V1.Ledger.Contexts.scriptContextTxInfo context)
+    PlutusTx.fromBuiltinData datum
+
 correctOutputDatum ::
   Plutus.V1.Ledger.Contexts.ScriptContext ->
   PlutusTx.Either.Either
@@ -251,19 +262,8 @@ correctOutputDatum context =
     case deserializedDatum context continuingScriptOutput of
       PlutusTx.Prelude.Nothing ->
         PlutusTx.Either.Left "Error deserializing txOutDatum"
-      PlutusTx.Prelude.Just dValue ->
-        PlutusTx.Either.Right dValue
-
-deserializedDatum ::
-  PlutusTx.FromData b =>
-  Plutus.V1.Ledger.Contexts.ScriptContext ->
-  Plutus.V1.Ledger.Contexts.TxOut ->
-  Prelude.Maybe b
-deserializedDatum context continuingScriptOutput =
-  do
-    datumHash <- Ledger.txOutDatum continuingScriptOutput
-    (Plutus.V1.Ledger.Scripts.Datum datum) <- Ledger.findDatum datumHash (Plutus.V1.Ledger.Contexts.scriptContextTxInfo context)
-    PlutusTx.fromBuiltinData datum
+      PlutusTx.Prelude.Just _ ->
+        PlutusTx.Either.Right PlutusTx.Prelude.True
 
 ownInputValue ::
   Data.String.IsString a =>
@@ -287,8 +287,8 @@ correctScriptOutputValue ::
     PlutusTx.Prelude.Bool
 correctScriptOutputValue tokenSaleParam context =
   do
-    iValue <- ownInputValue context
-    let adaInputValue = Ledger.Value.adaOnlyValue iValue
+    inputValue <- ownInputValue context
+    let adaInputValue = Ledger.Value.adaOnlyValue inputValue
         info = Plutus.V1.Ledger.Contexts.scriptContextTxInfo context
         totalValueContinueingToScript = Ledger.valueLockedBy info (Ledger.ownHash context)
         adaContinueingOutputValue = Ledger.Value.adaOnlyValue totalValueContinueingToScript
@@ -298,7 +298,7 @@ correctScriptOutputValue tokenSaleParam context =
 
     let nativeTokenInputQuantity =
           Plutus.V1.Ledger.Value.valueOf
-            iValue
+            inputValue
             (currencySymbol tokenSaleParam)
             (tokenName tokenSaleParam)
         nativeTokenOutputQuantity =
