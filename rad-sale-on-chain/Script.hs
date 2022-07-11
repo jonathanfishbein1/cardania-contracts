@@ -59,6 +59,7 @@ import qualified Data.Map
 import qualified Data.Monoid
 import qualified Data.OpenApi
 import qualified Data.Semigroup
+import qualified Data.String
 import qualified Data.Text
 import qualified Data.Void
 import qualified GHC.Generics
@@ -188,8 +189,12 @@ isTxToSeller tkSaleParam info =
 
 -- A valid transaction must include a signature from the buyer of the token
 
+tokenBuyerPaymentPubKeyHashsEither ::
+  Data.String.IsString a =>
+  Plutus.V1.Ledger.Contexts.TxInfo ->
+  Prelude.Either a Plutus.V1.Ledger.Crypto.PubKeyHash
 tokenBuyerPaymentPubKeyHashsEither info =
-  case (Plutus.V1.Ledger.Contexts.txInfoSignatories info) of
+  case Plutus.V1.Ledger.Contexts.txInfoSignatories info of
     [] ->
       PlutusTx.Either.Left "No signer"
     [signatory] ->
@@ -214,14 +219,13 @@ isTxToBuyer tkSaleParam info =
                                    Plutus.V1.Ledger.Contexts.valuePaidTo
                                      info
                                      signatory
-                              in if ( Plutus.V1.Ledger.Value.assetClassValueOf
-                                        valuePaidToBuyer
-                                        ( Plutus.V1.Ledger.Value.assetClass
-                                            (currencySymbol tkSaleParam)
-                                            (tokenName tkSaleParam)
-                                        )
-                                        PlutusTx.Prelude.== 1
-                                    )
+                              in if Plutus.V1.Ledger.Value.assetClassValueOf
+                                   valuePaidToBuyer
+                                   ( Plutus.V1.Ledger.Value.assetClass
+                                       (currencySymbol tkSaleParam)
+                                       (tokenName tkSaleParam)
+                                   )
+                                   PlutusTx.Prelude.== 1
                                    then PlutusTx.Either.Right PlutusTx.Prelude.True
                                    else PlutusTx.Either.Left "Incorrect Tx to buyer"
                          )
