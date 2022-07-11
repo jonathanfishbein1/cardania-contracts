@@ -74,7 +74,7 @@ start tokenSaleParam = do
         Plutus.V1.Ledger.Api.singleton
           (Script.currencySymbol tokenSaleParam)
           (Script.tokenName tokenSaleParam)
-          1
+          2
           PlutusTx.Prelude.<> Ledger.Ada.lovelaceValueOf 6_000_000
 
   let tx = Ledger.Constraints.TxConstraints.mustPayToTheScript () v

@@ -55,7 +55,7 @@ initialDistributionStart =
     v1 :: Ledger.Value.Value
     v1 =
       Ledger.Ada.lovelaceValueOf 100_000_000
-        PlutusTx.Prelude.<> Ledger.Value.singleton currencySymbol tokenName 1
+        PlutusTx.Prelude.<> Ledger.Value.singleton currencySymbol tokenName 2
 
 startEmulatorConfig :: Plutus.Trace.Emulator.EmulatorConfig
 startEmulatorConfig = Plutus.Trace.Emulator.EmulatorConfig (Prelude.Left initialDistributionStart) Data.Default.def
@@ -84,7 +84,7 @@ startPredicate :: Plutus.Contract.Test.TracePredicate
 startPredicate =
   Plutus.Contract.Test.walletFundsChange
     Plutus.Contract.Test.w1
-    (Ledger.Ada.lovelaceValueOf (-6_000_000) Prelude.<> Ledger.Value.assetClassValue token (-1))
+    (Ledger.Ada.lovelaceValueOf (-6_000_000) Prelude.<> Ledger.Value.assetClassValue token (-2))
 
 testBuy :: Test.Tasty.TestTree
 testBuy =
@@ -152,10 +152,10 @@ buyEmulatorConfig :: Plutus.Trace.Emulator.EmulatorConfig
 buyEmulatorConfig = Plutus.Trace.Emulator.EmulatorConfig (Prelude.Left initialDistributionBuy) Data.Default.def
 
 currencySymbol :: Ledger.Value.CurrencySymbol
-currencySymbol = "641593ca39c5cbd3eb314533841d53e61ebf6ee7a0ec7c391652f31e"
+currencySymbol = "fda1b6b487bee2e7f64ecf24d24b1224342484c0195ee1b7b943db50"
 
 tokenName :: Ledger.Value.TokenName
-tokenName = "CardaniaFounderWhite"
+tokenName = "CLASSICBABYBLUE01"
 
 token :: Ledger.Value.AssetClass
 token = Ledger.Value.AssetClass (currencySymbol, tokenName)
@@ -179,8 +179,8 @@ tokenSaleParam :: Script.TokenSaleParam
 tokenSaleParam =
   Script.TokenSaleParam
     { Script.tokenCost = 10_000_000,
-      Script.currencySymbol = "641593ca39c5cbd3eb314533841d53e61ebf6ee7a0ec7c391652f31e",
-      Script.tokenName = "CardaniaFounderWhite",
+      Script.currencySymbol = currencySymbol,
+      Script.tokenName = tokenName,
       Script.sellerPubKeyHash = Ledger.unPaymentPubKeyHash Prelude.$ Plutus.Contract.Test.mockWalletPaymentPubKeyHash Prelude.$ Plutus.Contract.Test.knownWallet 1
     }
 
