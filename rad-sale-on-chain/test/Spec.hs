@@ -11,7 +11,6 @@ module Main
   ( main,
     runCloseTrace,
     runBuyTrace,
-    runBuyThreeTrace,
   )
 where
 
@@ -42,8 +41,7 @@ tests =
     [ testStart,
       testBuy,
       testsClose,
-      testBuyTwo,
-      testBuyThree
+      testBuyTwo
     ]
 
 initialDistributionStart :: Plutus.Contract.Test.InitialDistribution
@@ -102,14 +100,6 @@ testBuyTwo =
     buyPredicateTwo
     buyTraceTwo
 
-testBuyThree :: Test.Tasty.TestTree
-testBuyThree =
-  Plutus.Contract.Test.checkPredicateOptions
-    buyOptions
-    "two tokens are bought successful"
-    buyPredicateThree
-    buyTraceThree
-
 buyOptions :: Plutus.Contract.Test.CheckOptions
 buyOptions =
   Plutus.Contract.Test.defaultCheckOptions
@@ -119,7 +109,7 @@ buyPredicate :: Plutus.Contract.Test.TracePredicate
 buyPredicate =
   Plutus.Contract.Test.walletFundsChange
     Plutus.Contract.Test.w1
-    (Ledger.Ada.lovelaceValueOf 4_000_000 Prelude.<> Ledger.Value.assetClassValue token (-1))
+    (Ledger.Ada.lovelaceValueOf 4_000_000 Prelude.<> Ledger.Value.assetClassValue token (-2))
     Plutus.Contract.Test..&&. Plutus.Contract.Test.walletFundsChange
       Plutus.Contract.Test.w2
       (Ledger.Ada.lovelaceValueOf (-10_000_000) Prelude.<> Ledger.Value.assetClassValue token 1)
@@ -128,25 +118,13 @@ buyPredicateTwo :: Plutus.Contract.Test.TracePredicate
 buyPredicateTwo =
   Plutus.Contract.Test.walletFundsChange
     Plutus.Contract.Test.w1
-    (Ledger.Ada.lovelaceValueOf (-2_000_000) Prelude.<> Ledger.Value.assetClassValue token (-2))
+    (Ledger.Ada.lovelaceValueOf 10_000_000 Prelude.<> Ledger.Value.assetClassValue token (-1))
     Plutus.Contract.Test..&&. Plutus.Contract.Test.walletFundsChange
       Plutus.Contract.Test.w2
       (Ledger.Ada.lovelaceValueOf (-10_000_000) Prelude.<> Ledger.Value.assetClassValue token 1)
 
-buyPredicateThree :: Plutus.Contract.Test.TracePredicate
-buyPredicateThree =
-  Plutus.Contract.Test.walletFundsChange
-    Plutus.Contract.Test.w1
-    (Ledger.Ada.lovelaceValueOf 8_000_000 Prelude.<> Ledger.Value.assetClassValue token (-2))
-    Plutus.Contract.Test..&&. Plutus.Contract.Test.walletFundsChange
-      Plutus.Contract.Test.w2
-      (Ledger.Ada.lovelaceValueOf (-20_000_000) Prelude.<> Ledger.Value.assetClassValue token 2)
-
 runBuyTrace :: Prelude.IO ()
 runBuyTrace = Plutus.Trace.Emulator.runEmulatorTraceIO' Data.Default.def buyEmulatorConfig buyTrace
-
-runBuyThreeTrace :: Prelude.IO ()
-runBuyThreeTrace = Plutus.Trace.Emulator.runEmulatorTraceIO' Data.Default.def buyEmulatorConfig buyTraceThree
 
 buyEmulatorConfig :: Plutus.Trace.Emulator.EmulatorConfig
 buyEmulatorConfig = Plutus.Trace.Emulator.EmulatorConfig (Prelude.Left initialDistributionBuy) Data.Default.def
@@ -200,23 +178,9 @@ buyTraceTwo = do
   h2 <- Plutus.Trace.Emulator.activateContractWallet Plutus.Contract.Test.w2 OffChain.endpoints
   Plutus.Trace.Emulator.callEndpoint @"start" h1 tokenSaleParam
   Control.Monad.void Prelude.$ Plutus.Trace.Emulator.waitNSlots 1
-  Plutus.Trace.Emulator.callEndpoint @"start" h1 tokenSaleParam
-  Control.Monad.void Prelude.$ Plutus.Trace.Emulator.waitNSlots 1
   Plutus.Trace.Emulator.callEndpoint @"buy" h2 tokenSaleParam
   Control.Monad.void Prelude.$ Plutus.Trace.Emulator.waitNSlots 1
-  Control.Monad.void Prelude.$ Control.Monad.Freer.Extras.logInfo @Prelude.String "Trace finished"
-
-buyTraceThree :: Plutus.Trace.Emulator.EmulatorTrace ()
-buyTraceThree = do
-  h1 <- Plutus.Trace.Emulator.activateContractWallet Plutus.Contract.Test.w1 OffChain.endpoints
-  h2 <- Plutus.Trace.Emulator.activateContractWallet Plutus.Contract.Test.w2 OffChain.endpoints
-  Plutus.Trace.Emulator.callEndpoint @"start" h1 tokenSaleParam
-  Control.Monad.void Prelude.$ Plutus.Trace.Emulator.waitNSlots 1
-  Plutus.Trace.Emulator.callEndpoint @"buy" h2 tokenSaleParam
-  Control.Monad.void Prelude.$ Plutus.Trace.Emulator.waitNSlots 1
-  Plutus.Trace.Emulator.callEndpoint @"start" h1 tokenSaleParam
-  Control.Monad.void Prelude.$ Plutus.Trace.Emulator.waitNSlots 1
-  Plutus.Trace.Emulator.callEndpoint @"buy" h2 tokenSaleParam
+  Plutus.Trace.Emulator.callEndpoint @"close" h1 tokenSaleParam
   Control.Monad.void Prelude.$ Plutus.Trace.Emulator.waitNSlots 1
   Control.Monad.void Prelude.$ Control.Monad.Freer.Extras.logInfo @Prelude.String "Trace finished"
 
