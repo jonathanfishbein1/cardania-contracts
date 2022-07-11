@@ -265,6 +265,20 @@ deserializedDatum context continuingScriptOutput =
     (Plutus.V1.Ledger.Scripts.Datum datum) <- Ledger.findDatum datumHash (Plutus.V1.Ledger.Contexts.scriptContextTxInfo context)
     PlutusTx.fromBuiltinData datum
 
+ownInputValue ::
+  Data.String.IsString a =>
+  Plutus.V1.Ledger.Contexts.ScriptContext ->
+  Prelude.Either a Plutus.V1.Ledger.Value.Value
+ownInputValue context =
+  do
+    case Plutus.V1.Ledger.Contexts.findOwnInput context of
+      PlutusTx.Prelude.Nothing ->
+        PlutusTx.Prelude.Left "Cant find own input"
+      PlutusTx.Prelude.Just ownInputMaybe ->
+        let ownInput = Plutus.V1.Ledger.Contexts.txInInfoResolved ownInputMaybe
+            ownInputValue = Plutus.V1.Ledger.Contexts.txOutValue ownInput
+         in PlutusTx.Prelude.Right ownInputValue
+
 correctScriptOutputValue ::
   TokenSaleParam ->
   Plutus.V1.Ledger.Contexts.ScriptContext ->
@@ -273,32 +287,28 @@ correctScriptOutputValue ::
     PlutusTx.Prelude.Bool
 correctScriptOutputValue tokenSaleParam context =
   do
-    continuingScriptOutput <- correctNumberOfOutputsToScript context
-    let info = Plutus.V1.Ledger.Contexts.scriptContextTxInfo context
-        totalValue = Ledger.valueLockedBy info (Ledger.ownHash context)
-        totalAdaLocked = Ledger.Value.adaOnlyValue totalValue
-    adaAmountToScriptEither <-
-      if Ledger.Value.adaOnlyValue (Plutus.V1.Ledger.Contexts.txOutValue continuingScriptOutput)
-        PlutusTx.Prelude.== totalAdaLocked
-        then PlutusTx.Prelude.Right PlutusTx.Prelude.True
-        else PlutusTx.Prelude.Left "Wrong Ada amount to Script output"
+    iValue <- ownInputValue context
+    let adaInputValue = Ledger.Value.adaOnlyValue iValue
+        info = Plutus.V1.Ledger.Contexts.scriptContextTxInfo context
+        totalValueContinueingToScript = Ledger.valueLockedBy info (Ledger.ownHash context)
+        adaContinueingOutputValue = Ledger.Value.adaOnlyValue totalValueContinueingToScript
+    if adaInputValue PlutusTx.Prelude.== adaContinueingOutputValue
+      then PlutusTx.Prelude.Right PlutusTx.Prelude.True
+      else PlutusTx.Prelude.Left "Wrong ada script output value"
 
-    let quantityOfNativeTokenBeforeTransaction =
-          Plutus.V1.Ledger.Value.assetClassValueOf
-            totalValue
-            ( Plutus.V1.Ledger.Value.assetClass
-                (currencySymbol tokenSaleParam)
-                (tokenName tokenSaleParam)
-            )
-        quantityOfOutputValueOfNativeToken =
+    let nativeTokenInputQuantity =
           Plutus.V1.Ledger.Value.valueOf
-            (Plutus.V1.Ledger.Contexts.txOutValue continuingScriptOutput)
+            iValue
             (currencySymbol tokenSaleParam)
             (tokenName tokenSaleParam)
-    if quantityOfOutputValueOfNativeToken
-      PlutusTx.Prelude.== (quantityOfNativeTokenBeforeTransaction PlutusTx.Prelude.- 1)
+        nativeTokenOutputQuantity =
+          Plutus.V1.Ledger.Value.valueOf
+            totalValueContinueingToScript
+            (currencySymbol tokenSaleParam)
+            (tokenName tokenSaleParam)
+    if nativeTokenOutputQuantity PlutusTx.Prelude.== (nativeTokenInputQuantity PlutusTx.Prelude.- 1)
       then PlutusTx.Prelude.Right PlutusTx.Prelude.True
-      else PlutusTx.Prelude.Left "Wrong native token amount to Script output"
+      else PlutusTx.Prelude.Left "Wrong Native token output quantity"
 
 {-# INLINEABLE mkRadSaleOnChainValidator #-}
 mkRadSaleOnChainValidator ::
