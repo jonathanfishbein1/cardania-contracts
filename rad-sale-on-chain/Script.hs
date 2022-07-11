@@ -243,23 +243,27 @@ correctOutputDatum ::
     PlutusTx.Builtins.Internal.BuiltinString
     PlutusTx.Prelude.Bool
 correctOutputDatum context =
-  correctNumberOfOutputsToScript context
-    PlutusTx.Prelude.>>= ( \continuingScriptOutput ->
-                             let cOutDat =
-                                   Ledger.txOutDatum continuingScriptOutput
-                                     PlutusTx.Prelude.>>= ( \datumHash ->
-                                                              Ledger.findDatum datumHash (Plutus.V1.Ledger.Contexts.scriptContextTxInfo context)
-                                                                PlutusTx.Prelude.>>= ( \(Plutus.V1.Ledger.Scripts.Datum d) ->
-                                                                                         (PlutusTx.fromBuiltinData d :: PlutusTx.Prelude.Maybe ())
-                                                                                           PlutusTx.Prelude.>>= (\datValue -> PlutusTx.Prelude.Just PlutusTx.Prelude.True)
-                                                                                     )
-                                                          )
-                              in case cOutDat of
-                                   PlutusTx.Prelude.Nothing ->
-                                     PlutusTx.Either.Left "Error converting txOutDatum to unit"
-                                   PlutusTx.Prelude.Just _ ->
-                                     PlutusTx.Either.Right PlutusTx.Prelude.True
-                         )
+  do
+    continuingScriptOutput <- correctNumberOfOutputsToScript context
+    datumValue <- case deserializedDatum context continuingScriptOutput of
+      PlutusTx.Prelude.Nothing ->
+        PlutusTx.Either.Left "Error deserializing txOutDatum"
+      PlutusTx.Prelude.Just dValue ->
+        PlutusTx.Either.Right dValue
+    case datumValue of
+      () -> PlutusTx.Either.Right PlutusTx.Prelude.True
+      _ -> PlutusTx.Either.Left "Error converting txOutDatum to unit"
+
+deserializedDatum ::
+  PlutusTx.FromData b =>
+  Plutus.V1.Ledger.Contexts.ScriptContext ->
+  Plutus.V1.Ledger.Contexts.TxOut ->
+  Prelude.Maybe b
+deserializedDatum context continuingScriptOutput =
+  do
+    datumHash <- Ledger.txOutDatum continuingScriptOutput
+    (Plutus.V1.Ledger.Scripts.Datum datum) <- Ledger.findDatum datumHash (Plutus.V1.Ledger.Contexts.scriptContextTxInfo context)
+    PlutusTx.fromBuiltinData datum
 
 correctScriptOutputValue ::
   TokenSaleParam ->
