@@ -47,18 +47,14 @@ if (hasWallet('nami') == true) {
             console.log(await lucid.wallet.address())
             console.log(paymentAddressDetails)
             const scriptAddress = lucid.utils.validatorToAddress(radSaleScript)
+            console.log(scriptAddress)
+            const utxo = (await lucid.utxosAt(scriptAddress))[0]
+            console.log(utxo)
+
             const transaction =
                 await lucid
                     .newTx()
-                    .collectFrom([{
-                        txHash: 'b71c258ec5555bbbc0b8b4a64e93969f5b6626fda8d6df335ce07dbdddf1af94',
-                        outputIndex: 1,
-                        assets: {
-                            'fda1b6b487bee2e7f64ecf24d24b1224342484c0195ee1b7b943db50434c415353494342414259424c55453031': BigInt(Number(4))
-                        },
-                        address: scriptAddress,
-                        datumHash: '923918e403bf43c34b4ef6b48eb2ee04babed17320d8d1b9ff9ad086e86f44ec'
-                    },], serializedRedeemer)
+                    .collectFrom([utxo], serializedRedeemer)
                     .addSigner(await lucid.wallet.address())
                     .payToAddress('addr_test1vrh0kkuahtz28qpfdhsx2hm2eekf06des8h03xnm757u65sd6egwy'
                         , { lovelace: lovelaceAmount })
