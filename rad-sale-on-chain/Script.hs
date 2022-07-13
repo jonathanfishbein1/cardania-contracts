@@ -33,7 +33,6 @@ module Script
         sellerPubKeyHash
       ),
     minLovelace,
-    isValid,
     isTxToSeller,
     isTxToBuyer,
     correctOutputDatum,
@@ -139,31 +138,6 @@ instance Ledger.Typed.Scripts.ValidatorTypes RadSaleOnChain where
 -- In the following the main validation logic is defined including
 -- addtional helper functions.
 
--- The isValid function is the compositional root of the contract logic.
--- The contract verifies the following
---   - the transaction to the seller of the token is valid
---   - the transaction to the buyer of the token is valid
---   - the output datum is correct
---   - the output value going back to the script is correct
-
-{-# INLINEABLE isValid #-}
-isValid ::
-  PlutusTx.Prelude.Bool ->
-  PlutusTx.Prelude.Bool ->
-  PlutusTx.Prelude.Bool ->
-  PlutusTx.Prelude.Bool ->
-  PlutusTx.Prelude.Bool
-isValid
-  txToSeller
-  txToBuyer
-  scriptOutputValue
-  outputDatum =
-    txToSeller
-      PlutusTx.Prelude.&& txToBuyer
-      PlutusTx.Prelude.&& outputDatum
-      PlutusTx.Prelude.&& scriptOutputValue
-      PlutusTx.Prelude.== PlutusTx.Prelude.True
-
 -- In the following validation logic helper functions are defined
 
 -- A valid transaction must include the cost of the token
@@ -174,7 +148,7 @@ isTxToSeller ::
   Plutus.V1.Ledger.Contexts.TxInfo ->
   PlutusTx.Either.Either
     PlutusTx.Builtins.Internal.BuiltinString
-    PlutusTx.Prelude.Bool
+    ()
 isTxToSeller tkSaleParam info =
   if ( Plutus.V1.Ledger.Contexts.valuePaidTo
          info
@@ -184,7 +158,7 @@ isTxToSeller tkSaleParam info =
            (tokenCost tkSaleParam)
      )
     PlutusTx.Prelude.== PlutusTx.Prelude.True
-    then PlutusTx.Either.Right PlutusTx.Prelude.True
+    then PlutusTx.Either.Right ()
     else PlutusTx.Either.Left "Incorrect Tx to seller"
 
 -- A valid transaction must include a signature from the buyer of the token
@@ -211,7 +185,7 @@ isTxToBuyer ::
   Plutus.V1.Ledger.Contexts.TxInfo ->
   PlutusTx.Either.Either
     PlutusTx.Builtins.Internal.BuiltinString
-    PlutusTx.Prelude.Bool
+    ()
 isTxToBuyer tkSaleParam info =
   do
     signatory <- tokenBuyerPaymentPubKeyHashsEither info
@@ -226,7 +200,7 @@ isTxToBuyer tkSaleParam info =
           (tokenName tkSaleParam)
       )
       PlutusTx.Prelude.== 1
-      then PlutusTx.Either.Right PlutusTx.Prelude.True
+      then PlutusTx.Either.Right ()
       else PlutusTx.Either.Left "Incorrect Tx to buyer"
 
 correctNumberOfOutputsToScript ::
@@ -255,7 +229,7 @@ correctOutputDatum ::
   Plutus.V1.Ledger.Contexts.ScriptContext ->
   PlutusTx.Either.Either
     PlutusTx.Builtins.Internal.BuiltinString
-    PlutusTx.Prelude.Bool
+    ()
 correctOutputDatum context =
   do
     continuingScriptOutput <- correctNumberOfOutputsToScript context
@@ -263,7 +237,7 @@ correctOutputDatum context =
       PlutusTx.Prelude.Nothing ->
         PlutusTx.Either.Left "Error deserializing txOutDatum"
       PlutusTx.Prelude.Just _ ->
-        PlutusTx.Either.Right PlutusTx.Prelude.True
+        PlutusTx.Either.Right ()
 
 ownInputValue ::
   Data.String.IsString a =>
@@ -284,7 +258,7 @@ correctScriptOutputValue ::
   Plutus.V1.Ledger.Contexts.ScriptContext ->
   PlutusTx.Either.Either
     PlutusTx.Builtins.Internal.BuiltinString
-    PlutusTx.Prelude.Bool
+    ()
 correctScriptOutputValue tokenSaleParam context =
   do
     inputValue <- ownInputValue context
@@ -307,7 +281,7 @@ correctScriptOutputValue tokenSaleParam context =
             (currencySymbol tokenSaleParam)
             (tokenName tokenSaleParam)
     if nativeTokenOutputQuantity PlutusTx.Prelude.== (nativeTokenInputQuantity PlutusTx.Prelude.- 1)
-      then PlutusTx.Prelude.Right PlutusTx.Prelude.True
+      then PlutusTx.Prelude.Right ()
       else PlutusTx.Prelude.Left "Wrong Native token output quantity"
 
 {-# INLINEABLE mkRadSaleOnChainValidator #-}
@@ -322,16 +296,19 @@ mkRadSaleOnChainValidator tkSaleParam () redeemer context =
       info = Plutus.V1.Ledger.Contexts.scriptContextTxInfo context
    in case redeemer of
         Close ->
-          Ledger.txSignedBy
+          case Ledger.txSignedBy
             info
-            (sellerPubKeyHash tkSaleParam)
+            (sellerPubKeyHash tkSaleParam) of
+            PlutusTx.Prelude.True -> PlutusTx.Prelude.True
+            _ -> PlutusTx.Prelude.traceIfFalse "Wrong signer to close sale" PlutusTx.Prelude.False
         Buy ->
-          case PlutusTx.Applicative.pure isValid
-            PlutusTx.Applicative.<*> isTxToSeller tkSaleParam info
-            PlutusTx.Applicative.<*> isTxToBuyer tkSaleParam info
-            PlutusTx.Applicative.<*> correctOutputDatum context
-            PlutusTx.Applicative.<*> correctScriptOutputValue tkSaleParam context of
-            PlutusTx.Either.Right PlutusTx.Prelude.True -> PlutusTx.Prelude.True
+          case PlutusTx.Prelude.sequence
+            [ isTxToSeller tkSaleParam info,
+              isTxToBuyer tkSaleParam info,
+              correctOutputDatum context,
+              correctScriptOutputValue tkSaleParam context
+            ] of
+            PlutusTx.Either.Right _ -> PlutusTx.Prelude.True
             PlutusTx.Either.Left error ->
               PlutusTx.Prelude.traceIfFalse error PlutusTx.Prelude.False
 
