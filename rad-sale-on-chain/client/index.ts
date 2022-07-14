@@ -99,48 +99,43 @@ if (hasWallet('nami') == true) {
             console.log(paymentAddressDetails)
             const scriptAddress = lucid.utils.validatorToAddress(radSaleScript)
             console.log(scriptAddress)
-            console.log
-            const utxoZero = (await lucid.utxosAt(scriptAddress))[0]
-            const utxoOne = (await lucid.utxosAt(scriptAddress))[1]
-            const utxoTwo = (await lucid.utxosAt(scriptAddress))[2]
-            const utxoThree = (await lucid.utxosAt(scriptAddress))[3]
-            console.log(utxoZero)
-            console.log(utxoOne)
-            console.log(utxoTwo)
-
-            const transaction =
-                await lucid
-                    .newTx()
-                    .payToContract(scriptAddress
-                        , Lucid.Data.empty()
-                        , {
-                            lovelace: BigInt(Number(2000000)),
-                            [currencySymbol + assetNameHex]: BigInt(Number(0))
+            const datumHash = '923918e403bf43c34b4ef6b48eb2ee04babed17320d8d1b9ff9ad086e86f44ec'
+            const utxo = (await lucid.utxosAt(scriptAddress)).find(utxo => utxo.datumHash === datumHash && utxo.assets[currencySymbol + assetNameHex] !== undefined)
+            if (utxo !== undefined) {
+                const transaction =
+                    await lucid
+                        .newTx()
+                        .payToContract(scriptAddress
+                            , Lucid.Data.empty()
+                            , {
+                                lovelace: BigInt(Number(2000000)),
+                                [currencySymbol + assetNameHex]: BigInt(Number(0))
+                            })
+                        .collectFrom([utxo], serializedRedeemer)
+                        .attachSpendingValidator(radSaleScript)
+                        .addSigner(await lucid.wallet.address())
+                        .payToAddress('addr_test1vrh0kkuahtz28qpfdhsx2hm2eekf06des8h03xnm757u65sd6egwy'
+                            , { lovelace: lovelaceAmount })
+                        .payToAddress(await lucid.wallet.address(), {
+                            lovelace: minLovelaceAmount
+                            , [currencySymbol + assetNameHex]: BigInt(Number(1))
                         })
-                    .collectFrom([utxoThree], serializedRedeemer)
-                    .attachSpendingValidator(radSaleScript)
-                    .addSigner(await lucid.wallet.address())
-                    .payToAddress('addr_test1vrh0kkuahtz28qpfdhsx2hm2eekf06des8h03xnm757u65sd6egwy'
-                        , { lovelace: lovelaceAmount })
-                    .payToAddress(await lucid.wallet.address(), {
-                        lovelace: minLovelaceAmount
-                        , [currencySymbol + assetNameHex]: BigInt(Number(1))
-                    })
+                        .complete()
+                transaction.txComplete
+                console.log(transaction)
+                console.log(transaction.txComplete)
+                const signedTx = await transaction
+                    .sign()
                     .complete()
-            transaction.txComplete
-            console.log(transaction)
-            console.log(transaction.txComplete)
-            const signedTx = await transaction
-                .sign()
-                .complete()
-            console.log(signedTx)
-            const transactionHash = await signedTx
-                .submit()
-            console.log(transactionHash)
-            transactionHash ?
-                connectButton!.innerText = successMessage
-                :
-                console.log('Transaction Hash', transaction)
+                console.log(signedTx)
+                const transactionHash = await signedTx
+                    .submit()
+                console.log(transactionHash)
+                transactionHash ?
+                    connectButton!.innerText = successMessage
+                    :
+                    console.log('Transaction Hash', transaction)
+            }
         })
     })
 
