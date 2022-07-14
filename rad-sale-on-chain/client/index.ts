@@ -151,9 +151,10 @@ if (hasWallet('nami') == true) {
             console.log(await lucid.wallet.address())
             const scriptAddress = lucid.utils.validatorToAddress(radSaleScript)
             console.log(scriptAddress)
-            const utxo = (await lucid.utxosAt(scriptAddress))[0]
             const redeemer = new Lucid.Construct(1, [])
             const serializedRedeemer = Lucid.Data.to(redeemer)
+            const datumHash = '923918e403bf43c34b4ef6b48eb2ee04babed17320d8d1b9ff9ad086e86f44ec'
+            const utxo = (await lucid.utxosAt(scriptAddress)).filter(utxo => utxo.datumHash === datumHash && utxo.assets[currencySymbol + assetNameHex] !== undefined)
             const transaction =
                 await lucid
                     .newTx()
@@ -162,7 +163,7 @@ if (hasWallet('nami') == true) {
                             lovelace: BigInt(Number(3000000))
                             , [currencySymbol + assetNameHex]: BigInt(Number(5))
                         })
-                    .collectFrom([utxo], serializedRedeemer)
+                    .collectFrom(utxo, serializedRedeemer)
                     .attachSpendingValidator(radSaleScript)
                     .addSigner(await lucid.wallet.address())
                     .complete()
