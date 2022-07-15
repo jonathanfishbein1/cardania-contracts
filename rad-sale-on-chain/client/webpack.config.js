@@ -48,5 +48,6 @@ export default {
         asyncWebAssembly: true,
         outputModule: true,
         topLevelAwait: true,
+        layers: true
     }
 };
