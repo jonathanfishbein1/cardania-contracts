@@ -5,7 +5,7 @@ const __dirname = path.resolve()
 
 export default {
     mode: 'development',
-    entry: './src/index.ts',
+    entry: './rad-sale-on-chain/index.ts',
     output: {
         path: path.resolve(__dirname, 'dist'),
         publicPath: '/',
@@ -40,7 +40,7 @@ export default {
     plugins: [new HtmlWebPackPlugin({
         title: 'index',
         filename: `index.html`,
-        template: `./src/index.html`,
+        template: `./rad-sale-on-chain/index.html`,
     }),
     new webpack.ProvidePlugin({ Buffer: ['buffer', 'Buffer'] })
     ]

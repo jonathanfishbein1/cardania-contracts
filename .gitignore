@@ -23,3 +23,5 @@ rad-sale-on-chain/transactions/wallets.json
 rad-sale-on-chain/transactions/walletTXs.json
 tx.body
 tx.signed
+rad-sale-on-chain/client/node_modules
+rad-sale-on-chain/client/build
