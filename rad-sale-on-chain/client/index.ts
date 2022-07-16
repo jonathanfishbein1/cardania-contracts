@@ -44,8 +44,8 @@ const supportedWallets = [
         , script: scriptCBORHex
     }
     , scriptAddress = lucid.utils.validatorToAddress(radSaleScript)
-    , minLovelaceAmount = BigInt(Number(2000000))
-    , priceOfTokenLovelace = BigInt(Number(10000000))
+    , minLovelaceAmount = BigInt(2000000)
+    , priceOfTokenLovelace = BigInt(10000000)
     , datumHash = '923918e403bf43c34b4ef6b48eb2ee04babed17320d8d1b9ff9ad086e86f44ec'
     , instantiateStartButton = () => {
         startConnectButton!.innerText = startMessage
@@ -68,7 +68,7 @@ const supportedWallets = [
                     , datum
                     , {
                         lovelace: minLovelaceAmount,
-                        [currencySymbol + assetNameHex]: BigInt(Number(3))
+                        [currencySymbol + assetNameHex]: BigInt(3)
                     })
                 .complete()
             , signedTx = await transaction
@@ -101,6 +101,8 @@ const supportedWallets = [
             , serializedBuyRedeemer = Lucid.Data.to(buyRedeemer)
             , utxo = (await lucid.utxosAt(scriptAddress))
                 .find(utxo => utxo.datumHash === datumHash && utxo.assets[currencySymbol + assetNameHex] !== undefined)
+            , assetQuantity = utxo?.assets[currencySymbol + assetNameHex] as bigint
+        console.log(utxo?.assets[currencySymbol + assetNameHex])
         if (utxo !== undefined) {
             const transaction =
                 await lucid
@@ -109,7 +111,7 @@ const supportedWallets = [
                         , datum
                         , {
                             lovelace: minLovelaceAmount,
-                            [currencySymbol + assetNameHex]: BigInt(Number(2))
+                            [currencySymbol + assetNameHex]: (assetQuantity - BigInt(1))
                         })
                     .collectFrom([utxo], serializedBuyRedeemer)
                     .attachSpendingValidator(radSaleScript)
@@ -118,7 +120,7 @@ const supportedWallets = [
                         , { lovelace: priceOfTokenLovelace })
                     .payToAddress(await lucid.wallet.address(), {
                         lovelace: minLovelaceAmount
-                        , [currencySymbol + assetNameHex]: BigInt(Number(1))
+                        , [currencySymbol + assetNameHex]: BigInt(1)
                     })
                     .complete()
                 , signedTx = await transaction
@@ -143,17 +145,18 @@ const supportedWallets = [
     closeContract = async () => {
         const closeRedeemer = new Lucid.Construct(1, [])
             , serializedCloseRedeemer = Lucid.Data.to(closeRedeemer)
-            , utxo = (await lucid.utxosAt(scriptAddress))
+            , utxos = (await lucid.utxosAt(scriptAddress))
                 .filter(utxo => utxo.datumHash === datumHash && utxo.assets[currencySymbol + assetNameHex] !== undefined)
+            , assetQuantity = utxos.reduce((accumulator: bigint, utxo) => accumulator + (utxo?.assets[currencySymbol + assetNameHex] as bigint), BigInt(0))
             , transaction =
                 await lucid
                     .newTx()
                     .payToAddress(await lucid.wallet.address()
                         , {
                             lovelace: minLovelaceAmount
-                            , [currencySymbol + assetNameHex]: BigInt(Number(1))
+                            , [currencySymbol + assetNameHex]: assetQuantity
                         })
-                    .collectFrom(utxo, serializedCloseRedeemer)
+                    .collectFrom(utxos, serializedCloseRedeemer)
                     .attachSpendingValidator(radSaleScript)
                     .addSigner(await lucid.wallet.address())
                     .complete()
