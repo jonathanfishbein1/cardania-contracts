@@ -45,6 +45,31 @@ const supportedWallets = [
     , minLovelaceAmount = BigInt(Number(2000000))
     , priceOfTokenLovelace = BigInt(Number(10000000))
     , datumHash = '923918e403bf43c34b4ef6b48eb2ee04babed17320d8d1b9ff9ad086e86f44ec'
+    , startContract = () => {
+        startConnectButton?.addEventListener('click', async () => {
+            startConnectButton!.innerText = startingMessage
+            const transaction =
+                await lucid
+                    .newTx()
+                    .payToContract(scriptAddress
+                        , datum
+                        , {
+                            lovelace: minLovelaceAmount,
+                            [currencySymbol + assetNameHex]: BigInt(Number(1))
+                        })
+                    .complete()
+                , signedTx = await transaction
+                    .sign()
+                    .complete()
+                , transactionHash = await signedTx
+                    .submit()
+            console.log(transactionHash)
+            transactionHash ?
+                startConnectButton!.innerText = startSuccessMessage
+                :
+                console.log('Transaction Hash', transaction)
+        })
+    }
     , closeContract = () => {
         closeConnectButton?.addEventListener('click', async () => {
             closeConnectButton!.innerText = closingMessage
@@ -76,6 +101,10 @@ const supportedWallets = [
                 console.log('Transaction Hash', transaction)
         })
     }
+    , instantiateStartButton = () => {
+        startConnectButton!.innerText = startMessage
+        startConnectButton?.removeEventListener('click', instantiateStartButton)
+    }
     , instantiateCloseButton = () => {
         closeConnectButton!.innerText = closeMessage
         closeConnectButton?.removeEventListener('click', instantiateCloseButton)
@@ -90,32 +119,8 @@ if (hasWallet('nami') == true) {
     startConnectButton!.innerText = connectMessage
     buyConnectButton!.innerText = connectMessage
     closeConnectButton!.innerText = connectMessage
-    startConnectButton?.addEventListener('click', async () => {
-        startConnectButton!.innerText = startMessage
-        startConnectButton?.addEventListener('click', async () => {
-            startConnectButton!.innerText = startingMessage
-            const transaction =
-                await lucid
-                    .newTx()
-                    .payToContract(scriptAddress
-                        , datum
-                        , {
-                            lovelace: minLovelaceAmount,
-                            [currencySymbol + assetNameHex]: BigInt(Number(2))
-                        })
-                    .complete()
-                , signedTx = await transaction
-                    .sign()
-                    .complete()
-                , transactionHash = await signedTx
-                    .submit()
-            console.log(transactionHash)
-            transactionHash ?
-                startConnectButton!.innerText = startSuccessMessage
-                :
-                console.log('Transaction Hash', transaction)
-        })
-    })
+    startConnectButton?.addEventListener('click', instantiateStartButton)
+    startConnectButton?.addEventListener('click', startContract)
 
     buyConnectButton?.addEventListener('click', async () => {
         buyConnectButton!.innerText = buyMessage
