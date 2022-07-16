@@ -1,21 +1,8 @@
-declare var window: any
 import './style.css'
 import * as Lucid from 'vasil'
+import * as Wallet from '../wallet'
 
-const supportedWallets = [
-    'nami',
-    'flint',
-    'eternl'
-]
-    , getWalletApi = async namespace => {
-        return await ('typhon' === namespace) ?
-            window.cardano[namespace]
-            :
-            window.cardano[namespace].enable()
-    }
-    , isSupported = type => supportedWallets.includes(type)
-    , hasWallet = type => isSupported(type) && window.cardano[type.toLowerCase()] !== undefined
-    ,
+const
     buyConnectButton = document.getElementById('buyConnect'),
     startConnectButton = document.getElementById('startConnect'),
     closeConnectButton = document.getElementById('closeConnect'),
@@ -175,8 +162,8 @@ const supportedWallets = [
 startConnectButton!.innerText = addWalletMessage
 buyConnectButton!.innerText = addWalletMessage
 closeConnectButton!.innerText = addWalletMessage
-if (hasWallet('nami') == true) {
-    const wallet = await getWalletApi('nami') as any
+if (Wallet.hasWallet('nami') == true) {
+    const wallet = await Wallet.getWalletApi('nami') as any
     lucid.selectWallet(wallet)
     startConnectButton!.innerText = connectMessage
     buyConnectButton!.innerText = connectMessage
