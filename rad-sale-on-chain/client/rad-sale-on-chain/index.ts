@@ -1,6 +1,6 @@
 declare var window: any
 import './style.css'
-import * as Lucid from 'lucid-cardano'
+import * as Lucid from 'vasil'
 
 const supportedWallets = [
     'nami',

@@ -6,7 +6,8 @@
   "main": "index.ts",
   "type": "module",
   "scripts": {
-    "dev": "webpack serve --config rad-sale-on-chain/webpack.config.js --open",
+    "devBuy": "webpack serve --config rad-sale-on-chain/webpack.config.js --open",
+    "devDelegate": "webpack serve --config browser-delegate/webpack.config.js --open",
     "build": "webpack build  && cp index.html dist",
     "start": "npm run build && cp server.cjs dist/ && node dist/server.cjs"
   },
@@ -26,6 +27,7 @@
   },
   "dependencies": {
     "buffer": "^6.0.3",
-    "lucid-cardano": "^0.5.0"
+    "lucid-cardano": "^0.3.5",
+    "vasil": "npm:lucid-cardano@vasil"
   }
 }

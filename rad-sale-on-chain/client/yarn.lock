@@ -1466,10 +1466,10 @@ lru-cache@^6.0.0:
   dependencies:
     yallist "^4.0.0"
 
-lucid-cardano@^0.5.0:
-  version "0.5.0"
-  resolved "https://registry.yarnpkg.com/lucid-cardano/-/lucid-cardano-0.5.0.tgz#2f8750b46901c713e98b6ca655e45d446a4eb494"
-  integrity sha512-4ZDa9oY1wAq3K0sMo7sjHZDIXU3BhJgbS/sYx1B1kpIgpvFxCcF/Fae63N9T50lVr9D6nkTBGiZ71x6gMnGKxg==
+lucid-cardano@^0.3.5:
+  version "0.3.5"
+  resolved "https://registry.yarnpkg.com/lucid-cardano/-/lucid-cardano-0.3.5.tgz#6ae9b2a2514b001625c6d482d5448d8ad8cfefa6"
+  integrity sha512-vrWsTCiSFpolwTXuDRArDGq2Rupi536H6vRM3BllfDtCaT2HX3M48+jzT2hewRt7q8Z7GAl2WylPBUIGgfrQbQ==
   dependencies:
     node-fetch "^3.2.3"
 
@@ -2343,6 +2343,13 @@ vary@~1.1.2:
   version "1.1.2"
   resolved "https://registry.yarnpkg.com/vary/-/vary-1.1.2.tgz#2299f02c6ded30d4a5961b0b9f74524a18f634fc"
   integrity sha512-BNGbWLfd0eUPabhkXUVm0j8uuvREyTh5ovRa/dyow/BqAbZJyC+5fU+IzQOzmAKzYqYRAISoRhdQr3eIZ/PXqg==
+
+"vasil@npm:lucid-cardano@vasil":
+  version "0.5.0"
+  resolved "https://registry.yarnpkg.com/lucid-cardano/-/lucid-cardano-0.5.0.tgz#2f8750b46901c713e98b6ca655e45d446a4eb494"
+  integrity sha512-4ZDa9oY1wAq3K0sMo7sjHZDIXU3BhJgbS/sYx1B1kpIgpvFxCcF/Fae63N9T50lVr9D6nkTBGiZ71x6gMnGKxg==
+  dependencies:
+    node-fetch "^3.2.3"
 
 watchpack@^2.3.1:
   version "2.4.0"
