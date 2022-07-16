@@ -59,10 +59,49 @@ const supportedWallets = [
         closeConnectButton!.innerText = closeMessage
         closeConnectButton?.removeEventListener('click', instantiateCloseButton)
 
+    },
+    startContract = async () => {
+        const transaction =
+            await lucid
+                .newTx()
+                .payToContract(scriptAddress
+                    , datum
+                    , {
+                        lovelace: minLovelaceAmount,
+                        [currencySymbol + assetNameHex]: BigInt(Number(3))
+                    })
+                .complete()
+            , signedTx = await transaction
+                .sign()
+                .complete()
+            , transactionHash = await signedTx
+                .submit()
+        console.log(transactionHash)
+        transactionHash ?
+            startConnectButton!.innerText = startSuccessMessage
+            :
+            console.log('Transaction Hash', transaction)
     }
-    , startContract = () => {
+    , instantiateStartContract = () => {
         startConnectButton?.addEventListener('click', async () => {
             startConnectButton!.innerText = startingMessage
+            startContract()
+        })
+        startConnectButton?.removeEventListener('click', instantiateStartContract)
+    },
+    instantiateBuyContract = () => {
+        buyConnectButton?.addEventListener('click', async () => {
+            buyConnectButton!.innerText = buyingMessage
+            buyContract()
+        })
+        buyConnectButton?.removeEventListener('click', instantiateBuyContract)
+    },
+    buyContract = async () => {
+        const buyRedeemer = new Lucid.Construct(0, [])
+            , serializedBuyRedeemer = Lucid.Data.to(buyRedeemer)
+            , utxo = (await lucid.utxosAt(scriptAddress))
+                .find(utxo => utxo.datumHash === datumHash && utxo.assets[currencySymbol + assetNameHex] !== undefined)
+        if (utxo !== undefined) {
             const transaction =
                 await lucid
                     .newTx()
@@ -70,8 +109,17 @@ const supportedWallets = [
                         , datum
                         , {
                             lovelace: minLovelaceAmount,
-                            [currencySymbol + assetNameHex]: BigInt(Number(1))
+                            [currencySymbol + assetNameHex]: BigInt(Number(2))
                         })
+                    .collectFrom([utxo], serializedBuyRedeemer)
+                    .attachSpendingValidator(radSaleScript)
+                    .addSigner(await lucid.wallet.address())
+                    .payToAddress('addr_test1vrh0kkuahtz28qpfdhsx2hm2eekf06des8h03xnm757u65sd6egwy'
+                        , { lovelace: priceOfTokenLovelace })
+                    .payToAddress(await lucid.wallet.address(), {
+                        lovelace: minLovelaceAmount
+                        , [currencySymbol + assetNameHex]: BigInt(Number(1))
+                    })
                     .complete()
                 , signedTx = await transaction
                     .sign()
@@ -80,81 +128,45 @@ const supportedWallets = [
                     .submit()
             console.log(transactionHash)
             transactionHash ?
-                startConnectButton!.innerText = startSuccessMessage
+                buyConnectButton!.innerText = successMessage
                 :
                 console.log('Transaction Hash', transaction)
+        }
+    }
+    , instantiateCloseContract = () => {
+        closeConnectButton?.addEventListener('click', async () => {
+            closeConnectButton!.innerText = closingMessage
+            closeContract()
         })
+        closeConnectButton?.removeEventListener('click', instantiateCloseContract)
     },
-    buyContract = () => {
-        buyConnectButton?.addEventListener('click', async () => {
-            buyConnectButton!.innerText = buyingMessage
-            const buyRedeemer = new Lucid.Construct(0, [])
-                , serializedBuyRedeemer = Lucid.Data.to(buyRedeemer)
-                , utxo = (await lucid.utxosAt(scriptAddress))
-                    .find(utxo => utxo.datumHash === datumHash && utxo.assets[currencySymbol + assetNameHex] !== undefined)
-            if (utxo !== undefined) {
-                const transaction =
-                    await lucid
-                        .newTx()
-                        .payToContract(scriptAddress
-                            , datum
-                            , {
-                                lovelace: minLovelaceAmount,
-                                [currencySymbol + assetNameHex]: BigInt(Number(0))
-                            })
-                        .collectFrom([utxo], serializedBuyRedeemer)
-                        .attachSpendingValidator(radSaleScript)
-                        .addSigner(await lucid.wallet.address())
-                        .payToAddress('addr_test1vrh0kkuahtz28qpfdhsx2hm2eekf06des8h03xnm757u65sd6egwy'
-                            , { lovelace: priceOfTokenLovelace })
-                        .payToAddress(await lucid.wallet.address(), {
+    closeContract = async () => {
+        const closeRedeemer = new Lucid.Construct(1, [])
+            , serializedCloseRedeemer = Lucid.Data.to(closeRedeemer)
+            , utxo = (await lucid.utxosAt(scriptAddress))
+                .filter(utxo => utxo.datumHash === datumHash && utxo.assets[currencySymbol + assetNameHex] !== undefined)
+            , transaction =
+                await lucid
+                    .newTx()
+                    .payToAddress(await lucid.wallet.address()
+                        , {
                             lovelace: minLovelaceAmount
                             , [currencySymbol + assetNameHex]: BigInt(Number(1))
                         })
-                        .complete()
-                    , signedTx = await transaction
-                        .sign()
-                        .complete()
-                    , transactionHash = await signedTx
-                        .submit()
-                console.log(transactionHash)
-                transactionHash ?
-                    buyConnectButton!.innerText = successMessage
-                    :
-                    console.log('Transaction Hash', transaction)
-            }
-        })
-    }
-    , closeContract = () => {
-        closeConnectButton?.addEventListener('click', async () => {
-            closeConnectButton!.innerText = closingMessage
-            const closeRedeemer = new Lucid.Construct(1, [])
-                , serializedCloseRedeemer = Lucid.Data.to(closeRedeemer)
-                , utxo = (await lucid.utxosAt(scriptAddress))
-                    .filter(utxo => utxo.datumHash === datumHash && utxo.assets[currencySymbol + assetNameHex] !== undefined)
-                , transaction =
-                    await lucid
-                        .newTx()
-                        .payToAddress(await lucid.wallet.address()
-                            , {
-                                lovelace: minLovelaceAmount
-                                , [currencySymbol + assetNameHex]: BigInt(Number(1))
-                            })
-                        .collectFrom(utxo, serializedCloseRedeemer)
-                        .attachSpendingValidator(radSaleScript)
-                        .addSigner(await lucid.wallet.address())
-                        .complete()
-                , signedTx = await transaction
-                    .sign()
+                    .collectFrom(utxo, serializedCloseRedeemer)
+                    .attachSpendingValidator(radSaleScript)
+                    .addSigner(await lucid.wallet.address())
                     .complete()
-                , transactionHash = await signedTx
-                    .submit()
-            console.log(transactionHash)
-            transactionHash ?
-                closeConnectButton!.innerText = closeSuccessMessage
-                :
-                console.log('Transaction Hash', transaction)
-        })
+            , signedTx = await transaction
+                .sign()
+                .complete()
+            , transactionHash = await signedTx
+                .submit()
+        console.log(transactionHash)
+        transactionHash ?
+            closeConnectButton!.innerText = closeSuccessMessage
+            :
+            console.log('Transaction Hash', transaction)
     }
 
 startConnectButton!.innerText = addWalletMessage
@@ -167,12 +179,12 @@ if (hasWallet('nami') == true) {
     buyConnectButton!.innerText = connectMessage
     closeConnectButton!.innerText = connectMessage
     startConnectButton?.addEventListener('click', instantiateStartButton)
-    startConnectButton?.addEventListener('click', startContract)
+    startConnectButton?.addEventListener('click', instantiateStartContract)
 
     buyConnectButton?.addEventListener('click', instantiateBuyButton)
-    buyConnectButton?.addEventListener('click', buyContract)
+    buyConnectButton?.addEventListener('click', instantiateBuyContract)
 
     closeConnectButton?.addEventListener('click', instantiateCloseButton)
-    closeConnectButton?.addEventListener('click', closeContract)
+    closeConnectButton?.addEventListener('click', instantiateCloseContract)
 }
 
