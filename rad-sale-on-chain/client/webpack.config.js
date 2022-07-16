@@ -5,7 +5,7 @@ const __dirname = path.resolve()
 
 export default {
     mode: 'development',
-    entry: './index.ts',
+    entry: './src/index.ts',
     output: {
         path: path.resolve(__dirname, 'dist'),
         publicPath: '/',
@@ -40,7 +40,7 @@ export default {
     plugins: [new HtmlWebPackPlugin({
         title: 'index',
         filename: `index.html`,
-        template: `./index.html`,
+        template: `./src/index.html`,
     }),
     new webpack.ProvidePlugin({ Buffer: ['buffer', 'Buffer'] })
     ]

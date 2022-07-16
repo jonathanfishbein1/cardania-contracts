@@ -94,7 +94,6 @@
         "skipLibCheck": true /* Skip type checking all .d.ts files. */
     },
     "include": [
-        "./",
-        "../cardano-wallet-browser-extensions-interface/webpack.config copy.js"
+        "./src",
     ]
 }
