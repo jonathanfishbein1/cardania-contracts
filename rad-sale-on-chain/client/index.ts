@@ -135,8 +135,8 @@ const supportedWallets = [
                     .newTx()
                     .payToAddress(await lucid.wallet.address()
                         , {
-                            minLovelaceAmount
-                            , [currencySymbol + assetNameHex]: BigInt(Number(2))
+                            lovelace: minLovelaceAmount
+                            , [currencySymbol + assetNameHex]: BigInt(Number(1))
                         })
                     .collectFrom(utxo, serializedCloseRedeemer)
                     .attachSpendingValidator(radSaleScript)
