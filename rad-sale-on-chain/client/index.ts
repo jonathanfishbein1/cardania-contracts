@@ -130,18 +130,18 @@ const supportedWallets = [
                 , serializedCloseRedeemer = Lucid.Data.to(closeRedeemer)
                 , utxo = (await lucid.utxosAt(scriptAddress))
                     .filter(utxo => utxo.datumHash === datumHash && utxo.assets[currencySymbol + assetNameHex] !== undefined)
-            const transaction =
-                await lucid
-                    .newTx()
-                    .payToAddress(await lucid.wallet.address()
-                        , {
-                            lovelace: minLovelaceAmount
-                            , [currencySymbol + assetNameHex]: BigInt(Number(1))
-                        })
-                    .collectFrom(utxo, serializedCloseRedeemer)
-                    .attachSpendingValidator(radSaleScript)
-                    .addSigner(await lucid.wallet.address())
-                    .complete()
+                , transaction =
+                    await lucid
+                        .newTx()
+                        .payToAddress(await lucid.wallet.address()
+                            , {
+                                lovelace: minLovelaceAmount
+                                , [currencySymbol + assetNameHex]: BigInt(Number(1))
+                            })
+                        .collectFrom(utxo, serializedCloseRedeemer)
+                        .attachSpendingValidator(radSaleScript)
+                        .addSigner(await lucid.wallet.address())
+                        .complete()
                 , signedTx = await transaction
                     .sign()
                     .complete()
