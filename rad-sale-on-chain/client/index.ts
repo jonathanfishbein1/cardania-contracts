@@ -45,7 +45,42 @@ const supportedWallets = [
     , minLovelaceAmount = BigInt(Number(2000000))
     , priceOfTokenLovelace = BigInt(Number(10000000))
     , datumHash = '923918e403bf43c34b4ef6b48eb2ee04babed17320d8d1b9ff9ad086e86f44ec'
+    , closeContract = () => {
+        closeConnectButton?.addEventListener('click', async () => {
+            closeConnectButton!.innerText = closingMessage
+            const closeRedeemer = new Lucid.Construct(1, [])
+                , serializedCloseRedeemer = Lucid.Data.to(closeRedeemer)
+                , utxo = (await lucid.utxosAt(scriptAddress))
+                    .filter(utxo => utxo.datumHash === datumHash && utxo.assets[currencySymbol + assetNameHex] !== undefined)
+            const transaction =
+                await lucid
+                    .newTx()
+                    .payToAddress(await lucid.wallet.address()
+                        , {
+                            minLovelaceAmount
+                            , [currencySymbol + assetNameHex]: BigInt(Number(2))
+                        })
+                    .collectFrom(utxo, serializedCloseRedeemer)
+                    .attachSpendingValidator(radSaleScript)
+                    .addSigner(await lucid.wallet.address())
+                    .complete()
+                , signedTx = await transaction
+                    .sign()
+                    .complete()
+                , transactionHash = await signedTx
+                    .submit()
+            console.log(transactionHash)
+            transactionHash ?
+                closeConnectButton!.innerText = closeSuccessMessage
+                :
+                console.log('Transaction Hash', transaction)
+        })
+    }
+    , instantiateCloseButton = () => {
+        closeConnectButton!.innerText = closeMessage
+        closeConnectButton?.removeEventListener('click', instantiateCloseButton)
 
+    }
 startConnectButton!.innerText = addWalletMessage
 buyConnectButton!.innerText = addWalletMessage
 closeConnectButton!.innerText = addWalletMessage
@@ -124,39 +159,7 @@ if (hasWallet('nami') == true) {
         })
     })
 
-    closeConnectButton?.addEventListener('click', async () => {
-        console.log('close')
-        closeConnectButton!.innerText = closeMessage
-        closeConnectButton?.addEventListener('click', async () => {
-            closeConnectButton!.innerText = closingMessage
-            const closeRedeemer = new Lucid.Construct(1, [])
-                , serializedCloseRedeemer = Lucid.Data.to(closeRedeemer)
-                , utxo = (await lucid.utxosAt(scriptAddress))
-                    .filter(utxo => utxo.datumHash === datumHash && utxo.assets[currencySymbol + assetNameHex] !== undefined)
-            const transaction =
-                await lucid
-                    .newTx()
-                    .payToAddress(await lucid.wallet.address()
-                        , {
-                            minLovelaceAmount
-                            , [currencySymbol + assetNameHex]: BigInt(Number(2))
-                        })
-                    .collectFrom(utxo, serializedCloseRedeemer)
-                    .attachSpendingValidator(radSaleScript)
-                    .addSigner(await lucid.wallet.address())
-                    .complete()
-                , signedTx = await transaction
-                    .sign()
-                    .complete()
-                , transactionHash = await signedTx
-                    .submit()
-            console.log(transactionHash)
-            transactionHash ?
-                closeConnectButton!.innerText = closeSuccessMessage
-                :
-                console.log('Transaction Hash', transaction)
-        })
-    })
-
+    closeConnectButton?.addEventListener('click', instantiateCloseButton)
+    closeConnectButton?.addEventListener('click', closeContract)
 }
 
