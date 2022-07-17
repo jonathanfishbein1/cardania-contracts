@@ -8,8 +8,8 @@
   "scripts": {
     "devBuy": "webpack serve --config rad-sale-on-chain/webpack.config.js --open",
     "devDelegate": "webpack serve --config delegation/webpack.config.js --open",
-    "build": "webpack build  && cp index.html dist",
-    "start": "npm run build && cp server.cjs dist/ && node dist/server.cjs"
+    "buildBuy": "webpack build --config rad-sale-on-chain/webpack.config.js && cp rad-sale-on-chain/index.html dist",
+    "startBuy": "npm run buildBuy && cp rad-sale-on-chain/server.cjs dist/ && node dist/server.cjs"
   },
   "keywords": [],
   "author": "",
