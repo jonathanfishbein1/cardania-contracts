@@ -63,11 +63,10 @@ const
                 .complete()
             , transactionHash = await signedTx
                 .submit()
-        console.log(transactionHash)
         transactionHash ?
             startConnectButton!.innerText = startSuccessMessage
             :
-            console.log('Transaction Hash', transaction)
+            console.log('Error starting contract')
     }
     , instantiateStartContract = () => {
         startConnectButton?.addEventListener('click', async () => {
@@ -89,7 +88,6 @@ const
             , utxo = (await lucid.utxosAt(scriptAddress))
                 .find(utxo => utxo.datumHash === datumHash && utxo.assets[currencySymbol + assetNameHex] !== undefined)
             , assetQuantity = utxo?.assets[currencySymbol + assetNameHex] as bigint
-        console.log(utxo?.assets[currencySymbol + assetNameHex])
         if (utxo !== undefined) {
             const transaction =
                 await lucid
@@ -115,11 +113,10 @@ const
                     .complete()
                 , transactionHash = await signedTx
                     .submit()
-            console.log(transactionHash)
             transactionHash ?
                 buyConnectButton!.innerText = successMessage
                 :
-                console.log('Transaction Hash', transaction)
+                console.log('Error buy token')
         }
     }
     , instantiateCloseContract = () => {
@@ -152,11 +149,10 @@ const
                 .complete()
             , transactionHash = await signedTx
                 .submit()
-        console.log(transactionHash)
         transactionHash ?
             closeConnectButton!.innerText = closeSuccessMessage
             :
-            console.log('Transaction Hash', transaction)
+            console.log('Error closing contract')
     }
 
 startConnectButton!.innerText = addWalletMessage
