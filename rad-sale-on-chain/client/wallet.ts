@@ -1,15 +1,15 @@
 declare var window: any
 
-const supportedWallets = [
-    'nami',
-    'flint',
-    'eternl'
-]
-export const getWalletApi = async namespace => {
-    return await ('typhon' === namespace) ?
-        window.cardano[namespace]
+export type SupportedWallets =
+    'nami'
+    | 'flint'
+    | 'eternl'
+    | 'typhon'
+
+export const getWalletApi = async (wallet: SupportedWallets) => {
+    return await ('typhon' === wallet) ?
+        window.cardano[wallet]
         :
-        window.cardano[namespace].enable()
+        window.cardano[wallet].enable()
 }
-    , isSupported = type => supportedWallets.includes(type)
-    , hasWallet = type => isSupported(type) && window.cardano[type.toLowerCase()] !== undefined
+    , hasWallet = (wallet: SupportedWallets) => window.cardano[wallet] !== undefined
