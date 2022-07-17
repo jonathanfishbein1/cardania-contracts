@@ -44,21 +44,18 @@ const
                     .newTx()
                     .registerStake(rewardAddress)
                     .complete()
-            transaction.txComplete
-            console.log(transaction)
-            console.log(transaction.txComplete)
-            const signedTx = await transaction
-                .sign()
-                .complete()
-            console.log(signedTx)
-            const transactionHash = await signedTx
-                .submit()
-            console.log(transactionHash)
+                , signedTx = await transaction
+                    .sign()
+                    .complete()
+                , transactionHash = await signedTx
+                    .submit()
             transactionHash ?
                 registerConnectButton!.innerText = registeringSuccessMessage
                 :
-                console.log('Transaction Hash', transaction)
+                console.log('Error registering')
         }
+        else
+            console.log('Reward address is undefined')
     }
     , instantiateRegister = () => {
         registerConnectButton?.addEventListener('click', async () => {
@@ -83,21 +80,18 @@ const
                     .newTx()
                     .delegateTo(rewardAddress, poolId)
                     .complete()
-            transaction.txComplete
-            console.log(transaction)
-            console.log(transaction.txComplete)
-            const signedTx = await transaction
-                .sign()
-                .complete()
-            console.log(signedTx)
-            const transactionHash = await signedTx
-                .submit()
-            console.log(transactionHash)
+                , signedTx = await transaction
+                    .sign()
+                    .complete()
+                , transactionHash = await signedTx
+                    .submit()
             transactionHash ?
                 delegateConnectButton!.innerText = delegatingSuccessMessage
                 :
-                console.log('Transaction Hash', transaction)
+                console.log('Error delegating')
         }
+        else
+            console.log('Reward address is undefined')
     }
     , instantiateDeregister = () => {
         deregisterConnectButton?.addEventListener('click', async () => {
@@ -114,21 +108,18 @@ const
                     .newTx()
                     .deregisterStake(rewardAddress)
                     .complete()
-            transaction.txComplete
-            console.log(transaction)
-            console.log(transaction.txComplete)
-            const signedTx = await transaction
-                .sign()
-                .complete()
-            console.log(signedTx)
-            const transactionHash = await signedTx
-                .submit()
-            console.log(transactionHash)
+                , signedTx = await transaction
+                    .sign()
+                    .complete()
+                , transactionHash = await signedTx
+                    .submit()
             transactionHash ?
                 deregisterConnectButton!.innerText = deregisteringSuccessMessage
                 :
-                console.log('Transaction Hash', transaction)
+                console.log('Error deregistering')
         }
+        else
+            console.log('Reward address is undefined')
     }
 
 registerConnectButton!.innerText = addWalletMessage
