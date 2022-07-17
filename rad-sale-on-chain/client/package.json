@@ -27,7 +27,6 @@
   },
   "dependencies": {
     "buffer": "^6.0.3",
-    "lucid-cardano": "^0.3.5",
     "vasil": "npm:lucid-cardano@vasil"
   }
 }

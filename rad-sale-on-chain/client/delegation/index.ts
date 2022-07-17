@@ -1,101 +1,157 @@
-declare var window: any
 import './style.css'
-import {
-    Lucid, Blockfrost, Utils
-} from 'lucid-cardano'
+import * as Lucid from 'vasil'
 import * as Wallet from '../wallet'
 
 const
-    connectButton = document.getElementById('connect'),
-    poolId = "pool1m3gg43uhtetn4hmw79u8836dyq8qe4cex8qnn6mks5egza7n6tp",
-    bk = "mainnetU8uxziYphJfG9PTWWplZD2lEHMXbJHCX",
+    registerConnectButton = document.getElementById('registerConnect'),
+    delegateConnectButton = document.getElementById('delegateConnect'),
+    deregisterConnectButton = document.getElementById('deregisterConnect'),
+    poolId = "pool13dgxp4ph2ut5datuh5na4wy7hrnqgkj4fyvac3e8fzfqcc7qh0h",
+    bk = "testnetwIyK8IphOti170JCngH0NedP0yK8wBZs",
+    addWalletMessage = "Add a browser wallet",
     connectMessage = "connect wallet",
-    delegateMessage = "Delegate to SUMN",
-    delagatingMessage = "Delegating...",
-    undelagatingMessage = "Undelegating..."
-    , successMessage = "Successfully delegated to SUMN!"
-    , lucid = await Lucid.new(
-        new Blockfrost('https://cardano-mainnet.blockfrost.io/api/v0', bk), 'Mainnet')
-if (Wallet.hasWallet('eternl') == true) {
-    const wallet = await Wallet.getWalletApi('eternl') as any
-    lucid.selectWallet(wallet)
-    const rewardAddress = await lucid.wallet.rewardAddress()
-        , utils = new Utils(lucid)
-    if (rewardAddress !== undefined) {
-        const { address: { address } } = utils.getAddressDetails(rewardAddress)
-            , account = await fetch(`https://cardano-mainnet.blockfrost.io/api/v0/accounts/${(address)}/`
-                , { headers: { project_id: bk } })
-                .then(res => res.json())
-            , registrationStatus = await fetch(`https://cardano-mainnet.blockfrost.io/api/v0/accounts/${(address)}/registrations`
-                , { headers: { project_id: bk } })
-                .then(res => res.json())
-        console.log(address)
-        console.log(registrationStatus)
-        if (account.active && account.pool_id === poolId)
-            connectButton!.innerText = successMessage
-        else if (account.active) {
-            connectButton!.innerText = connectMessage
-            connectButton?.addEventListener('click', async () => {
-                connectButton!.innerText = delegateMessage
-                connectButton?.addEventListener('click', async () => {
-                    connectButton!.innerText = delagatingMessage
-                    if (rewardAddress !== undefined) {
-                        const transaction =
-                            await lucid
-                                .newTx()
-                                .delegateTo(address, poolId)
-                                .addSigner(address)
-                                .complete()
-                        transaction.txComplete
-                        console.log(transaction)
-                        console.log(transaction.txComplete)
-                        const signedTx = await transaction
-                            .sign()
-                            .complete()
-                        console.log(signedTx)
-                        const transactionHash = await signedTx
-                            .submit()
-                        console.log(transactionHash)
-                        transactionHash ?
-                            connectButton!.innerText = successMessage
-                            :
-                            console.log('Transaction Hash', transaction)
-                    }
-                })
-            })
-        }
-        else {
-            console.log('register stake')
-            connectButton!.innerText = connectMessage
-            connectButton?.addEventListener('click', async () => {
-                connectButton!.innerText = delegateMessage
-                connectButton?.addEventListener('click', async () => {
-                    connectButton!.innerText = delagatingMessage
-                    if (rewardAddress !== undefined) {
-                        const transaction =
-                            await lucid
-                                .newTx()
-                                .registerStake(address)
-                                .delegateTo(address, poolId)
-                                .complete()
-                        transaction.txComplete
-                        console.log(transaction)
-                        console.log(transaction.txComplete)
-                        const signedTx = await transaction
-                            .sign()
-                            .complete()
-                        console.log(signedTx)
-                        const transactionHash = await signedTx
-                            .submit()
-                        console.log(transactionHash)
-                        transactionHash ?
-                            connectButton!.innerText = successMessage
-                            :
-                            console.log('Transaction Hash', transaction)
-                    }
-                })
-            })
+    registerMessage = "Register",
+    deregisterMessage = "Deregister",
+    delegateMessage = "Delegate",
+    registeringMessage = "Registering...",
+    delegatingMessage = "Delegating...",
+    deregisteringMessage = "Deregistering..."
+    , registeringSuccessMessage = "Successfully registered to SUMN!"
+    , delegatingSuccessMessage = "Successfully delegated to SUMN!"
+    , deregisterSuccessMessage = "Successfully deregistered from SUMN!"
+    , blockfrostApi = 'https://cardano-testnet.blockfrost.io/api/v0'
+    , blockfrostClient = new Lucid.Blockfrost(blockfrostApi, bk)
+    , lucid = await Lucid.Lucid.new(blockfrostClient,
+        'Testnet')
+    , instantiateRegistertButton = () => {
+        registerConnectButton!.innerText = registerMessage
+        registerConnectButton?.removeEventListener('click', instantiateRegistertButton)
+    },
+    instantiateDelegateButton = () => {
+        delegateConnectButton!.innerText = delegateMessage
+        delegateConnectButton?.removeEventListener('click', instantiateDelegateButton)
+    }
+    , instantiateDeregisterButton = () => {
+        deregisterConnectButton!.innerText = deregisterMessage
+        deregisterConnectButton?.removeEventListener('click', instantiateDeregisterButton)
 
+    },
+    register = async () => {
+        const rewardAddress = await lucid.wallet.rewardAddress()
+        if (rewardAddress !== undefined) {
+            const transaction =
+                await lucid
+                    .newTx()
+                    .registerStake(rewardAddress)
+                    .complete()
+            transaction.txComplete
+            console.log(transaction)
+            console.log(transaction.txComplete)
+            const signedTx = await transaction
+                .sign()
+                .complete()
+            console.log(signedTx)
+            const transactionHash = await signedTx
+                .submit()
+            console.log(transactionHash)
+            transactionHash ?
+                registerConnectButton!.innerText = registeringSuccessMessage
+                :
+                console.log('Transaction Hash', transaction)
         }
     }
+    , instantiateRegister = () => {
+        registerConnectButton?.addEventListener('click', async () => {
+            registerConnectButton!.innerText = registeringMessage
+            register()
+        })
+        registerConnectButton?.removeEventListener('click', instantiateRegister)
+    }
+    ,
+    instantiateDelegate = () => {
+        delegateConnectButton?.addEventListener('click', async () => {
+            delegateConnectButton!.innerText = delegatingMessage
+            delegate()
+        })
+        delegateConnectButton?.removeEventListener('click', instantiateDelegate)
+    },
+    delegate = async () => {
+        const rewardAddress = await lucid.wallet.rewardAddress()
+        if (rewardAddress !== undefined) {
+            const transaction =
+                await lucid
+                    .newTx()
+                    .delegateTo(rewardAddress, poolId)
+                    .complete()
+            transaction.txComplete
+            console.log(transaction)
+            console.log(transaction.txComplete)
+            const signedTx = await transaction
+                .sign()
+                .complete()
+            console.log(signedTx)
+            const transactionHash = await signedTx
+                .submit()
+            console.log(transactionHash)
+            transactionHash ?
+                registerConnectButton!.innerText = registeringSuccessMessage
+                :
+                console.log('Transaction Hash', transaction)
+        }
+    }
+// , instantiateCloseContract = () => {
+//     deregisterConnectButton?.addEventListener('click', async () => {
+//         deregisterConnectButton!.innerText = deregisteringMessage
+//         closeContract()
+//     })
+//     deregisterConnectButton?.removeEventListener('click', instantiateCloseContract)
+// },
+// closeContract = async () => {
+//     const closeRedeemer = new Lucid.Construct(1, [])
+//         , serializedCloseRedeemer = Lucid.Data.to(closeRedeemer)
+//         , utxos = (await lucid.utxosAt(scriptAddress))
+//             .filter(utxo => utxo.datumHash === datumHash && utxo.assets[currencySymbol + assetNameHex] !== undefined)
+//         , assetQuantity = utxos.reduce((accumulator: bigint, utxo) => accumulator + (utxo?.assets[currencySymbol + assetNameHex] as bigint), BigInt(0))
+//         , transaction =
+//             await lucid
+//                 .newTx()
+//                 .payToAddress(await lucid.wallet.address()
+//                     , {
+//                         lovelace: minLovelaceAmount
+//                         , [currencySymbol + assetNameHex]: assetQuantity
+//                     })
+//                 .collectFrom(utxos, serializedCloseRedeemer)
+//                 .attachSpendingValidator(radSaleScript)
+//                 .addSigner(await lucid.wallet.address())
+//                 .complete()
+//         , signedTx = await transaction
+//             .sign()
+//             .complete()
+//         , transactionHash = await signedTx
+//             .submit()
+//     console.log(transactionHash)
+//     transactionHash ?
+//         deregisterConnectButton!.innerText = deregisterSuccessMessage
+//         :
+//         console.log('Transaction Hash', transaction)
+// }
+
+registerConnectButton!.innerText = addWalletMessage
+delegateConnectButton!.innerText = addWalletMessage
+deregisterConnectButton!.innerText = addWalletMessage
+if (Wallet.hasWallet('nami') == true) {
+    const wallet = await Wallet.getWalletApi('nami') as any
+    lucid.selectWallet(wallet)
+    registerConnectButton!.innerText = connectMessage
+    delegateConnectButton!.innerText = connectMessage
+    deregisterConnectButton!.innerText = connectMessage
+    registerConnectButton?.addEventListener('click', instantiateRegistertButton)
+    registerConnectButton?.addEventListener('click', instantiateRegister)
+
+    delegateConnectButton?.addEventListener('click', instantiateDelegateButton)
+    delegateConnectButton?.addEventListener('click', instantiateDelegate)
+
+    // deregisterConnectButton?.addEventListener('click', instantiateDeregisterButton)
+    // deregisterConnectButton?.addEventListener('click', instantiateCloseContract)
 }
+

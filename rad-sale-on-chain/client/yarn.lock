@@ -1466,13 +1466,6 @@ lru-cache@^6.0.0:
   dependencies:
     yallist "^4.0.0"
 
-lucid-cardano@^0.3.5:
-  version "0.3.5"
-  resolved "https://registry.yarnpkg.com/lucid-cardano/-/lucid-cardano-0.3.5.tgz#6ae9b2a2514b001625c6d482d5448d8ad8cfefa6"
-  integrity sha512-vrWsTCiSFpolwTXuDRArDGq2Rupi536H6vRM3BllfDtCaT2HX3M48+jzT2hewRt7q8Z7GAl2WylPBUIGgfrQbQ==
-  dependencies:
-    node-fetch "^3.2.3"
-
 media-typer@0.3.0:
   version "0.3.0"
   resolved "https://registry.yarnpkg.com/media-typer/-/media-typer-0.3.0.tgz#8710d7af0aa626f8fffa1ce00168545263255748"
