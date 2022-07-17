@@ -18,7 +18,7 @@ const
     deregisteringMessage = "Deregistering..."
     , registeringSuccessMessage = "Successfully registered to SUMN!"
     , delegatingSuccessMessage = "Successfully delegated to SUMN!"
-    , deregisterSuccessMessage = "Successfully deregistered from SUMN!"
+    , deregisteringSuccessMessage = "Successfully deregistered from SUMN!"
     , blockfrostApi = 'https://cardano-testnet.blockfrost.io/api/v0'
     , blockfrostClient = new Lucid.Blockfrost(blockfrostApi, bk)
     , lucid = await Lucid.Lucid.new(blockfrostClient,
@@ -94,7 +94,7 @@ const
                 .submit()
             console.log(transactionHash)
             transactionHash ?
-                registerConnectButton!.innerText = registeringSuccessMessage
+                delegateConnectButton!.innerText = delegatingSuccessMessage
                 :
                 console.log('Transaction Hash', transaction)
         }
@@ -125,7 +125,7 @@ const
                 .submit()
             console.log(transactionHash)
             transactionHash ?
-                registerConnectButton!.innerText = registeringSuccessMessage
+                deregisterConnectButton!.innerText = deregisteringSuccessMessage
                 :
                 console.log('Transaction Hash', transaction)
         }
