@@ -99,42 +99,37 @@ const
                 console.log('Transaction Hash', transaction)
         }
     }
-// , instantiateCloseContract = () => {
-//     deregisterConnectButton?.addEventListener('click', async () => {
-//         deregisterConnectButton!.innerText = deregisteringMessage
-//         closeContract()
-//     })
-//     deregisterConnectButton?.removeEventListener('click', instantiateCloseContract)
-// },
-// closeContract = async () => {
-//     const closeRedeemer = new Lucid.Construct(1, [])
-//         , serializedCloseRedeemer = Lucid.Data.to(closeRedeemer)
-//         , utxos = (await lucid.utxosAt(scriptAddress))
-//             .filter(utxo => utxo.datumHash === datumHash && utxo.assets[currencySymbol + assetNameHex] !== undefined)
-//         , assetQuantity = utxos.reduce((accumulator: bigint, utxo) => accumulator + (utxo?.assets[currencySymbol + assetNameHex] as bigint), BigInt(0))
-//         , transaction =
-//             await lucid
-//                 .newTx()
-//                 .payToAddress(await lucid.wallet.address()
-//                     , {
-//                         lovelace: minLovelaceAmount
-//                         , [currencySymbol + assetNameHex]: assetQuantity
-//                     })
-//                 .collectFrom(utxos, serializedCloseRedeemer)
-//                 .attachSpendingValidator(radSaleScript)
-//                 .addSigner(await lucid.wallet.address())
-//                 .complete()
-//         , signedTx = await transaction
-//             .sign()
-//             .complete()
-//         , transactionHash = await signedTx
-//             .submit()
-//     console.log(transactionHash)
-//     transactionHash ?
-//         deregisterConnectButton!.innerText = deregisterSuccessMessage
-//         :
-//         console.log('Transaction Hash', transaction)
-// }
+    , instantiateDeregister = () => {
+        deregisterConnectButton?.addEventListener('click', async () => {
+            deregisterConnectButton!.innerText = deregisteringMessage
+            deregister()
+        })
+        deregisterConnectButton?.removeEventListener('click', instantiateDeregister)
+    },
+    deregister = async () => {
+        const rewardAddress = await lucid.wallet.rewardAddress()
+        if (rewardAddress !== undefined) {
+            const transaction =
+                await lucid
+                    .newTx()
+                    .deregisterStake(rewardAddress)
+                    .complete()
+            transaction.txComplete
+            console.log(transaction)
+            console.log(transaction.txComplete)
+            const signedTx = await transaction
+                .sign()
+                .complete()
+            console.log(signedTx)
+            const transactionHash = await signedTx
+                .submit()
+            console.log(transactionHash)
+            transactionHash ?
+                registerConnectButton!.innerText = registeringSuccessMessage
+                :
+                console.log('Transaction Hash', transaction)
+        }
+    }
 
 registerConnectButton!.innerText = addWalletMessage
 delegateConnectButton!.innerText = addWalletMessage
@@ -151,7 +146,7 @@ if (Wallet.hasWallet('nami') == true) {
     delegateConnectButton?.addEventListener('click', instantiateDelegateButton)
     delegateConnectButton?.addEventListener('click', instantiateDelegate)
 
-    // deregisterConnectButton?.addEventListener('click', instantiateDeregisterButton)
-    // deregisterConnectButton?.addEventListener('click', instantiateCloseContract)
+    deregisterConnectButton?.addEventListener('click', instantiateDeregisterButton)
+    deregisterConnectButton?.addEventListener('click', instantiateDeregister)
 }
 
