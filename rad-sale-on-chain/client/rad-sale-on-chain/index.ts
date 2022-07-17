@@ -118,6 +118,8 @@ const
                 :
                 console.log('Error buy token')
         }
+        else
+            console.log('utxo is undefined')
     }
     , instantiateCloseContract = () => {
         closeConnectButton?.addEventListener('click', async () => {
