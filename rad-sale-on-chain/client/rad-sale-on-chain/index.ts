@@ -1,5 +1,5 @@
 import './style.css'
-import * as Lucid from 'vasil'
+import * as Lucid from 'lucid-cardano'
 import * as Wallet from '../wallet'
 
 const

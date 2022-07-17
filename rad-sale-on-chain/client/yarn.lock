@@ -1466,6 +1466,13 @@ lru-cache@^6.0.0:
   dependencies:
     yallist "^4.0.0"
 
+lucid-cardano@^0.5.0:
+  version "0.5.0"
+  resolved "https://registry.yarnpkg.com/lucid-cardano/-/lucid-cardano-0.5.0.tgz#2f8750b46901c713e98b6ca655e45d446a4eb494"
+  integrity sha512-4ZDa9oY1wAq3K0sMo7sjHZDIXU3BhJgbS/sYx1B1kpIgpvFxCcF/Fae63N9T50lVr9D6nkTBGiZ71x6gMnGKxg==
+  dependencies:
+    node-fetch "^3.2.3"
+
 media-typer@0.3.0:
   version "0.3.0"
   resolved "https://registry.yarnpkg.com/media-typer/-/media-typer-0.3.0.tgz#8710d7af0aa626f8fffa1ce00168545263255748"
@@ -2336,13 +2343,6 @@ vary@~1.1.2:
   version "1.1.2"
   resolved "https://registry.yarnpkg.com/vary/-/vary-1.1.2.tgz#2299f02c6ded30d4a5961b0b9f74524a18f634fc"
   integrity sha512-BNGbWLfd0eUPabhkXUVm0j8uuvREyTh5ovRa/dyow/BqAbZJyC+5fU+IzQOzmAKzYqYRAISoRhdQr3eIZ/PXqg==
-
-"vasil@npm:lucid-cardano@vasil":
-  version "0.5.0"
-  resolved "https://registry.yarnpkg.com/lucid-cardano/-/lucid-cardano-0.5.0.tgz#2f8750b46901c713e98b6ca655e45d446a4eb494"
-  integrity sha512-4ZDa9oY1wAq3K0sMo7sjHZDIXU3BhJgbS/sYx1B1kpIgpvFxCcF/Fae63N9T50lVr9D6nkTBGiZ71x6gMnGKxg==
-  dependencies:
-    node-fetch "^3.2.3"
 
 watchpack@^2.3.1:
   version "2.4.0"
