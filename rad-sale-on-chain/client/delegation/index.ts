@@ -26,24 +26,7 @@ const
     , blockfrostApi = 'https://cardano-testnet.blockfrost.io/api/v0'
     , blockfrostClient = new Lucid.Blockfrost(blockfrostApi, bk)
     , lucid = await Lucid.Lucid.new(blockfrostClient,
-        'Testnet')
-    , instantiateRegistertButton = () => {
-        registerConnectButton!.innerText = registerMessage
-        registerConnectButton?.removeEventListener('click', instantiateRegistertButton)
-    },
-    instantiateDelegateButton = () => {
-        delegateConnectButton!.innerText = delegateMessage
-        delegateConnectButton?.removeEventListener('click', instantiateDelegateButton)
-    }
-    , instantiateDeregisterButton = () => {
-        deregisterConnectButton!.innerText = deregisterMessage
-        deregisterConnectButton?.removeEventListener('click', instantiateDeregisterButton)
-
-    }
-    , instantiateRegisterAndDelegateButton = () => {
-        registerAndDelegateButton!.innerText = registerAndDelegateMessage
-        registerAndDelegateButton?.removeEventListener('click', instantiateRegisterAndDelegateButton)
-    },
+        'Testnet'),
     register = async rewardAddress => {
         const transaction =
             await lucid
@@ -149,11 +132,8 @@ if (supportedWallet !== undefined) {
     lucid.selectWallet(wallet)
     const rewardAddress = await lucid.wallet.rewardAddress()
     if (rewardAddress !== undefined) {
-        const appliedInstantiageRegister = () => instantiateRegister(rewardAddress)
-            , appliedInstantiageDelegate = () => instantiateDelegate(rewardAddress)
-            , appliedInstantiageDeregister = () => instantiateDeregister(rewardAddress)
-            , appliedInstantiageRegisterAndDelegate = () => instantiateRegisterAndDelegate(rewardAddress)
-            , utils = new Lucid.Utils(lucid)
+        const
+            utils = new Lucid.Utils(lucid)
             , { address: { address } } = utils.getAddressDetails(rewardAddress)
             , account = await fetch(`${blockfrostApi}/accounts/${(address)}/`
                 , { headers: { project_id: bk } })
@@ -161,22 +141,22 @@ if (supportedWallet !== undefined) {
         console.log(account)
         if (account.active && account.pool_id === poolId) {
             if (deregisterConnectButton !== null) {
+                deregisterConnectButton!.innerText = deregisterMessage
                 deregisterConnectButton.style.visibility = 'visible'
                 deregisterConnectButton.style.display = 'inline'
                 deregisterConnectButton.disabled = false
-                deregisterConnectButton?.addEventListener('click', instantiateDeregisterButton)
-                deregisterConnectButton?.addEventListener('click', appliedInstantiageDeregister)
+                instantiateDeregister(rewardAddress)
             }
             else
                 console.log('Cannot find button on page')
         }
         else if (account.active) {
             if (delegateConnectButton !== null) {
+                delegateConnectButton!.innerText = delegateMessage
                 delegateConnectButton.style.visibility = 'visible'
                 delegateConnectButton.style.display = 'inline'
                 delegateConnectButton.disabled = false
-                delegateConnectButton?.addEventListener('click', instantiateDelegateButton)
-                delegateConnectButton?.addEventListener('click', appliedInstantiageDelegate)
+                instantiateDelegate(rewardAddress)
             }
             else
                 console.log('Cannot find button on page')
@@ -184,11 +164,11 @@ if (supportedWallet !== undefined) {
         }
         else {
             if (registerAndDelegateButton !== null) {
+                registerAndDelegateButton!.innerText = registerAndDelegateMessage
                 registerAndDelegateButton.style.visibility = 'visible'
                 registerAndDelegateButton.style.display = 'inline'
                 registerAndDelegateButton.disabled = false
-                registerAndDelegateButton?.addEventListener('click', instantiateRegisterAndDelegateButton)
-                registerAndDelegateButton?.addEventListener('click', appliedInstantiageRegisterAndDelegate)
+                instantiateRegisterAndDelegate(rewardAddress)
             }
             else
                 console.log('Cannot find button on page')
