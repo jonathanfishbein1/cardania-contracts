@@ -1,9 +1,8 @@
 {
-  "name": "browser-buy",
+  "name": "client",
   "private": true,
   "version": "1.0.0",
   "description": "",
-  "main": "index.ts",
   "type": "module",
   "scripts": {
     "devBuy": "webpack serve --config rad-sale-on-chain/webpack.config.js --open",
