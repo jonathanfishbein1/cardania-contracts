@@ -148,26 +148,44 @@ if (supportedWallet !== undefined) {
     const wallet = await Wallet.getWalletApi(supportedWallet) as any
     lucid.selectWallet(wallet)
     const rewardAddress = await lucid.wallet.rewardAddress()
-        , appliedInstantiageRegister = () => instantiateRegister(rewardAddress)
-        , appliedInstantiageDelegate = () => instantiateDelegate(rewardAddress)
-        , appliedInstantiageDeregister = () => instantiateDeregister(rewardAddress)
-        , appliedInstantiageRegisterAndDelegate = () => instantiateRegisterAndDelegate(rewardAddress)
+    if (rewardAddress !== undefined) {
+        const appliedInstantiageRegister = () => instantiateRegister(rewardAddress)
+            , appliedInstantiageDelegate = () => instantiateDelegate(rewardAddress)
+            , appliedInstantiageDeregister = () => instantiateDeregister(rewardAddress)
+            , appliedInstantiageRegisterAndDelegate = () => instantiateRegisterAndDelegate(rewardAddress)
+            , utils = new Lucid.Utils(lucid)
+            , { address: { address } } = utils.getAddressDetails(rewardAddress)
+            , account = await fetch(`${blockfrostApi}/accounts/${(address)}/`
+                , { headers: { project_id: bk } })
+                .then(res => res.json())
+        console.log(account)
+        if (account.active && account.pool_id === poolId) {
+            deregisterConnectButton?.addEventListener('click', instantiateDeregisterButton)
+            deregisterConnectButton?.addEventListener('click', appliedInstantiageDeregister)
+        }
+        else if (account.active) {
+            delegateConnectButton?.addEventListener('click', instantiateDelegateButton)
+            delegateConnectButton?.addEventListener('click', appliedInstantiageDelegate)
 
-    registerConnectButton!.innerText = connectMessage
-    delegateConnectButton!.innerText = connectMessage
-    deregisterConnectButton!.innerText = connectMessage
-    registerAndDelegateButton!.innerText = connectMessage
-    registerConnectButton?.addEventListener('click', instantiateRegistertButton)
-    registerConnectButton?.addEventListener('click', appliedInstantiageRegister)
+        }
+        else {
+            registerAndDelegateButton?.addEventListener('click', instantiateRegisterAndDelegateButton)
+            registerAndDelegateButton?.addEventListener('click', appliedInstantiageRegisterAndDelegate)
+        }
+        registerConnectButton!.innerText = connectMessage
+        delegateConnectButton!.innerText = connectMessage
+        deregisterConnectButton!.innerText = connectMessage
+        registerAndDelegateButton!.innerText = connectMessage
+        registerConnectButton?.addEventListener('click', instantiateRegistertButton)
+        registerConnectButton?.addEventListener('click', appliedInstantiageRegister)
+        delegateConnectButton?.addEventListener('click', instantiateDelegateButton)
+        delegateConnectButton?.addEventListener('click', appliedInstantiageDelegate)
+        registerAndDelegateButton?.addEventListener('click', instantiateRegisterAndDelegateButton)
+        registerAndDelegateButton?.addEventListener('click', appliedInstantiageRegisterAndDelegate)
 
-    delegateConnectButton?.addEventListener('click', instantiateDelegateButton)
-    delegateConnectButton?.addEventListener('click', appliedInstantiageDelegate)
-
-    deregisterConnectButton?.addEventListener('click', instantiateDeregisterButton)
-    deregisterConnectButton?.addEventListener('click', appliedInstantiageDeregister)
-
-    registerAndDelegateButton?.addEventListener('click', instantiateRegisterAndDelegateButton)
-    registerAndDelegateButton?.addEventListener('click', appliedInstantiageRegisterAndDelegate)
+    }
+    else
+        console.log('Reward address is undefined')
 }
 else
     console.log('No supported wallet')
