@@ -145,15 +145,16 @@ deregisterConnectButton!.innerText = addWalletMessage
 registerAndDelegateButton!.innerText = addWalletMessage
 const supportedWallet = Wallet.hasWallet()
 if (supportedWallet !== undefined) {
+    registerConnectButton!.innerText = connectMessage
+    delegateConnectButton!.innerText = connectMessage
+    deregisterConnectButton!.innerText = connectMessage
+    registerAndDelegateButton!.innerText = connectMessage
     const wallet = await Wallet.getWalletApi(supportedWallet) as any
     lucid.selectWallet(wallet)
     const rewardAddress = await lucid.wallet.rewardAddress()
     if (rewardAddress !== undefined) {
-        const appliedInstantiageRegister = () => instantiateRegister(rewardAddress)
-            , appliedInstantiageDelegate = () => instantiateDelegate(rewardAddress)
-            , appliedInstantiageDeregister = () => instantiateDeregister(rewardAddress)
-            , appliedInstantiageRegisterAndDelegate = () => instantiateRegisterAndDelegate(rewardAddress)
-            , utils = new Lucid.Utils(lucid)
+        const
+            utils = new Lucid.Utils(lucid)
             , { address: { address } } = utils.getAddressDetails(rewardAddress)
             , account = await fetch(`${blockfrostApi}/accounts/${(address)}/`
                 , { headers: { project_id: bk } })
@@ -165,7 +166,7 @@ if (supportedWallet !== undefined) {
                 deregisterConnectButton.style.display = 'inline'
                 deregisterConnectButton.disabled = false
                 deregisterConnectButton?.addEventListener('click', instantiateDeregisterButton)
-                deregisterConnectButton?.addEventListener('click', appliedInstantiageDeregister)
+                deregisterConnectButton?.addEventListener('click', instantiateDeregister.bind(rewardAddress))
             }
             else
                 console.log('Cannot find button on page')
@@ -176,7 +177,7 @@ if (supportedWallet !== undefined) {
                 delegateConnectButton.style.display = 'inline'
                 delegateConnectButton.disabled = false
                 delegateConnectButton?.addEventListener('click', instantiateDelegateButton)
-                delegateConnectButton?.addEventListener('click', appliedInstantiageDelegate)
+                delegateConnectButton?.addEventListener('click', instantiateDelegate.bind(rewardAddress))
             }
             else
                 console.log('Cannot find button on page')
@@ -188,7 +189,7 @@ if (supportedWallet !== undefined) {
                 registerAndDelegateButton.style.display = 'inline'
                 registerAndDelegateButton.disabled = false
                 registerAndDelegateButton?.addEventListener('click', instantiateRegisterAndDelegateButton)
-                registerAndDelegateButton?.addEventListener('click', appliedInstantiageRegisterAndDelegate)
+                registerAndDelegateButton?.addEventListener('click', instantiateRegisterAndDelegate.bind(rewardAddress))
             }
             else
                 console.log('Cannot find button on page')
