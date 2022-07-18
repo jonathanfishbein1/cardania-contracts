@@ -163,8 +163,9 @@ registerConnectButton!.innerText = addWalletMessage
 delegateConnectButton!.innerText = addWalletMessage
 deregisterConnectButton!.innerText = addWalletMessage
 registerAndDelegateButton!.innerText = addWalletMessage
-if (Wallet.hasWallet('nami') == true) {
-    const wallet = await Wallet.getWalletApi('nami') as any
+const supportedWallet = Wallet.hasWallet()
+if (supportedWallet !== undefined) {
+    const wallet = await Wallet.getWalletApi(supportedWallet) as any
     lucid.selectWallet(wallet)
     registerConnectButton!.innerText = connectMessage
     delegateConnectButton!.innerText = connectMessage

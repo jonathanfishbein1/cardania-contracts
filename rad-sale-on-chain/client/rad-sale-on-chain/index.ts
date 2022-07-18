@@ -160,8 +160,9 @@ const
 startConnectButton!.innerText = addWalletMessage
 buyConnectButton!.innerText = addWalletMessage
 closeConnectButton!.innerText = addWalletMessage
-if (Wallet.hasWallet('nami') == true) {
-    const wallet = await Wallet.getWalletApi('nami') as any
+const supportedWallet = Wallet.hasWallet()
+if (supportedWallet !== undefined) {
+    const wallet = await Wallet.getWalletApi(supportedWallet) as any
     lucid.selectWallet(wallet)
     startConnectButton!.innerText = connectMessage
     buyConnectButton!.innerText = connectMessage
@@ -175,4 +176,6 @@ if (Wallet.hasWallet('nami') == true) {
     closeConnectButton?.addEventListener('click', instantiateCloseButton)
     closeConnectButton?.addEventListener('click', instantiateCloseContract)
 }
+else
+    console.log('No supported wallet')
 

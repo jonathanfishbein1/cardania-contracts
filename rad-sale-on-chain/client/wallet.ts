@@ -1,15 +1,13 @@
 declare var window: any
 
-export type SupportedWallets =
+export type SupportedWallet =
     'nami'
     | 'flint'
     | 'eternl'
-    | 'typhon'
 
-export const getWalletApi = async (wallet: SupportedWallets) => {
-    return await ('typhon' === wallet) ?
-        window.cardano[wallet]
-        :
-        window.cardano[wallet].enable()
-}
-    , hasWallet = (wallet: SupportedWallets) => window.cardano[wallet] !== undefined
+export const getWalletApi = async (wallet: SupportedWallet) => window.cardano[wallet].enable()
+    , hasWallet = () => supportedWallets.find(supportedWallet => window.cardano[supportedWallet] !== undefined)
+const supportedWallets: Array<SupportedWallet> =
+    ['nami'
+        , 'flint'
+        , 'eternl']
