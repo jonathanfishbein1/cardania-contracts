@@ -10,6 +10,7 @@ const
     poolId = "pool13dgxp4ph2ut5datuh5na4wy7hrnqgkj4fyvac3e8fzfqcc7qh0h",
     bk = "testnetwIyK8IphOti170JCngH0NedP0yK8wBZs",
     addWalletMessage = "Add a browser wallet",
+    connectMessage = "connect wallet",
     registerMessage = "Register",
     deregisterMessage = "Deregister",
     delegateMessage = "Delegate",
@@ -26,7 +27,23 @@ const
     , blockfrostClient = new Lucid.Blockfrost(blockfrostApi, bk)
     , lucid = await Lucid.Lucid.new(blockfrostClient,
         'Testnet')
-    ,
+    , instantiateRegistertButton = () => {
+        registerConnectButton!.innerText = registerMessage
+        registerConnectButton?.removeEventListener('click', instantiateRegistertButton)
+    },
+    instantiateDelegateButton = () => {
+        delegateConnectButton!.innerText = delegateMessage
+        delegateConnectButton?.removeEventListener('click', instantiateDelegateButton)
+    }
+    , instantiateDeregisterButton = () => {
+        deregisterConnectButton!.innerText = deregisterMessage
+        deregisterConnectButton?.removeEventListener('click', instantiateDeregisterButton)
+
+    }
+    , instantiateRegisterAndDelegateButton = () => {
+        registerAndDelegateButton!.innerText = registerAndDelegateMessage
+        registerAndDelegateButton?.removeEventListener('click', instantiateRegisterAndDelegateButton)
+    },
     register = async rewardAddress => {
         const transaction =
             await lucid
@@ -147,7 +164,7 @@ if (supportedWallet !== undefined) {
                 deregisterConnectButton.style.visibility = 'visible'
                 deregisterConnectButton.style.display = 'inline'
                 deregisterConnectButton.disabled = false
-                deregisterConnectButton!.innerText = deregisterMessage
+                deregisterConnectButton?.addEventListener('click', instantiateDeregisterButton)
                 deregisterConnectButton?.addEventListener('click', appliedInstantiageDeregister)
             }
             else
@@ -158,7 +175,7 @@ if (supportedWallet !== undefined) {
                 delegateConnectButton.style.visibility = 'visible'
                 delegateConnectButton.style.display = 'inline'
                 delegateConnectButton.disabled = false
-                delegateConnectButton!.innerText = delegateMessage
+                delegateConnectButton?.addEventListener('click', instantiateDelegateButton)
                 delegateConnectButton?.addEventListener('click', appliedInstantiageDelegate)
             }
             else
@@ -170,7 +187,7 @@ if (supportedWallet !== undefined) {
                 registerAndDelegateButton.style.visibility = 'visible'
                 registerAndDelegateButton.style.display = 'inline'
                 registerAndDelegateButton.disabled = false
-                registerAndDelegateButton!.innerText = registerAndDelegateMessage
+                registerAndDelegateButton?.addEventListener('click', instantiateRegisterAndDelegateButton)
                 registerAndDelegateButton?.addEventListener('click', appliedInstantiageRegisterAndDelegate)
             }
             else
