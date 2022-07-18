@@ -44,119 +44,99 @@ const
         registerAndDelegateButton!.innerText = registerAndDelegateMessage
         registerAndDelegateButton?.removeEventListener('click', instantiateRegisterAndDelegateButton)
     },
-    register = async () => {
-        const rewardAddress = await lucid.wallet.rewardAddress()
-        if (rewardAddress !== undefined) {
-            const transaction =
-                await lucid
-                    .newTx()
-                    .registerStake(rewardAddress)
-                    .complete()
-                , signedTx = await transaction
-                    .sign()
-                    .complete()
-                , transactionHash = await signedTx
-                    .submit()
-            transactionHash ?
-                registerConnectButton!.innerText = registeringSuccessMessage
-                :
-                console.log('Error registering')
-        }
-        else
-            console.log('Reward address is undefined')
+    register = async rewardAddress => {
+        const transaction =
+            await lucid
+                .newTx()
+                .registerStake(rewardAddress)
+                .complete()
+            , signedTx = await transaction
+                .sign()
+                .complete()
+            , transactionHash = await signedTx
+                .submit()
+        transactionHash ?
+            registerConnectButton!.innerText = registeringSuccessMessage
+            :
+            console.log('Error registering')
     }
-    , instantiateRegister = () => {
+    , instantiateRegister = (rewardAddress) => {
         registerConnectButton?.addEventListener('click', async () => {
             registerConnectButton!.innerText = registeringMessage
-            register()
+            register(rewardAddress)
         })
         registerConnectButton?.removeEventListener('click', instantiateRegister)
     }
     ,
-    instantiateDelegate = () => {
+    instantiateDelegate = rewardAddress => {
         delegateConnectButton?.addEventListener('click', async () => {
             delegateConnectButton!.innerText = delegatingMessage
-            delegate()
+            delegate(rewardAddress)
         })
         delegateConnectButton?.removeEventListener('click', instantiateDelegate)
     },
-    delegate = async () => {
-        const rewardAddress = await lucid.wallet.rewardAddress()
-        if (rewardAddress !== undefined) {
-            const transaction =
-                await lucid
-                    .newTx()
-                    .delegateTo(rewardAddress, poolId)
-                    .complete()
-                , signedTx = await transaction
-                    .sign()
-                    .complete()
-                , transactionHash = await signedTx
-                    .submit()
-            transactionHash ?
-                delegateConnectButton!.innerText = delegatingSuccessMessage
-                :
-                console.log('Error delegating')
-        }
-        else
-            console.log('Reward address is undefined')
+    delegate = async rewardAddress => {
+        const transaction =
+            await lucid
+                .newTx()
+                .delegateTo(rewardAddress, poolId)
+                .complete()
+            , signedTx = await transaction
+                .sign()
+                .complete()
+            , transactionHash = await signedTx
+                .submit()
+        transactionHash ?
+            delegateConnectButton!.innerText = delegatingSuccessMessage
+            :
+            console.log('Error delegating')
     }
-    , instantiateDeregister = () => {
+    , instantiateDeregister = rewardAddress => {
         deregisterConnectButton?.addEventListener('click', async () => {
             deregisterConnectButton!.innerText = deregisteringMessage
-            deregister()
+            deregister(rewardAddress)
         })
         deregisterConnectButton?.removeEventListener('click', instantiateDeregister)
     },
-    deregister = async () => {
-        const rewardAddress = await lucid.wallet.rewardAddress()
-        if (rewardAddress !== undefined) {
-            const transaction =
-                await lucid
-                    .newTx()
-                    .deregisterStake(rewardAddress)
-                    .complete()
-                , signedTx = await transaction
-                    .sign()
-                    .complete()
-                , transactionHash = await signedTx
-                    .submit()
-            transactionHash ?
-                deregisterConnectButton!.innerText = deregisteringSuccessMessage
-                :
-                console.log('Error deregistering')
-        }
-        else
-            console.log('Reward address is undefined')
+    deregister = async rewardAddress => {
+        const transaction =
+            await lucid
+                .newTx()
+                .deregisterStake(rewardAddress)
+                .complete()
+            , signedTx = await transaction
+                .sign()
+                .complete()
+            , transactionHash = await signedTx
+                .submit()
+        transactionHash ?
+            deregisterConnectButton!.innerText = deregisteringSuccessMessage
+            :
+            console.log('Error deregistering')
     }
-    , instantiateRegisterAndDelegate = () => {
+    , instantiateRegisterAndDelegate = rewardAddress => {
         registerAndDelegateButton?.addEventListener('click', async () => {
             registerAndDelegateButton!.innerText = registeringAndDelegatingMessage
-            registerAndDelegate()
+            registerAndDelegate(rewardAddress)
         })
         registerAndDelegateButton?.removeEventListener('click', instantiateRegisterAndDelegate)
     }
-    , registerAndDelegate = async () => {
-        const rewardAddress = await lucid.wallet.rewardAddress()
-        if (rewardAddress !== undefined) {
-            const transaction =
-                await lucid
-                    .newTx()
-                    .registerStake(rewardAddress)
-                    .delegateTo(rewardAddress, poolId)
-                    .complete()
-                , signedTx = await transaction
-                    .sign()
-                    .complete()
-                , transactionHash = await signedTx
-                    .submit()
-            transactionHash ?
-                registerAndDelegateButton!.innerText = registeringAndDelegatinguccessMessage
-                :
-                console.log('Error registering')
-        }
-        else
-            console.log('Reward address is undefined')
+    , registerAndDelegate = async rewardAddress => {
+        const transaction =
+            await lucid
+                .newTx()
+                .registerStake(rewardAddress)
+                .delegateTo(rewardAddress, poolId)
+                .complete()
+            , signedTx = await transaction
+                .sign()
+                .complete()
+            , transactionHash = await signedTx
+                .submit()
+        transactionHash ?
+            registerAndDelegateButton!.innerText = registeringAndDelegatinguccessMessage
+            :
+            console.log('Error registering')
     }
 
 registerConnectButton!.innerText = addWalletMessage
@@ -167,20 +147,28 @@ const supportedWallet = Wallet.hasWallet()
 if (supportedWallet !== undefined) {
     const wallet = await Wallet.getWalletApi(supportedWallet) as any
     lucid.selectWallet(wallet)
+    const rewardAddress = await lucid.wallet.rewardAddress()
+        , appliedInstantiageRegister = () => instantiateRegister(rewardAddress)
+        , appliedInstantiageDelegate = () => instantiateDelegate(rewardAddress)
+        , appliedInstantiageDeregister = () => instantiateDeregister(rewardAddress)
+        , appliedInstantiageRegisterAndDelegate = () => instantiateRegisterAndDelegate(rewardAddress)
+
     registerConnectButton!.innerText = connectMessage
     delegateConnectButton!.innerText = connectMessage
     deregisterConnectButton!.innerText = connectMessage
     registerAndDelegateButton!.innerText = connectMessage
     registerConnectButton?.addEventListener('click', instantiateRegistertButton)
-    registerConnectButton?.addEventListener('click', instantiateRegister)
+    registerConnectButton?.addEventListener('click', appliedInstantiageRegister)
 
     delegateConnectButton?.addEventListener('click', instantiateDelegateButton)
-    delegateConnectButton?.addEventListener('click', instantiateDelegate)
+    delegateConnectButton?.addEventListener('click', appliedInstantiageDelegate)
 
     deregisterConnectButton?.addEventListener('click', instantiateDeregisterButton)
-    deregisterConnectButton?.addEventListener('click', instantiateDeregister)
+    deregisterConnectButton?.addEventListener('click', appliedInstantiageDeregister)
 
     registerAndDelegateButton?.addEventListener('click', instantiateRegisterAndDelegateButton)
-    registerAndDelegateButton?.addEventListener('click', instantiateRegisterAndDelegate)
+    registerAndDelegateButton?.addEventListener('click', appliedInstantiageRegisterAndDelegate)
 }
+else
+    console.log('No supported wallet')
 
