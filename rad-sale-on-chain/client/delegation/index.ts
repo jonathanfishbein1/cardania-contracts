@@ -166,7 +166,7 @@ if (supportedWallet !== undefined) {
                 deregisterConnectButton.style.display = 'inline'
                 deregisterConnectButton.disabled = false
                 deregisterConnectButton?.addEventListener('click', instantiateDeregisterButton)
-                deregisterConnectButton?.addEventListener('click', instantiateDeregister.bind(rewardAddress))
+                deregisterConnectButton?.addEventListener('click', instantiateDeregister.bind(this, rewardAddress))
             }
             else
                 console.log('Cannot find button on page')
@@ -177,7 +177,7 @@ if (supportedWallet !== undefined) {
                 delegateConnectButton.style.display = 'inline'
                 delegateConnectButton.disabled = false
                 delegateConnectButton?.addEventListener('click', instantiateDelegateButton)
-                delegateConnectButton?.addEventListener('click', instantiateDelegate.bind(rewardAddress))
+                delegateConnectButton?.addEventListener('click', instantiateDelegate.bind(this, rewardAddress))
             }
             else
                 console.log('Cannot find button on page')
@@ -189,7 +189,7 @@ if (supportedWallet !== undefined) {
                 registerAndDelegateButton.style.display = 'inline'
                 registerAndDelegateButton.disabled = false
                 registerAndDelegateButton?.addEventListener('click', instantiateRegisterAndDelegateButton)
-                registerAndDelegateButton?.addEventListener('click', instantiateRegisterAndDelegate.bind(rewardAddress))
+                registerAndDelegateButton?.addEventListener('click', instantiateRegisterAndDelegate.bind(this, rewardAddress))
             }
             else
                 console.log('Cannot find button on page')
