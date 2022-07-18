@@ -3,10 +3,10 @@ import * as Lucid from 'lucid-cardano'
 import * as Wallet from '../wallet'
 
 const
-    registerConnectButton = document.getElementById('registerConnect'),
-    delegateConnectButton = document.getElementById('delegateConnect'),
-    deregisterConnectButton = document.getElementById('deregisterConnect'),
-    registerAndDelegateButton = document.getElementById('registerAndDelegateConnect'),
+    registerConnectButton = document.getElementById('registerConnect') as HTMLButtonElement,
+    delegateConnectButton = document.getElementById('delegateConnect') as HTMLButtonElement,
+    deregisterConnectButton = document.getElementById('deregisterConnect') as HTMLButtonElement,
+    registerAndDelegateButton = document.getElementById('registerAndDelegateConnect') as HTMLButtonElement,
     poolId = "pool13dgxp4ph2ut5datuh5na4wy7hrnqgkj4fyvac3e8fzfqcc7qh0h",
     bk = "testnetwIyK8IphOti170JCngH0NedP0yK8wBZs",
     addWalletMessage = "Add a browser wallet",
@@ -160,29 +160,39 @@ if (supportedWallet !== undefined) {
                 .then(res => res.json())
         console.log(account)
         if (account.active && account.pool_id === poolId) {
-            deregisterConnectButton?.addEventListener('click', instantiateDeregisterButton)
-            deregisterConnectButton?.addEventListener('click', appliedInstantiageDeregister)
+            if (deregisterConnectButton !== null) {
+                deregisterConnectButton.style.visibility = 'visible'
+                deregisterConnectButton.style.display = 'inline'
+                deregisterConnectButton.disabled = false
+                deregisterConnectButton?.addEventListener('click', instantiateDeregisterButton)
+                deregisterConnectButton?.addEventListener('click', appliedInstantiageDeregister)
+            }
+            else
+                console.log('Cannot find button on page')
         }
         else if (account.active) {
-            delegateConnectButton?.addEventListener('click', instantiateDelegateButton)
-            delegateConnectButton?.addEventListener('click', appliedInstantiageDelegate)
+            if (delegateConnectButton !== null) {
+                delegateConnectButton.style.visibility = 'visible'
+                delegateConnectButton.style.display = 'inline'
+                delegateConnectButton.disabled = false
+                delegateConnectButton?.addEventListener('click', instantiateDelegateButton)
+                delegateConnectButton?.addEventListener('click', appliedInstantiageDelegate)
+            }
+            else
+                console.log('Cannot find button on page')
 
         }
         else {
-            registerAndDelegateButton?.addEventListener('click', instantiateRegisterAndDelegateButton)
-            registerAndDelegateButton?.addEventListener('click', appliedInstantiageRegisterAndDelegate)
+            if (registerAndDelegateButton !== null) {
+                registerAndDelegateButton.style.visibility = 'visible'
+                registerAndDelegateButton.style.display = 'inline'
+                registerAndDelegateButton.disabled = false
+                registerAndDelegateButton?.addEventListener('click', instantiateRegisterAndDelegateButton)
+                registerAndDelegateButton?.addEventListener('click', appliedInstantiageRegisterAndDelegate)
+            }
+            else
+                console.log('Cannot find button on page')
         }
-        registerConnectButton!.innerText = connectMessage
-        delegateConnectButton!.innerText = connectMessage
-        deregisterConnectButton!.innerText = connectMessage
-        registerAndDelegateButton!.innerText = connectMessage
-        registerConnectButton?.addEventListener('click', instantiateRegistertButton)
-        registerConnectButton?.addEventListener('click', appliedInstantiageRegister)
-        delegateConnectButton?.addEventListener('click', instantiateDelegateButton)
-        delegateConnectButton?.addEventListener('click', appliedInstantiageDelegate)
-        registerAndDelegateButton?.addEventListener('click', instantiateRegisterAndDelegateButton)
-        registerAndDelegateButton?.addEventListener('click', appliedInstantiageRegisterAndDelegate)
-
     }
     else
         console.log('Reward address is undefined')
