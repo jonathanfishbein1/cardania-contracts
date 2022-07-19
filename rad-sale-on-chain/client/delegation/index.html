@@ -1,18 +1,17 @@
 <html>
 
 <head>
-    <script type="module" defer="defer" src="./index.ts"></script>
 </head>
 
 <body>
-    <button id="registerConnect" class="connect" style="visibility: hidden; display: none" disabled>connect
-        wallet</button>
-    <button id="delegateConnect" class="connect" style="visibility: hidden; display: none" disabled>connect
-        wallet</button>
-    <button id="deregisterConnect" class="connect" style="visibility: hidden; display: none" disabled>connect
-        wallet</button>
-    <button id="registerAndDelegateConnect" class="connect" style="visibility: hidden; display: none" disabled>connect
-        wallet</button>
+    <div id="elm-app-is-loaded-here"></div>
+
+    <script src="elm.js"></script>
+    <script>
+        var app = Elm.HomePage.init({
+            node: document.getElementById("elm-app-is-loaded-here")
+        });      
+    </script>
 </body>
 
 </html>
