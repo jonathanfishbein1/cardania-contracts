@@ -6,17 +6,20 @@ import Html.Attributes
 import Html.Events
 
 
-decodeWallet : String -> SupportedWallet
+decodeWallet : String -> Maybe SupportedWallet
 decodeWallet status =
     case status of
         "nami" ->
-            Nami
+            Just Nami
 
-        "Eternl" ->
-            Eternl
+        "eternl" ->
+            Just Eternl
+
+        "flint" ->
+            Just Flint
 
         _ ->
-            Flint
+            Nothing
 
 
 type SupportedWallet
@@ -38,14 +41,24 @@ type State
 
 type alias Model =
     { state : State
-    , wallet : SupportedWallet
+    , wallet : Maybe SupportedWallet
     }
 
 
 init : String -> ( Model, Cmd Msg )
 init supportedWallet =
-    ( { state = NotConnected
-      , wallet = decodeWallet supportedWallet
+    let
+        wallet =
+            decodeWallet supportedWallet
+    in
+    ( { state =
+            case wallet of
+                Just w ->
+                    Connected
+
+                Nothing ->
+                    NotConnected
+      , wallet = wallet
       }
     , Cmd.none
     )
@@ -75,7 +88,15 @@ view model =
                     Disconnect
             )
         ]
-        [ Html.text (Debug.toString model) ]
+        [ Html.text
+            (case model.state of
+                NotConnected ->
+                    "Connect"
+
+                Connected ->
+                    "Disconnect"
+            )
+        ]
 
 
 subscriptions : Model -> Sub Msg
