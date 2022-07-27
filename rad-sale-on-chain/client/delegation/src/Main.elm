@@ -42,22 +42,22 @@ type SupportedWallet
 
 
 type Msg
-    = Connect
-    | Disconnect
+    = Connect SupportedWallet
+    | Disconnect SupportedWallet
     | NoOp
-    | WalletConnected Bool
+    | WalletConnected (Maybe SupportedWallet)
 
 
 type State
-    = NotConnected
+    = NotConnectedAbleTo SupportedWallet
+    | NotConnectedNotAbleTo
     | Connecting
-    | Connected
+    | Connected SupportedWallet
     | NullState
 
 
 type alias Model =
     { state : State
-    , wallet : Maybe SupportedWallet
     }
 
 
@@ -70,11 +70,10 @@ init supportedWallet =
     ( { state =
             case wallet of
                 Just w ->
-                    Connected
+                    NotConnectedAbleTo w
 
                 Nothing ->
-                    NotConnected
-      , wallet = wallet
+                    NotConnectedNotAbleTo
       }
     , Cmd.none
     )
@@ -83,27 +82,23 @@ init supportedWallet =
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
-        Connect ->
+        Connect w ->
             ( { model | state = Connecting }
-            , case model.wallet of
-                Just w ->
-                    connectWallet (encodeWallet w)
-
-                Nothing ->
-                    Cmd.none
+            , connectWallet (encodeWallet w)
             )
 
-        Disconnect ->
-            ( { model | state = NotConnected }, Cmd.none )
+        Disconnect wallet ->
+            ( { model | state = NotConnectedAbleTo wallet }, Cmd.none )
 
-        WalletConnected connectedStatus ->
+        WalletConnected wallet ->
             ( { model
                 | state =
-                    if connectedStatus == True then
-                        Connected
+                    case wallet of
+                        Just w ->
+                            Connected w
 
-                    else
-                        NotConnected
+                        Nothing ->
+                            NotConnectedNotAbleTo
               }
             , Cmd.none
             )
@@ -117,11 +112,14 @@ view model =
     Html.button
         [ Html.Events.onClick
             (case model.state of
-                NotConnected ->
-                    Connect
+                NotConnectedAbleTo w ->
+                    Connect w
 
-                Connected ->
-                    Disconnect
+                NotConnectedNotAbleTo ->
+                    NoOp
+
+                Connected w ->
+                    Disconnect w
 
                 Connecting ->
                     NoOp
@@ -132,10 +130,13 @@ view model =
         ]
         [ Html.text
             (case model.state of
-                NotConnected ->
+                NotConnectedAbleTo w ->
                     "Connect"
 
-                Connected ->
+                NotConnectedNotAbleTo ->
+                    "No available wallet"
+
+                Connected w ->
                     "Disconnect"
 
                 Connecting ->
@@ -149,7 +150,7 @@ view model =
 
 subscriptions : Model -> Sub Msg
 subscriptions _ =
-    walletConnection WalletConnected
+    walletConnection (\s -> WalletConnected (decodeWallet s))
 
 
 main : Program String Model Msg
@@ -165,4 +166,4 @@ main =
 port connectWallet : String -> Cmd msg
 
 
-port walletConnection : (Bool -> msg) -> Sub msg
+port walletConnection : (String -> msg) -> Sub msg

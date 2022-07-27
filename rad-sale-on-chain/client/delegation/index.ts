@@ -77,7 +77,7 @@ app.ports.connectWallet.subscribe(async supportedWallet => {
     const wallet = await Wallet.getWalletApi(supportedWallet!) as any
     lucid.selectWallet(wallet)
     console.log(wallet)
-    wallet ? app.ports.walletConnection.send(true) : app.ports.walletConnection.send(false)
+    app.ports.walletConnection.send(supportedWallet)
 
     // const rewardAddress = await lucid.wallet.rewardAddress()
     // const
