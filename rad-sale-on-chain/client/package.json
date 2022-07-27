@@ -6,7 +6,7 @@
   "type": "module",
   "scripts": {
     "devBuy": "webpack serve --config rad-sale-on-chain/webpack.config.js --open",
-    "devDelegate": "webpack serve --config delegation/webpack.config.js --open",
+    "devDelegate": "cd delegation && webpack serve --config webpack.config.js --open",
     "buildBuy": "webpack build --config rad-sale-on-chain/webpack.config.js && cp rad-sale-on-chain/index.html dist",
     "startBuy": "npm run buildBuy && cp rad-sale-on-chain/server.cjs dist/ && node dist/server.cjs"
   },
@@ -27,6 +27,7 @@
   },
   "dependencies": {
     "buffer": "^6.0.3",
+    "elm": "^0.19.1-5",
     "lucid-cardano": "^0.5.0"
   }
 }

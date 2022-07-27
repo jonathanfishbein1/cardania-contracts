@@ -1,9 +1,9 @@
 import './style.css'
 import * as Lucid from 'lucid-cardano'
 import * as Wallet from '../wallet'
+var { Elm } = require('./src/Main.elm')
 
 const
-
     poolId = "pool13dgxp4ph2ut5datuh5na4wy7hrnqgkj4fyvac3e8fzfqcc7qh0h",
     bk = "testnetwIyK8IphOti170JCngH0NedP0yK8wBZs"
     , blockfrostApi = 'https://cardano-testnet.blockfrost.io/api/v0'
@@ -72,9 +72,14 @@ const
         .then(res => res.json())
 console.log(account)
 
-declare var Elm: any
+
+console.log('here')
+
+console.log('here')
 
 var app = Elm.Main.init({
     flags: Wallet.hasWallet(),
     node: document.getElementById("elm-app-is-loaded-here")
-});    
+})
+
+app.ports.connectWallet.subscribe(console.log('made it here'))

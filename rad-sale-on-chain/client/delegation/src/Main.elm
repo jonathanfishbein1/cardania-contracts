@@ -55,7 +55,9 @@ update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
         Connect ->
-            ( { model | state = Connected }, connectWallet () )
+            ( { model | state = Connected }
+            , connectWallet ()
+            )
 
         Disconnect ->
             ( { model | state = NotConnected }, Cmd.none )
