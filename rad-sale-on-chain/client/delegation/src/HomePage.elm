@@ -8,21 +8,44 @@ import Html.Events
 
 type Msg
     = Connect
+    | Disconnect
 
 
-update : Msg -> number -> number
+type State
+    = NotConnected
+      -- | Connecting
+    | Connected
+
+
+init : { state : State }
+init =
+    { state = NotConnected }
+
+
+update : Msg -> { state : State } -> { state : State }
 update msg model =
     case msg of
         Connect ->
-            model + 1
+            { state = Connected }
+
+        Disconnect ->
+            { state = NotConnected }
 
 
-view : Int -> Html.Html Msg
+view : { state : State } -> Html.Html Msg
 view model =
-    Html.button [ Html.Events.onClick Connect ]
-        [ Html.text (String.fromInt model) ]
+    Html.button
+        [ Html.Events.onClick
+            (case model.state of
+                NotConnected ->
+                    Connect
+
+                Connected ->
+                    Disconnect
+            )
+        ]
+        [ Html.text (Debug.toString model.state) ]
 
 
-main : Program () Int Msg
 main =
-    Browser.sandbox { init = 0, update = update, view = view }
+    Browser.sandbox { init = init, update = update, view = view }
