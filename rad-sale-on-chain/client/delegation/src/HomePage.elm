@@ -6,6 +6,25 @@ import Html.Attributes
 import Html.Events
 
 
+decodeWallet : String -> SupportedWallet
+decodeWallet status =
+    case status of
+        "nami" ->
+            Nami
+
+        "Eternl" ->
+            Eternl
+
+        _ ->
+            Flint
+
+
+type SupportedWallet
+    = Nami
+    | Eternl
+    | Flint
+
+
 type Msg
     = Connect
     | Disconnect
@@ -17,22 +36,32 @@ type State
     | Connected
 
 
-init : { state : State }
-init =
-    { state = NotConnected }
+type alias Model =
+    { state : State
+    , wallet : SupportedWallet
+    }
 
 
-update : Msg -> { state : State } -> { state : State }
+init : String -> ( Model, Cmd Msg )
+init supportedWallet =
+    ( { state = NotConnected
+      , wallet = decodeWallet supportedWallet
+      }
+    , Cmd.none
+    )
+
+
+update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
         Connect ->
-            { state = Connected }
+            ( { model | state = Connected }, Cmd.none )
 
         Disconnect ->
-            { state = NotConnected }
+            ( { model | state = NotConnected }, Cmd.none )
 
 
-view : { state : State } -> Html.Html Msg
+view : Model -> Html.Html Msg
 view model =
     Html.button
         [ Html.Events.onClick
@@ -44,8 +73,19 @@ view model =
                     Disconnect
             )
         ]
-        [ Html.text (Debug.toString model.state) ]
+        [ Html.text (Debug.toString model) ]
 
 
+subscriptions : Model -> Sub Msg
+subscriptions _ =
+    Sub.none
+
+
+main : Program String Model Msg
 main =
-    Browser.sandbox { init = init, update = update, view = view }
+    Browser.element
+        { init = init
+        , update = update
+        , view = view
+        , subscriptions = subscriptions
+        }
