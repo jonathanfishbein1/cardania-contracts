@@ -72,3 +72,9 @@ const
         .then(res => res.json())
 console.log(account)
 
+declare var Elm: any
+
+var app = Elm.Main.init({
+    flags: Wallet.hasWallet(),
+    node: document.getElementById("elm-app-is-loaded-here")
+});    

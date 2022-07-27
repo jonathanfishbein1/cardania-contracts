@@ -34,6 +34,11 @@ export default {
                 test: /\.tsx?$/,
                 use: 'ts-loader',
                 exclude: /node_modules/,
+            },
+            {
+                test: /\.elm$/,
+                use: 'elm-webpack-loader',
+                exclude: [/elm-stuff/, /node_modules/],
             }
         ]
     },
