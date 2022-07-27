@@ -58,7 +58,8 @@ type Model
     = NotConnectedAbleTo SupportedWallet
     | NotConnectedNotAbleTo
     | Connecting
-    | Connected SupportedWallet
+    | ConnectionEstablished SupportedWallet
+    | Connected SupportedWallet DelegationStatus
     | NullState
 
 
@@ -92,11 +93,11 @@ update msg model =
         WalletConnected wallet ->
             ( case wallet of
                 Just w ->
-                    Connected w
+                    ConnectionEstablished w
 
                 Nothing ->
                     NotConnectedNotAbleTo
-            , Cmd.none
+            , getDelegationStatus ()
             )
 
         NoOp ->
@@ -114,7 +115,10 @@ view model =
                 NotConnectedNotAbleTo ->
                     NoOp
 
-                Connected w ->
+                ConnectionEstablished w ->
+                    Disconnect w
+
+                Connected w d ->
                     Disconnect w
 
                 Connecting ->
@@ -132,7 +136,10 @@ view model =
                 NotConnectedNotAbleTo ->
                     "No available wallet"
 
-                Connected w ->
+                ConnectionEstablished w ->
+                    "Disconnect"
+
+                Connected w d ->
                     "Disconnect"
 
                 Connecting ->
@@ -163,3 +170,6 @@ port connectWallet : String -> Cmd msg
 
 
 port walletConnection : (String -> msg) -> Sub msg
+
+
+port getDelegationStatus : () -> Cmd msg

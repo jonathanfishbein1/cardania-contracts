@@ -78,13 +78,14 @@ app.ports.connectWallet.subscribe(async supportedWallet => {
     lucid.selectWallet(wallet)
     console.log(wallet)
     app.ports.walletConnection.send(supportedWallet)
+})
 
-    // const rewardAddress = await lucid.wallet.rewardAddress()
-    // const
-    //     utils = new Lucid.Utils(lucid)
-    //     , { address: { address } } = utils.getAddressDetails(rewardAddress!)
-    //     , account = await fetch(`${blockfrostApi}/accounts/${(address)}/`
-    //         , { headers: { project_id: bk } })
-    //         .then(res => res.json())
-    // console.log(account)
+app.ports.getDelegationStatus.subscribe(async () => {
+    const rewardAddress = await lucid.wallet.rewardAddress()
+        , utils = new Lucid.Utils(lucid)
+        , { address: { address } } = utils.getAddressDetails(rewardAddress!)
+        , account = await fetch(`${blockfrostApi}/accounts/${(address)}/`
+            , { headers: { project_id: bk } })
+            .then(res => res.json())
+    console.log(account)
 })
