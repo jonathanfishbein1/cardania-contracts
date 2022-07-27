@@ -82,4 +82,4 @@ var app = Elm.Main.init({
     node: document.getElementById("elm-app-is-loaded-here")
 })
 
-app.ports.connectWallet.subscribe(console.log('made it here'))
+app.ports.connectWallet.subscribe(() => console.log('in js'))
