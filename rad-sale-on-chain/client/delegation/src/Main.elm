@@ -29,6 +29,7 @@ decodeAccount =
     Json.Decode.succeed Account
         |> Json.Decode.Pipeline.required "stake_address" Json.Decode.string
         |> Json.Decode.Pipeline.optional "pool_id" Json.Decode.string ""
+        |> Json.Decode.Pipeline.required "active" Json.Decode.bool
 
 
 encodeWallet : SupportedWallet -> String
@@ -47,6 +48,7 @@ encodeWallet wallet =
 type alias Account =
     { stake_address : String
     , pool_id : String
+    , active : Bool
     }
 
 
@@ -95,6 +97,10 @@ init supportedWallet =
     )
 
 
+sumnPoolId =
+    "pool13dgxp4ph2ut5datuh5na4wy7hrnqgkj4fyvac3e8fzfqcc7qh0h"
+
+
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
@@ -128,11 +134,19 @@ update msg model =
             in
             ( case account of
                 Ok res ->
-                    let
-                        b =
-                            Debug.log res.stake_address ()
-                    in
-                    Connected wallet DelegatingToOther
+                    Connected wallet
+                        (if res.active == False then
+                            NotDelegating
+
+                         else if res.active == True && res.pool_id /= sumnPoolId then
+                            DelegatingToOther
+
+                         else if res.active && res.pool_id == sumnPoolId then
+                            DelegatingToSumn
+
+                         else
+                            NotDelegating
+                        )
 
                 Err e ->
                     let
