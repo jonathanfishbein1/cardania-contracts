@@ -4419,53 +4419,9 @@ var $elm$virtual_dom$VirtualDom$toHandlerInt = function (handler) {
 			return 3;
 	}
 };
-var $elm$json$Json$Encode$string = _Json_wrap;
-var $elm$html$Html$Attributes$stringProperty = F2(
-	function (key, string) {
-		return A2(
-			_VirtualDom_property,
-			key,
-			$elm$json$Json$Encode$string(string));
-	});
-var $elm$html$Html$Attributes$class = $elm$html$Html$Attributes$stringProperty('className');
-var $elm$html$Html$div = _VirtualDom_node('div');
-var $elm$html$Html$h1 = _VirtualDom_node('h1');
-var $elm$html$Html$p = _VirtualDom_node('p');
-var $elm$html$Html$strong = _VirtualDom_node('strong');
-var $elm$virtual_dom$VirtualDom$text = _VirtualDom_text;
-var $elm$html$Html$text = $elm$virtual_dom$VirtualDom$text;
+var $elm$html$Html$button = _VirtualDom_node('button');
 var $author$project$HomePage$view = function (model) {
-	return A2(
-		$elm$html$Html$div,
-		_List_fromArray(
-			[
-				$elm$html$Html$Attributes$class('jumbotron')
-			]),
-		_List_fromArray(
-			[
-				A2(
-				$elm$html$Html$h1,
-				_List_Nil,
-				_List_fromArray(
-					[
-						$elm$html$Html$text('Welcome to Dunder Mifflin!')
-					])),
-				A2(
-				$elm$html$Html$p,
-				_List_Nil,
-				_List_fromArray(
-					[
-						$elm$html$Html$text('Dunder Mifflin Inc. (stock symbol '),
-						A2(
-						$elm$html$Html$strong,
-						_List_Nil,
-						_List_fromArray(
-							[
-								$elm$html$Html$text('DMI')
-							])),
-						$elm$html$Html$text(' \n                ) is a micro-cap regional paper and office \n                supply distributor with an emphasis on servicing \n                small-business clients.\n                ')
-					]))
-			]));
+	return A2($elm$html$Html$button, _List_Nil, _List_Nil);
 };
 var $author$project$HomePage$main = $author$project$HomePage$view('dummy model');
 _Platform_export({'HomePage':{'init':_VirtualDom_init($author$project$HomePage$main)(0)(0)}});}(this));

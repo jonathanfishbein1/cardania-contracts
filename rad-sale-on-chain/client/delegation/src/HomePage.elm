@@ -1,26 +1,28 @@
 module HomePage exposing (main)
 
-import Html exposing (..)
-import Html.Attributes exposing (..)
+import Browser
+import Html
+import Html.Attributes
+import Html.Events
 
 
-view : a -> Html msg
+type Msg
+    = Connect
+
+
+update : Msg -> number -> number
+update msg model =
+    case msg of
+        Connect ->
+            model + 1
+
+
+view : Int -> Html.Html Msg
 view model =
-    div [ class "jumbotron" ]
-        [ h1 [] [ text "Welcome to Dunder Mifflin!" ]
-        , p []
-            [ text "Dunder Mifflin Inc. (stock symbol "
-            , strong [] [ text "DMI" ]
-            , text <|
-                """ 
-                ) is a micro-cap regional paper and office 
-                supply distributor with an emphasis on servicing 
-                small-business clients.
-                """
-            ]
-        ]
+    Html.button [ Html.Events.onClick Connect ]
+        [ Html.text (String.fromInt model) ]
 
 
-main : Html msg
+main : Program () Int Msg
 main =
-    view "dummy model"
+    Browser.sandbox { init = 0, update = update, view = view }
