@@ -61,18 +61,14 @@ const
     }
 
 const supportedWallet = Wallet.hasWallet()
-if (supportedWallet !== undefined) {
-    const wallet = await Wallet.getWalletApi(supportedWallet) as any
-    lucid.selectWallet(wallet)
-    const rewardAddress = await lucid.wallet.rewardAddress()
-    const
-        utils = new Lucid.Utils(lucid)
-        , { address: { address } } = utils.getAddressDetails(rewardAddress!)
-        , account = await fetch(`${blockfrostApi}/accounts/${(address)}/`
-            , { headers: { project_id: bk } })
-            .then(res => res.json())
-    console.log(account)
-}
-else
-    console.log('No supported wallet')
+const wallet = await Wallet.getWalletApi(supportedWallet!) as any
+lucid.selectWallet(wallet)
+const rewardAddress = await lucid.wallet.rewardAddress()
+const
+    utils = new Lucid.Utils(lucid)
+    , { address: { address } } = utils.getAddressDetails(rewardAddress!)
+    , account = await fetch(`${blockfrostApi}/accounts/${(address)}/`
+        , { headers: { project_id: bk } })
+        .then(res => res.json())
+console.log(account)
 
