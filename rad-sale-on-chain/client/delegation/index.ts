@@ -76,13 +76,15 @@ var app = Elm.Main.init({
 app.ports.connectWallet.subscribe(async supportedWallet => {
     const wallet = await Wallet.getWalletApi(supportedWallet!) as any
     lucid.selectWallet(wallet)
+    console.log(wallet)
+    wallet ? app.ports.walletConnection.send(true) : app.ports.walletConnection.send(false)
 
-    const rewardAddress = await lucid.wallet.rewardAddress()
-    const
-        utils = new Lucid.Utils(lucid)
-        , { address: { address } } = utils.getAddressDetails(rewardAddress!)
-        , account = await fetch(`${blockfrostApi}/accounts/${(address)}/`
-            , { headers: { project_id: bk } })
-            .then(res => res.json())
-    console.log(account)
+    // const rewardAddress = await lucid.wallet.rewardAddress()
+    // const
+    //     utils = new Lucid.Utils(lucid)
+    //     , { address: { address } } = utils.getAddressDetails(rewardAddress!)
+    //     , account = await fetch(`${blockfrostApi}/accounts/${(address)}/`
+    //         , { headers: { project_id: bk } })
+    //         .then(res => res.json())
+    // console.log(account)
 })

@@ -45,6 +45,7 @@ type Msg
     = Connect
     | Disconnect
     | NoOp
+    | WalletConnected Bool
 
 
 type State
@@ -95,6 +96,18 @@ update msg model =
         Disconnect ->
             ( { model | state = NotConnected }, Cmd.none )
 
+        WalletConnected connectedStatus ->
+            ( { model
+                | state =
+                    if connectedStatus == True then
+                        Connected
+
+                    else
+                        NotConnected
+              }
+            , Cmd.none
+            )
+
         NoOp ->
             ( model, Cmd.none )
 
@@ -136,7 +149,7 @@ view model =
 
 subscriptions : Model -> Sub Msg
 subscriptions _ =
-    Sub.none
+    walletConnection WalletConnected
 
 
 main : Program String Model Msg
@@ -150,3 +163,6 @@ main =
 
 
 port connectWallet : String -> Cmd msg
+
+
+port walletConnection : (Bool -> msg) -> Sub msg
