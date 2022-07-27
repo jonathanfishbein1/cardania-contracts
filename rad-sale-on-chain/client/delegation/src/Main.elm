@@ -4,6 +4,8 @@ import Browser
 import Html
 import Html.Attributes
 import Html.Events
+import Json.Decode
+import Json.Decode.Pipeline
 
 
 decodeWallet : String -> Maybe SupportedWallet
@@ -22,6 +24,13 @@ decodeWallet status =
             Nothing
 
 
+decodeAccount : Json.Decode.Decoder Account
+decodeAccount =
+    Json.Decode.succeed Account
+        |> Json.Decode.Pipeline.required "stake_address" Json.Decode.string
+        |> Json.Decode.Pipeline.optional "pool_id" Json.Decode.string ""
+
+
 encodeWallet : SupportedWallet -> String
 encodeWallet wallet =
     case wallet of
@@ -35,6 +44,12 @@ encodeWallet wallet =
             "flint"
 
 
+type alias Account =
+    { stake_address : String
+    , pool_id : String
+    }
+
+
 type SupportedWallet
     = Nami
     | Eternl
@@ -46,6 +61,7 @@ type Msg
     | Disconnect SupportedWallet
     | NoOp
     | WalletConnected (Maybe SupportedWallet)
+    | ReceiveAccountStatus (Result Json.Decode.Error Account)
 
 
 type DelegationStatus
@@ -97,7 +113,34 @@ update msg model =
 
                 Nothing ->
                     NotConnectedNotAbleTo
-            , getDelegationStatus ()
+            , getAccountStatus ()
+            )
+
+        ReceiveAccountStatus account ->
+            let
+                wallet =
+                    case model of
+                        ConnectionEstablished w ->
+                            w
+
+                        _ ->
+                            Nami
+            in
+            ( case account of
+                Ok res ->
+                    let
+                        b =
+                            Debug.log res.stake_address ()
+                    in
+                    Connected wallet DelegatingToOther
+
+                Err e ->
+                    let
+                        p =
+                            Debug.log "" ()
+                    in
+                    NullState
+            , Cmd.none
             )
 
         NoOp ->
@@ -153,7 +196,10 @@ view model =
 
 subscriptions : Model -> Sub Msg
 subscriptions _ =
-    walletConnection (\s -> WalletConnected (decodeWallet s))
+    Sub.batch
+        [ walletConnection (\s -> WalletConnected (decodeWallet s))
+        , receiveAccountStatus (\s -> ReceiveAccountStatus (Json.Decode.decodeString decodeAccount s))
+        ]
 
 
 main : Program String Model Msg
@@ -172,4 +218,7 @@ port connectWallet : String -> Cmd msg
 port walletConnection : (String -> msg) -> Sub msg
 
 
-port getDelegationStatus : () -> Cmd msg
+port getAccountStatus : () -> Cmd msg
+
+
+port receiveAccountStatus : (String -> msg) -> Sub msg

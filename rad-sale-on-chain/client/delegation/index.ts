@@ -80,7 +80,7 @@ app.ports.connectWallet.subscribe(async supportedWallet => {
     app.ports.walletConnection.send(supportedWallet)
 })
 
-app.ports.getDelegationStatus.subscribe(async () => {
+app.ports.getAccountStatus.subscribe(async () => {
     const rewardAddress = await lucid.wallet.rewardAddress()
         , utils = new Lucid.Utils(lucid)
         , { address: { address } } = utils.getAddressDetails(rewardAddress!)
@@ -88,4 +88,5 @@ app.ports.getDelegationStatus.subscribe(async () => {
             , { headers: { project_id: bk } })
             .then(res => res.json())
     console.log(account)
+    app.ports.receiveAccountStatus.send(JSON.stringify(account))
 })
