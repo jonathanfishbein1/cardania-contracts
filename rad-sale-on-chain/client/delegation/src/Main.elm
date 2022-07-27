@@ -44,12 +44,14 @@ type SupportedWallet
 type Msg
     = Connect
     | Disconnect
+    | NoOp
 
 
 type State
     = NotConnected
-      -- | Connecting
+    | Connecting
     | Connected
+    | NullState
 
 
 type alias Model =
@@ -81,7 +83,7 @@ update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
         Connect ->
-            ( { model | state = Connected }
+            ( { model | state = Connecting }
             , case model.wallet of
                 Just w ->
                     connectWallet (encodeWallet w)
@@ -92,6 +94,9 @@ update msg model =
 
         Disconnect ->
             ( { model | state = NotConnected }, Cmd.none )
+
+        NoOp ->
+            ( model, Cmd.none )
 
 
 view : Model -> Html.Html Msg
@@ -104,6 +109,12 @@ view model =
 
                 Connected ->
                     Disconnect
+
+                Connecting ->
+                    NoOp
+
+                NullState ->
+                    NoOp
             )
         ]
         [ Html.text
@@ -113,6 +124,12 @@ view model =
 
                 Connected ->
                     "Disconnect"
+
+                Connecting ->
+                    "Connecting"
+
+                NullState ->
+                    "Connect"
             )
         ]
 
