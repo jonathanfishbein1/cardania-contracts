@@ -22,6 +22,19 @@ decodeWallet status =
             Nothing
 
 
+encodeWallet : SupportedWallet -> String
+encodeWallet wallet =
+    case wallet of
+        Nami ->
+            "nami"
+
+        Eternl ->
+            "eternl"
+
+        Flint ->
+            "flint"
+
+
 type SupportedWallet
     = Nami
     | Eternl
@@ -69,7 +82,12 @@ update msg model =
     case msg of
         Connect ->
             ( { model | state = Connected }
-            , connectWallet ()
+            , case model.wallet of
+                Just w ->
+                    connectWallet (encodeWallet w)
+
+                Nothing ->
+                    Cmd.none
             )
 
         Disconnect ->
@@ -114,4 +132,4 @@ main =
         }
 
 
-port connectWallet : () -> Cmd msg
+port connectWallet : String -> Cmd msg
