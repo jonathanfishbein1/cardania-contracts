@@ -4,6 +4,7 @@ import Html exposing (..)
 import Html.Attributes exposing (..)
 
 
+view : a -> Html msg
 view model =
     div [ class "jumbotron" ]
         [ h1 [] [ text "Welcome to Dunder Mifflin!" ]
@@ -20,5 +21,6 @@ view model =
         ]
 
 
+main : Html msg
 main =
     view "dummy model"
