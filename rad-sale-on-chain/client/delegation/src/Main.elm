@@ -1,4 +1,4 @@
-module Main exposing (main)
+port module Main exposing (main)
 
 import Browser
 import Html
@@ -55,7 +55,7 @@ update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
         Connect ->
-            ( { model | state = Connected }, Cmd.none )
+            ( { model | state = Connected }, connectWallet () )
 
         Disconnect ->
             ( { model | state = NotConnected }, Cmd.none )
@@ -89,3 +89,6 @@ main =
         , view = view
         , subscriptions = subscriptions
         }
+
+
+port connectWallet : () -> Cmd msg
