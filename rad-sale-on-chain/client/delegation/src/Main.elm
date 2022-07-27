@@ -48,17 +48,18 @@ type Msg
     | WalletConnected (Maybe SupportedWallet)
 
 
-type State
+type DelegationStatus
+    = NotDelegating
+    | DelegatingToSumn
+    | DelegatingToOther
+
+
+type Model
     = NotConnectedAbleTo SupportedWallet
     | NotConnectedNotAbleTo
     | Connecting
     | Connected SupportedWallet
     | NullState
-
-
-type alias Model =
-    { state : State
-    }
 
 
 init : String -> ( Model, Cmd Msg )
@@ -67,14 +68,12 @@ init supportedWallet =
         wallet =
             decodeWallet supportedWallet
     in
-    ( { state =
-            case wallet of
-                Just w ->
-                    NotConnectedAbleTo w
+    ( case wallet of
+        Just w ->
+            NotConnectedAbleTo w
 
-                Nothing ->
-                    NotConnectedNotAbleTo
-      }
+        Nothing ->
+            NotConnectedNotAbleTo
     , Cmd.none
     )
 
@@ -83,23 +82,20 @@ update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
         Connect w ->
-            ( { model | state = Connecting }
+            ( Connecting
             , connectWallet (encodeWallet w)
             )
 
         Disconnect wallet ->
-            ( { model | state = NotConnectedAbleTo wallet }, Cmd.none )
+            ( NotConnectedAbleTo wallet, Cmd.none )
 
         WalletConnected wallet ->
-            ( { model
-                | state =
-                    case wallet of
-                        Just w ->
-                            Connected w
+            ( case wallet of
+                Just w ->
+                    Connected w
 
-                        Nothing ->
-                            NotConnectedNotAbleTo
-              }
+                Nothing ->
+                    NotConnectedNotAbleTo
             , Cmd.none
             )
 
@@ -111,7 +107,7 @@ view : Model -> Html.Html Msg
 view model =
     Html.button
         [ Html.Events.onClick
-            (case model.state of
+            (case model of
                 NotConnectedAbleTo w ->
                     Connect w
 
@@ -129,7 +125,7 @@ view model =
             )
         ]
         [ Html.text
-            (case model.state of
+            (case model of
                 NotConnectedAbleTo w ->
                     "Connect"
 
