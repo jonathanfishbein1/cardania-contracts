@@ -72,7 +72,7 @@ suite =
                         Main.Connected "" Main.Nami account Main.NotDelegating
 
                     ( newModel, _ ) =
-                        Main.update (Main.ReceiveRegisterAndDelegateStatus (Result.Ok sucess)) initialModel
+                        Main.update (Main.ReceiveRegisterAndDelegateStatus True) initialModel
                 in
                 Expect.equal
                     newModel

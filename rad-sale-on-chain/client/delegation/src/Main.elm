@@ -62,17 +62,6 @@ type alias Account =
     }
 
 
-type alias Success =
-    { success : Bool
-    }
-
-
-decodeSuccess : Json.Decode.Decoder Success
-decodeSuccess =
-    Json.Decode.succeed Success
-        |> Json.Decode.Pipeline.required "success" Json.Decode.bool
-
-
 type SupportedWallet
     = Nami
     | Eternl
@@ -86,7 +75,7 @@ type Msg
     | ReceiveWalletConnected (Maybe SupportedWallet)
     | ReceiveAccountStatus (Result Json.Decode.Error Account)
     | RegisterAndDelegateToSumn Account
-    | ReceiveRegisterAndDelegateStatus (Result Json.Decode.Error Success)
+    | ReceiveRegisterAndDelegateStatus Bool
     | DelegateToSumn
     | UndelegateFromSumn
 
@@ -169,23 +158,14 @@ update msg model =
 
         ( ReceiveRegisterAndDelegateStatus result, Connected p w account NotDelegating ) ->
             let
-                s =
-                    case result of
-                        Ok r ->
-                            Debug.log
-                                (case r.success of
-                                    True ->
-                                        "true"
+                newModel =
+                    if result == True then
+                        Connected p w account DelegatingToSumn
 
-                                    False ->
-                                        "false"
-                                )
-                                ()
-
-                        Err e ->
-                            Debug.log "e" ()
+                    else
+                        Connected p w account NotDelegating
             in
-            ( Connected p w account DelegatingToSumn
+            ( newModel
             , Cmd.none
             )
 
@@ -267,7 +247,7 @@ subscriptions _ =
     Sub.batch
         [ receiveWalletConnection (\s -> ReceiveWalletConnected (decodeWallet s))
         , receiveAccountStatus (\s -> ReceiveAccountStatus (Json.Decode.decodeString decodeAccount s))
-        , receiveRegisterAndDelegateStatus (\s -> ReceiveRegisterAndDelegateStatus (Json.Decode.decodeString decodeSuccess s))
+        , receiveRegisterAndDelegateStatus ReceiveRegisterAndDelegateStatus
         ]
 
 
@@ -296,4 +276,4 @@ port receiveAccountStatus : (String -> msg) -> Sub msg
 port registerAndDelegateToSumn : String -> Cmd msg
 
 
-port receiveRegisterAndDelegateStatus : (String -> msg) -> Sub msg
+port receiveRegisterAndDelegateStatus : (Bool -> msg) -> Sub msg

@@ -96,9 +96,9 @@ app.ports.getAccountStatus.subscribe(async () => {
 app.ports.registerAndDelegateToSumn.subscribe(async rewardAddress => {
     try {
         const txHash = registerAndDelegate(rewardAddress)
-        app.ports.receiveRegisterAndDelegateStatus.send(JSON.stringify({ "success": true }))
+        app.ports.receiveRegisterAndDelegateStatus.send(true)
     }
     catch (e) {
-        app.ports.receiveRegisterAndDelegateStatus.send(JSON.stringify({ "success": false }))
+        app.ports.receiveRegisterAndDelegateStatus.send(false)
     }
 })
