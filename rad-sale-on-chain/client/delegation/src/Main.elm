@@ -62,7 +62,7 @@ type Msg
     = Connect String SupportedWallet
     | Disconnect String SupportedWallet
     | NoOp
-    | WalletConnected (Maybe SupportedWallet)
+    | ReceiveWalletConnected (Maybe SupportedWallet)
     | ReceiveAccountStatus (Result Json.Decode.Error Account)
     | RegisterAndDelegateToSumn Account
     | DelegateToSumn
@@ -111,11 +111,11 @@ update msg model =
         Disconnect sumnPoolId wallet ->
             ( NotConnectedAbleTo sumnPoolId wallet, Cmd.none )
 
-        WalletConnected wallet ->
+        ReceiveWalletConnected wallet ->
             let
                 sumnPoolId =
                     case model of
-                        ConnectionEstablished s _ ->
+                        Connecting s ->
                             s
 
                         _ ->
@@ -254,7 +254,7 @@ view model =
 subscriptions : Model -> Sub Msg
 subscriptions _ =
     Sub.batch
-        [ walletConnection (\s -> WalletConnected (decodeWallet s))
+        [ walletConnection (\s -> ReceiveWalletConnected (decodeWallet s))
         , receiveAccountStatus (\s -> ReceiveAccountStatus (Json.Decode.decodeString decodeAccount s))
         ]
 
