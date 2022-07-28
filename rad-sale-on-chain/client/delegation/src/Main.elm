@@ -59,12 +59,12 @@ type SupportedWallet
 
 
 type Msg
-    = Connect SupportedWallet
-    | Disconnect SupportedWallet
+    = Connect String SupportedWallet
+    | Disconnect String SupportedWallet
     | NoOp
     | WalletConnected (Maybe SupportedWallet)
     | ReceiveAccountStatus (Result Json.Decode.Error Account)
-    | RegisterAndDelegateToSumn
+    | RegisterAndDelegateToSumn Account
     | DelegateToSumn
     | UndelegateFromSumn
 
@@ -76,23 +76,23 @@ type DelegationStatus
 
 
 type Model
-    = NotConnectedAbleTo SupportedWallet
+    = NotConnectedAbleTo String SupportedWallet
     | NotConnectedNotAbleTo
-    | Connecting
-    | ConnectionEstablished SupportedWallet
-    | Connected SupportedWallet DelegationStatus
+    | Connecting String
+    | ConnectionEstablished String SupportedWallet
+    | Connected String SupportedWallet Account DelegationStatus
     | NullState
 
 
-init : String -> ( Model, Cmd Msg )
-init supportedWallet =
+init : ( String, String ) -> ( Model, Cmd Msg )
+init ( supportedWallet, sumnPoolId ) =
     let
         wallet =
             decodeWallet supportedWallet
     in
     ( case wallet of
         Just w ->
-            NotConnectedAbleTo w
+            NotConnectedAbleTo sumnPoolId w
 
         Nothing ->
             NotConnectedNotAbleTo
@@ -100,26 +100,30 @@ init supportedWallet =
     )
 
 
-sumnPoolId : String
-sumnPoolId =
-    "pool13dgxp4ph2ut5datuh5na4wy7hrnqgkj4fyvac3e8fzfqcc7qh0h"
-
-
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
-        Connect w ->
-            ( Connecting
+        Connect sumnPoolId w ->
+            ( Connecting sumnPoolId
             , connectWallet (encodeWallet w)
             )
 
-        Disconnect wallet ->
-            ( NotConnectedAbleTo wallet, Cmd.none )
+        Disconnect sumnPoolId wallet ->
+            ( NotConnectedAbleTo sumnPoolId wallet, Cmd.none )
 
         WalletConnected wallet ->
+            let
+                sumnPoolId =
+                    case model of
+                        ConnectionEstablished s _ ->
+                            s
+
+                        _ ->
+                            ""
+            in
             ( case wallet of
                 Just w ->
-                    ConnectionEstablished w
+                    ConnectionEstablished sumnPoolId w
 
                 Nothing ->
                     NotConnectedNotAbleTo
@@ -130,22 +134,32 @@ update msg model =
             let
                 wallet =
                     case model of
-                        ConnectionEstablished w ->
+                        ConnectionEstablished _ w ->
                             w
 
                         _ ->
                             Nami
+
+                sumnPoolId =
+                    case model of
+                        ConnectionEstablished s _ ->
+                            s
+
+                        _ ->
+                            ""
             in
             ( case account of
-                Ok res ->
-                    Connected wallet
-                        (if res.active == False then
+                Ok acc ->
+                    Connected sumnPoolId
+                        wallet
+                        acc
+                        (if acc.active == False then
                             NotDelegating
 
-                         else if res.active == True && res.pool_id /= sumnPoolId then
+                         else if acc.active == True && acc.pool_id /= sumnPoolId then
                             DelegatingToOther
 
-                         else if res.active && res.pool_id == sumnPoolId then
+                         else if acc.active && acc.pool_id == sumnPoolId then
                             DelegatingToSumn
 
                          else
@@ -161,8 +175,8 @@ update msg model =
             , Cmd.none
             )
 
-        RegisterAndDelegateToSumn ->
-            ( model, Cmd.none )
+        RegisterAndDelegateToSumn account ->
+            ( model, registerAndDelegateToSumn account.stake_address )
 
         DelegateToSumn ->
             ( model, Cmd.none )
@@ -179,19 +193,19 @@ view model =
     Html.button
         [ Html.Events.onClick
             (case model of
-                NotConnectedAbleTo w ->
-                    Connect w
+                NotConnectedAbleTo sumnPoolId w ->
+                    Connect sumnPoolId w
 
                 NotConnectedNotAbleTo ->
                     NoOp
 
-                ConnectionEstablished w ->
-                    Disconnect w
+                ConnectionEstablished sumnPoolId w ->
+                    Disconnect sumnPoolId w
 
-                Connected w d ->
+                Connected _ w acc d ->
                     case d of
                         NotDelegating ->
-                            RegisterAndDelegateToSumn
+                            RegisterAndDelegateToSumn acc
 
                         DelegatingToOther ->
                             DelegateToSumn
@@ -199,7 +213,7 @@ view model =
                         DelegatingToSumn ->
                             UndelegateFromSumn
 
-                Connecting ->
+                Connecting _ ->
                     NoOp
 
                 NullState ->
@@ -208,16 +222,16 @@ view model =
         ]
         [ Html.text
             (case model of
-                NotConnectedAbleTo w ->
+                NotConnectedAbleTo _ w ->
                     "Connect"
 
                 NotConnectedNotAbleTo ->
                     "No available wallet"
 
-                ConnectionEstablished w ->
+                ConnectionEstablished _ w ->
                     "Disconnect"
 
-                Connected w d ->
+                Connected _ w _ d ->
                     case d of
                         NotDelegating ->
                             "Delegate"
@@ -228,7 +242,7 @@ view model =
                         DelegatingToSumn ->
                             "Undelegate"
 
-                Connecting ->
+                Connecting _ ->
                     "Connecting"
 
                 NullState ->
@@ -245,7 +259,7 @@ subscriptions _ =
         ]
 
 
-main : Program String Model Msg
+main : Program ( String, String ) Model Msg
 main =
     Browser.element
         { init = init
@@ -265,3 +279,6 @@ port getAccountStatus : () -> Cmd msg
 
 
 port receiveAccountStatus : (String -> msg) -> Sub msg
+
+
+port registerAndDelegateToSumn : String -> Cmd msg

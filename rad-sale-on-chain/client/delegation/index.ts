@@ -4,7 +4,7 @@ import * as Wallet from '../wallet'
 var { Elm } = require('./src/Main.elm')
 
 const
-    poolId = "pool13dgxp4ph2ut5datuh5na4wy7hrnqgkj4fyvac3e8fzfqcc7qh0h",
+    sumnPoolId = "pool13dgxp4ph2ut5datuh5na4wy7hrnqgkj4fyvac3e8fzfqcc7qh0h",
     bk = "testnetwIyK8IphOti170JCngH0NedP0yK8wBZs"
     , blockfrostApi = 'https://cardano-testnet.blockfrost.io/api/v0'
     , blockfrostClient = new Lucid.Blockfrost(blockfrostApi, bk)
@@ -26,7 +26,7 @@ const
         const transaction =
             await lucid
                 .newTx()
-                .delegateTo(rewardAddress, poolId)
+                .delegateTo(rewardAddress, sumnPoolId)
                 .complete()
             , signedTx = await transaction
                 .sign()
@@ -51,7 +51,7 @@ const
             await lucid
                 .newTx()
                 .registerStake(rewardAddress)
-                .delegateTo(rewardAddress, poolId)
+                .delegateTo(rewardAddress, sumnPoolId)
                 .complete()
             , signedTx = await transaction
                 .sign()
@@ -69,7 +69,7 @@ console.log('here')
 console.log('here')
 
 var app = Elm.Main.init({
-    flags: Wallet.hasWallet(),
+    flags: [Wallet.hasWallet(), sumnPoolId],
     node: document.getElementById("elm-app-is-loaded-here")
 })
 
@@ -90,3 +90,7 @@ app.ports.getAccountStatus.subscribe(async () => {
     console.log(account)
     app.ports.receiveAccountStatus.send(JSON.stringify(account))
 })
+
+
+app.ports.registerAndDelegateToSumn.subscribe(async rewardAddress =>
+    registerAndDelegate(rewardAddress))
