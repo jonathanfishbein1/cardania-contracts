@@ -288,7 +288,7 @@ view model =
 subscriptions : Model -> Sub Msg
 subscriptions _ =
     Sub.batch
-        [ walletConnection (\s -> ReceiveWalletConnected (decodeWallet s))
+        [ receiveWalletConnection (\s -> ReceiveWalletConnected (decodeWallet s))
         , receiveAccountStatus (\s -> ReceiveAccountStatus (Json.Decode.decodeString decodeAccount s))
         , receiveRegisterAndDelegateStatus (\s -> ReceiveRegisterAndDelegateStatus (Json.Decode.decodeString decodeSuccess s))
         ]
@@ -307,7 +307,7 @@ main =
 port connectWallet : String -> Cmd msg
 
 
-port walletConnection : (String -> msg) -> Sub msg
+port receiveWalletConnection : (String -> msg) -> Sub msg
 
 
 port getAccountStatus : () -> Cmd msg

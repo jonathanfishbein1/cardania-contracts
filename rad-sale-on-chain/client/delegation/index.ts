@@ -78,7 +78,7 @@ app.ports.connectWallet.subscribe(async supportedWallet => {
     const wallet = await Wallet.getWalletApi(supportedWallet!) as any
     lucid.selectWallet(wallet)
     console.log(wallet)
-    app.ports.walletConnection.send(supportedWallet)
+    app.ports.receiveWalletConnection.send(supportedWallet)
 })
 
 app.ports.getAccountStatus.subscribe(async () => {
