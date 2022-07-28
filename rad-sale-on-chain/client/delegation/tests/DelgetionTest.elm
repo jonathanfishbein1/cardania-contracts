@@ -59,4 +59,22 @@ suite =
                 Expect.equal
                     newModel
                     (Main.Connected "" Main.Nami account Main.DelegatingToSumn)
+        , Test.test "test ReceiveRegisterAndDelegateStatus with Connected NotDelegating" <|
+            \_ ->
+                let
+                    account =
+                        { stake_address = "", pool_id = "", active = True }
+
+                    sucess =
+                        { success = True }
+
+                    initialModel =
+                        Main.Connected "" Main.Nami account Main.NotDelegating
+
+                    ( newModel, _ ) =
+                        Main.update (Main.ReceiveRegisterAndDelegateStatus (Result.Ok sucess)) initialModel
+                in
+                Expect.equal
+                    newModel
+                    (Main.Connected "" Main.Nami account Main.DelegatingToSumn)
         ]

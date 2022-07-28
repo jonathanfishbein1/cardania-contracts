@@ -190,26 +190,33 @@ update msg model =
             ( model, registerAndDelegateToSumn account.stake_address )
 
         ReceiveRegisterAndDelegateStatus result ->
-            let
-                s =
-                    case result of
-                        Ok r ->
-                            Debug.log
-                                (case r.success of
-                                    True ->
-                                        "true"
+            case model of
+                Connected p w account NotDelegating ->
+                    let
+                        s =
+                            case result of
+                                Ok r ->
+                                    Debug.log
+                                        (case r.success of
+                                            True ->
+                                                "true"
 
-                                    False ->
-                                        "false"
-                                )
-                                ()
+                                            False ->
+                                                "false"
+                                        )
+                                        ()
 
-                        Err e ->
-                            Debug.log "e" ()
-            in
-            ( model
-            , Cmd.none
-            )
+                                Err e ->
+                                    Debug.log "e" ()
+                    in
+                    ( Connected p w account DelegatingToSumn
+                    , Cmd.none
+                    )
+
+                _ ->
+                    ( NullState
+                    , Cmd.none
+                    )
 
         DelegateToSumn ->
             ( model, Cmd.none )
