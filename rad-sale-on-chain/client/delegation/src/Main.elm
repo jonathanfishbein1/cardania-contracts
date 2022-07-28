@@ -197,7 +197,15 @@ view model =
                     "Disconnect"
 
                 Connected w d ->
-                    "Disconnect"
+                    case d of
+                        NotDelegating ->
+                            "Delegate"
+
+                        DelegatingToOther ->
+                            "Delegate"
+
+                        DelegatingToSumn ->
+                            "Undelegate"
 
                 Connecting ->
                     "Connecting"
