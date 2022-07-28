@@ -64,6 +64,9 @@ type Msg
     | NoOp
     | WalletConnected (Maybe SupportedWallet)
     | ReceiveAccountStatus (Result Json.Decode.Error Account)
+    | RegisterAndDelegateToSumn
+    | DelegateToSumn
+    | UndelegateFromSumn
 
 
 type DelegationStatus
@@ -97,6 +100,7 @@ init supportedWallet =
     )
 
 
+sumnPoolId : String
 sumnPoolId =
     "pool13dgxp4ph2ut5datuh5na4wy7hrnqgkj4fyvac3e8fzfqcc7qh0h"
 
@@ -157,6 +161,15 @@ update msg model =
             , Cmd.none
             )
 
+        RegisterAndDelegateToSumn ->
+            ( model, Cmd.none )
+
+        DelegateToSumn ->
+            ( model, Cmd.none )
+
+        UndelegateFromSumn ->
+            ( model, Cmd.none )
+
         NoOp ->
             ( model, Cmd.none )
 
@@ -176,7 +189,15 @@ view model =
                     Disconnect w
 
                 Connected w d ->
-                    Disconnect w
+                    case d of
+                        NotDelegating ->
+                            RegisterAndDelegateToSumn
+
+                        DelegatingToOther ->
+                            DelegateToSumn
+
+                        DelegatingToSumn ->
+                            UndelegateFromSumn
 
                 Connecting ->
                     NoOp
