@@ -122,109 +122,80 @@ init ( supportedWallet, sumnPoolId ) =
     )
 
 
-update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
-    case msg of
-        Connect sumnPoolId w ->
-            case model of
-                NotConnectedAbleTo p wallet ->
-                    ( Connecting sumnPoolId, connectWallet (encodeWallet w) )
+    case ( msg, model ) of
+        ( Connect sumnPoolId w, NotConnectedAbleTo p wallet ) ->
+            ( Connecting sumnPoolId, connectWallet (encodeWallet w) )
 
-                _ ->
-                    ( NotConnectedNotAbleTo
-                    , Cmd.none
-                    )
-
-        Disconnect sumnPoolId wallet ->
+        ( Disconnect sumnPoolId wallet, _ ) ->
             ( NotConnectedAbleTo sumnPoolId wallet, Cmd.none )
 
-        ReceiveWalletConnected wallet ->
-            case model of
-                Connecting sumnPoolId ->
-                    ( case wallet of
-                        Just w ->
-                            ConnectionEstablished sumnPoolId w
+        ( ReceiveWalletConnected wallet, Connecting sumnPoolId ) ->
+            ( case wallet of
+                Just w ->
+                    ConnectionEstablished sumnPoolId w
 
-                        Nothing ->
-                            NotConnectedNotAbleTo
-                    , getAccountStatus ()
-                    )
+                Nothing ->
+                    NotConnectedNotAbleTo
+            , getAccountStatus ()
+            )
 
-                _ ->
-                    ( NullState
-                    , Cmd.none
-                    )
+        ( ReceiveAccountStatus account, ConnectionEstablished sumnPoolId wallet ) ->
+            ( case account of
+                Ok acc ->
+                    Connected sumnPoolId
+                        wallet
+                        acc
+                        (if acc.active == False then
+                            NotDelegating
 
-        ReceiveAccountStatus account ->
-            case model of
-                ConnectionEstablished sumnPoolId wallet ->
-                    ( case account of
-                        Ok acc ->
-                            Connected sumnPoolId
-                                wallet
-                                acc
-                                (if acc.active == False then
-                                    NotDelegating
+                         else if acc.active == True && acc.pool_id /= sumnPoolId then
+                            DelegatingToOther
 
-                                 else if acc.active == True && acc.pool_id /= sumnPoolId then
-                                    DelegatingToOther
+                         else if acc.active && acc.pool_id == sumnPoolId then
+                            DelegatingToSumn
 
-                                 else if acc.active && acc.pool_id == sumnPoolId then
-                                    DelegatingToSumn
+                         else
+                            NotDelegating
+                        )
 
-                                 else
-                                    NotDelegating
-                                )
+                Err e ->
+                    NullState
+            , Cmd.none
+            )
 
-                        Err e ->
-                            NullState
-                    , Cmd.none
-                    )
-
-                _ ->
-                    ( NullState
-                    , Cmd.none
-                    )
-
-        RegisterAndDelegateToSumn account ->
+        ( RegisterAndDelegateToSumn a, Connected p w account NotDelegating ) ->
             ( model, registerAndDelegateToSumn account.stake_address )
 
-        ReceiveRegisterAndDelegateStatus result ->
-            case model of
-                Connected p w account NotDelegating ->
-                    let
-                        s =
-                            case result of
-                                Ok r ->
-                                    Debug.log
-                                        (case r.success of
-                                            True ->
-                                                "true"
+        ( ReceiveRegisterAndDelegateStatus result, Connected p w account NotDelegating ) ->
+            let
+                s =
+                    case result of
+                        Ok r ->
+                            Debug.log
+                                (case r.success of
+                                    True ->
+                                        "true"
 
-                                            False ->
-                                                "false"
-                                        )
-                                        ()
+                                    False ->
+                                        "false"
+                                )
+                                ()
 
-                                Err e ->
-                                    Debug.log "e" ()
-                    in
-                    ( Connected p w account DelegatingToSumn
-                    , Cmd.none
-                    )
+                        Err e ->
+                            Debug.log "e" ()
+            in
+            ( Connected p w account DelegatingToSumn
+            , Cmd.none
+            )
 
-                _ ->
-                    ( NullState
-                    , Cmd.none
-                    )
-
-        DelegateToSumn ->
+        ( DelegateToSumn, Connected p w account DelegatingToOther ) ->
             ( model, Cmd.none )
 
-        UndelegateFromSumn ->
+        ( UndelegateFromSumn, Connected p w account DelegatingToSumn ) ->
             ( model, Cmd.none )
 
-        NoOp ->
+        ( _, _ ) ->
             ( model, Cmd.none )
 
 
