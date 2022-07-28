@@ -1,5 +1,8 @@
 port module Main exposing
-    ( Msg(..)
+    ( Account
+    , DelegationStatus(..)
+    , Model(..)
+    , Msg(..)
     , SupportedWallet(..)
     , encodeWallet
     , init
@@ -95,8 +98,8 @@ type DelegationStatus
 
 
 type Model
-    = NotConnectedAbleTo String SupportedWallet
-    | NotConnectedNotAbleTo
+    = NotConnectedNotAbleTo
+    | NotConnectedAbleTo String SupportedWallet
     | Connecting String
     | ConnectionEstablished String SupportedWallet
     | Connected String SupportedWallet Account DelegationStatus
@@ -123,76 +126,65 @@ update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
         Connect sumnPoolId w ->
-            ( Connecting sumnPoolId
-            , connectWallet (encodeWallet w)
-            )
+            case model of
+                NotConnectedAbleTo p wallet ->
+                    ( Connecting sumnPoolId, connectWallet (encodeWallet w) )
+
+                _ ->
+                    ( NotConnectedNotAbleTo
+                    , Cmd.none
+                    )
 
         Disconnect sumnPoolId wallet ->
             ( NotConnectedAbleTo sumnPoolId wallet, Cmd.none )
 
         ReceiveWalletConnected wallet ->
-            let
-                sumnPoolId =
-                    case model of
-                        Connecting s ->
-                            s
+            case model of
+                Connecting sumnPoolId ->
+                    ( case wallet of
+                        Just w ->
+                            ConnectionEstablished sumnPoolId w
 
-                        _ ->
-                            ""
-            in
-            ( case wallet of
-                Just w ->
-                    ConnectionEstablished sumnPoolId w
+                        Nothing ->
+                            NotConnectedNotAbleTo
+                    , getAccountStatus ()
+                    )
 
-                Nothing ->
-                    NotConnectedNotAbleTo
-            , getAccountStatus ()
-            )
+                _ ->
+                    ( NullState
+                    , Cmd.none
+                    )
 
         ReceiveAccountStatus account ->
-            let
-                wallet =
-                    case model of
-                        ConnectionEstablished _ w ->
-                            w
+            case model of
+                ConnectionEstablished sumnPoolId wallet ->
+                    ( case account of
+                        Ok acc ->
+                            Connected sumnPoolId
+                                wallet
+                                acc
+                                (if acc.active == False then
+                                    NotDelegating
 
-                        _ ->
-                            Nami
+                                 else if acc.active == True && acc.pool_id /= sumnPoolId then
+                                    DelegatingToOther
 
-                sumnPoolId =
-                    case model of
-                        ConnectionEstablished s _ ->
-                            s
+                                 else if acc.active && acc.pool_id == sumnPoolId then
+                                    DelegatingToSumn
 
-                        _ ->
-                            ""
-            in
-            ( case account of
-                Ok acc ->
-                    Connected sumnPoolId
-                        wallet
-                        acc
-                        (if acc.active == False then
-                            NotDelegating
+                                 else
+                                    NotDelegating
+                                )
 
-                         else if acc.active == True && acc.pool_id /= sumnPoolId then
-                            DelegatingToOther
+                        Err e ->
+                            NullState
+                    , Cmd.none
+                    )
 
-                         else if acc.active && acc.pool_id == sumnPoolId then
-                            DelegatingToSumn
-
-                         else
-                            NotDelegating
-                        )
-
-                Err e ->
-                    let
-                        p =
-                            Debug.log "" ()
-                    in
-                    NullState
-            , Cmd.none
-            )
+                _ ->
+                    ( NullState
+                    , Cmd.none
+                    )
 
         RegisterAndDelegateToSumn account ->
             ( model, registerAndDelegateToSumn account.stake_address )
