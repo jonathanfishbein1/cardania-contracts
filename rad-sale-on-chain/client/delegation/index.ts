@@ -58,6 +58,7 @@ const
                 .complete()
             , transactionHash = await signedTx
                 .submit()
+        return transactionHash
     }
 
 
@@ -92,5 +93,12 @@ app.ports.getAccountStatus.subscribe(async () => {
 })
 
 
-app.ports.registerAndDelegateToSumn.subscribe(async rewardAddress =>
-    registerAndDelegate(rewardAddress))
+app.ports.registerAndDelegateToSumn.subscribe(async rewardAddress => {
+    try {
+        const txHash = registerAndDelegate(rewardAddress)
+        app.ports.receiveRegisterAndDelegateStatus.send(JSON.stringify({ "success": true }))
+    }
+    catch (e) {
+        app.ports.receiveRegisterAndDelegateStatus.send(JSON.stringify({ "success": false }))
+    }
+})

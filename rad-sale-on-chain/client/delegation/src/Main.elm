@@ -52,6 +52,17 @@ type alias Account =
     }
 
 
+type alias Success =
+    { success : Bool
+    }
+
+
+decodeSuccess : Json.Decode.Decoder Success
+decodeSuccess =
+    Json.Decode.succeed Success
+        |> Json.Decode.Pipeline.required "success" Json.Decode.bool
+
+
 type SupportedWallet
     = Nami
     | Eternl
@@ -65,6 +76,7 @@ type Msg
     | ReceiveWalletConnected (Maybe SupportedWallet)
     | ReceiveAccountStatus (Result Json.Decode.Error Account)
     | RegisterAndDelegateToSumn Account
+    | ReceiveRegisterAndDelegateStatus (Result Json.Decode.Error Success)
     | DelegateToSumn
     | UndelegateFromSumn
 
@@ -178,6 +190,28 @@ update msg model =
         RegisterAndDelegateToSumn account ->
             ( model, registerAndDelegateToSumn account.stake_address )
 
+        ReceiveRegisterAndDelegateStatus result ->
+            let
+                s =
+                    case result of
+                        Ok r ->
+                            Debug.log
+                                (case r.success of
+                                    True ->
+                                        "true"
+
+                                    False ->
+                                        "false"
+                                )
+                                ()
+
+                        Err e ->
+                            Debug.log "e" ()
+            in
+            ( model
+            , Cmd.none
+            )
+
         DelegateToSumn ->
             ( model, Cmd.none )
 
@@ -256,6 +290,7 @@ subscriptions _ =
     Sub.batch
         [ walletConnection (\s -> ReceiveWalletConnected (decodeWallet s))
         , receiveAccountStatus (\s -> ReceiveAccountStatus (Json.Decode.decodeString decodeAccount s))
+        , receiveRegisterAndDelegateStatus (\s -> ReceiveRegisterAndDelegateStatus (Json.Decode.decodeString decodeSuccess s))
         ]
 
 
@@ -282,3 +317,6 @@ port receiveAccountStatus : (String -> msg) -> Sub msg
 
 
 port registerAndDelegateToSumn : String -> Cmd msg
+
+
+port receiveRegisterAndDelegateStatus : (String -> msg) -> Sub msg
