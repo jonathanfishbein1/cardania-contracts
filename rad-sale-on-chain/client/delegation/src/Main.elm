@@ -1,4 +1,11 @@
-port module Main exposing (main)
+port module Main exposing
+    ( Msg(..)
+    , SupportedWallet(..)
+    , encodeWallet
+    , init
+    , main
+    , update
+    )
 
 import Browser
 import Html
