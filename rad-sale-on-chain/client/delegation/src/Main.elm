@@ -73,6 +73,7 @@ type Msg
     | Disconnect String SupportedWallet
     | NoOp
     | ReceiveWalletConnected (Maybe SupportedWallet)
+    | GetAccountStatus
     | ReceiveAccountStatus (Result Json.Decode.Error Account)
     | RegisterAndDelegateToSumn Account
     | ReceiveRegisterAndDelegateStatus Bool
@@ -90,6 +91,7 @@ type Model
     = NotConnectedNotAbleTo
     | NotConnectedAbleTo String SupportedWallet
     | Connecting String
+    | GettingAcountStatus String SupportedWallet
     | ConnectionEstablished String SupportedWallet
     | Connected String SupportedWallet Account DelegationStatus
     | Delegating String SupportedWallet Account
@@ -112,6 +114,7 @@ init ( supportedWallet, sumnPoolId ) =
     )
 
 
+update : Msg -> Model -> ( Model, Cmd msg )
 update msg model =
     case ( msg, model ) of
         ( Connect sumnPoolId w, NotConnectedAbleTo p wallet ) ->
@@ -121,16 +124,21 @@ update msg model =
             ( NotConnectedAbleTo sumnPoolId wallet, Cmd.none )
 
         ( ReceiveWalletConnected wallet, Connecting sumnPoolId ) ->
-            ( case wallet of
+            case wallet of
                 Just w ->
-                    ConnectionEstablished sumnPoolId w
+                    let
+                        newModel =
+                            ConnectionEstablished sumnPoolId w
+                    in
+                    update GetAccountStatus newModel
 
                 Nothing ->
-                    NotConnectedNotAbleTo
-            , getAccountStatus ()
-            )
+                    ( NotConnectedNotAbleTo, Cmd.none )
 
-        ( ReceiveAccountStatus account, ConnectionEstablished sumnPoolId wallet ) ->
+        ( GetAccountStatus, ConnectionEstablished sumnPoolId w ) ->
+            ( model, getAccountStatus () )
+
+        ( ReceiveAccountStatus account, GettingAcountStatus sumnPoolId wallet ) ->
             ( case account of
                 Ok acc ->
                     Connected sumnPoolId
@@ -185,13 +193,16 @@ view model =
     Html.button
         [ Html.Events.onClick
             (case model of
-                NotConnectedAbleTo sumnPoolId w ->
-                    Connect sumnPoolId w
-
                 NotConnectedNotAbleTo ->
                     NoOp
 
+                NotConnectedAbleTo sumnPoolId w ->
+                    Connect sumnPoolId w
+
                 ConnectionEstablished sumnPoolId w ->
+                    NoOp
+
+                GettingAcountStatus _ _ ->
                     NoOp
 
                 Connected _ w acc d ->
@@ -217,14 +228,17 @@ view model =
         ]
         [ Html.text
             (case model of
-                NotConnectedAbleTo _ w ->
-                    "Connect"
-
                 NotConnectedNotAbleTo ->
                     "No available wallet"
 
+                NotConnectedAbleTo _ w ->
+                    "Connect"
+
                 ConnectionEstablished _ w ->
                     "Connection established"
+
+                GettingAcountStatus _ _ ->
+                    "Getting account status"
 
                 Connected _ w _ d ->
                     case d of

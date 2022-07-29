@@ -44,11 +44,11 @@ suite =
                 Expect.equal
                     newModel
                     (Main.ConnectionEstablished "" Main.Nami)
-        , Test.test "test ReceiveAccountStatus with ConnectionEstablished" <|
+        , Test.test "test ReceiveAccountStatus with GettingAcountStatus" <|
             \_ ->
                 let
                     initialModel =
-                        Main.ConnectionEstablished "" Main.Nami
+                        Main.GettingAcountStatus "" Main.Nami
 
                     account =
                         { stake_address = "", pool_id = "", active = True }
