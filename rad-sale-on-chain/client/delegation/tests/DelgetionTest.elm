@@ -44,6 +44,18 @@ suite =
                 Expect.equal
                     newModel
                     (Main.GettingAcountStatus "" Main.Nami)
+        , Test.test "test GetAccountStatus with ConnectionEstablished" <|
+            \_ ->
+                let
+                    initialModel =
+                        Main.ConnectionEstablished "" Main.Nami
+
+                    ( newModel, _ ) =
+                        Main.update Main.GetAccountStatus initialModel
+                in
+                Expect.equal
+                    newModel
+                    (Main.GettingAcountStatus "" Main.Nami)
         , Test.test "test ReceiveAccountStatus with GettingAcountStatus" <|
             \_ ->
                 let
