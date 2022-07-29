@@ -79,6 +79,7 @@ type Msg
     | ReceiveRegisterAndDelegateStatus Bool
     | DelegateToSumn
     | UndelegateFromSumn
+    | ReceiveUndelegateStatus Bool
 
 
 type DelegationStatus
@@ -96,6 +97,7 @@ type Model
     | Connected String SupportedWallet Account DelegationStatus
     | RegisteringAndDelegating String SupportedWallet Account
     | Delegating String SupportedWallet Account
+    | Undelegating String SupportedWallet Account DelegationStatus
     | NullState
 
 
@@ -183,7 +185,20 @@ update msg model =
             ( model, Cmd.none )
 
         ( UndelegateFromSumn, Connected p w account DelegatingToSumn ) ->
-            ( model, Cmd.none )
+            ( Undelegating p w account DelegatingToSumn, undelegate account.stake_address )
+
+        ( ReceiveUndelegateStatus result, Undelegating p w account _ ) ->
+            let
+                newModel =
+                    if result == True then
+                        Connected p w account NotDelegating
+
+                    else
+                        Connected p w account DelegatingToSumn
+            in
+            ( newModel
+            , Cmd.none
+            )
 
         ( _, _ ) ->
             ( model, Cmd.none )
@@ -226,6 +241,9 @@ view model =
                 Delegating _ _ _ ->
                     NoOp
 
+                Undelegating _ _ _ _ ->
+                    NoOp
+
                 NullState ->
                     NoOp
             )
@@ -258,11 +276,14 @@ view model =
                 Connecting _ ->
                     "Connecting"
 
+                RegisteringAndDelegating _ _ _ ->
+                    "Registering and Delegating"
+
                 Delegating _ _ _ ->
                     "Delegating"
 
-                RegisteringAndDelegating _ _ _ ->
-                    "Registering and Delegating"
+                Undelegating _ _ _ _ ->
+                    "Undelegating"
 
                 NullState ->
                     "Connect"
@@ -276,6 +297,7 @@ subscriptions _ =
         [ receiveWalletConnection (\s -> ReceiveWalletConnected (decodeWallet s))
         , receiveAccountStatus (\s -> ReceiveAccountStatus (Json.Decode.decodeString decodeAccount s))
         , receiveRegisterAndDelegateStatus ReceiveRegisterAndDelegateStatus
+        , receiveUndelegateStatus ReceiveUndelegateStatus
         ]
 
 
@@ -305,3 +327,9 @@ port registerAndDelegateToSumn : String -> Cmd msg
 
 
 port receiveRegisterAndDelegateStatus : (Bool -> msg) -> Sub msg
+
+
+port undelegate : String -> Cmd msg
+
+
+port receiveUndelegateStatus : (Bool -> msg) -> Sub msg

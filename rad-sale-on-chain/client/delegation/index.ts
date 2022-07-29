@@ -102,3 +102,13 @@ app.ports.registerAndDelegateToSumn.subscribe(async rewardAddress => {
         app.ports.receiveRegisterAndDelegateStatus.send(false)
     }
 })
+
+app.ports.undelegate.subscribe(async rewardAddress => {
+    try {
+        const txHash = await deregister(rewardAddress)
+        app.ports.receiveUndelegateStatus.send(true)
+    }
+    catch (e) {
+        app.ports.receiveUndelegateStatus.send(false)
+    }
+})

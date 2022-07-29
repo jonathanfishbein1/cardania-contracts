@@ -101,4 +101,34 @@ suite =
                 Expect.equal
                     newModel
                     (Main.Connected "" Main.Nami account Main.DelegatingToSumn)
+        , Test.test "test UndelegateFromSumn with Connected DelegatingToSumn" <|
+            \_ ->
+                let
+                    account =
+                        { stake_address = "", pool_id = "", active = True }
+
+                    initialModel =
+                        Main.Connected "" Main.Nami account Main.DelegatingToSumn
+
+                    ( newModel, _ ) =
+                        Main.update Main.UndelegateFromSumn initialModel
+                in
+                Expect.equal
+                    newModel
+                    (Main.Undelegating "" Main.Nami account Main.DelegatingToSumn)
+        , Test.test "test ReceiveUndelegateStatus with Undelegating" <|
+            \_ ->
+                let
+                    account =
+                        { stake_address = "", pool_id = "", active = True }
+
+                    initialModel =
+                        Main.Undelegating "" Main.Nami account Main.DelegatingToSumn
+
+                    ( newModel, _ ) =
+                        Main.update (Main.ReceiveUndelegateStatus True) initialModel
+                in
+                Expect.equal
+                    newModel
+                    (Main.Connected "" Main.Nami account Main.NotDelegating)
         ]
