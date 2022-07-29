@@ -85,7 +85,7 @@ suite =
                 in
                 Expect.equal
                     newModel
-                    (Main.Delegating "" Main.Nami account)
+                    (Main.RegisteringAndDelegating "" Main.Nami account)
         , Test.test "test ReceiveRegisterAndDelegateStatus with Connected NotDelegating" <|
             \_ ->
                 let
@@ -93,7 +93,7 @@ suite =
                         { stake_address = "", pool_id = "", active = True }
 
                     initialModel =
-                        Main.Delegating "" Main.Nami account
+                        Main.RegisteringAndDelegating "" Main.Nami account
 
                     ( newModel, _ ) =
                         Main.update (Main.ReceiveRegisterAndDelegateStatus True) initialModel

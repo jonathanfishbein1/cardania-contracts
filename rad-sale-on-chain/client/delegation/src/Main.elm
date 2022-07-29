@@ -94,6 +94,7 @@ type Model
     | GettingAcountStatus String SupportedWallet
     | ConnectionEstablished String SupportedWallet
     | Connected String SupportedWallet Account DelegationStatus
+    | RegisteringAndDelegating String SupportedWallet Account
     | Delegating String SupportedWallet Account
     | NullState
 
@@ -163,9 +164,9 @@ update msg model =
             )
 
         ( RegisterAndDelegateToSumn a, Connected p w account NotDelegating ) ->
-            ( Delegating p w account, registerAndDelegateToSumn account.stake_address )
+            ( RegisteringAndDelegating p w account, registerAndDelegateToSumn account.stake_address )
 
-        ( ReceiveRegisterAndDelegateStatus result, Delegating p w account ) ->
+        ( ReceiveRegisterAndDelegateStatus result, RegisteringAndDelegating p w account ) ->
             let
                 newModel =
                     if result == True then
@@ -219,6 +220,9 @@ view model =
                 Connecting _ ->
                     NoOp
 
+                RegisteringAndDelegating _ _ _ ->
+                    NoOp
+
                 Delegating _ _ _ ->
                     NoOp
 
@@ -254,11 +258,14 @@ view model =
                 Connecting _ ->
                     "Connecting"
 
-                NullState ->
-                    "Connect"
-
                 Delegating _ _ _ ->
                     "Delegating"
+
+                RegisteringAndDelegating _ _ _ ->
+                    "Registering and Delegating"
+
+                NullState ->
+                    "Connect"
             )
         ]
 
