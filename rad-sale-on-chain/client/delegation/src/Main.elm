@@ -136,7 +136,7 @@ update msg model =
                     ( NotConnectedNotAbleTo, Cmd.none )
 
         ( GetAccountStatus, ConnectionEstablished sumnPoolId w ) ->
-            ( model, getAccountStatus () )
+            ( GettingAcountStatus sumnPoolId w, getAccountStatus () )
 
         ( ReceiveAccountStatus account, GettingAcountStatus sumnPoolId wallet ) ->
             ( case account of
