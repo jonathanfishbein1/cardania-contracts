@@ -92,6 +92,7 @@ type Model
     | Connecting String
     | ConnectionEstablished String SupportedWallet
     | Connected String SupportedWallet Account DelegationStatus
+    | Delegating String SupportedWallet Account
     | NullState
 
 
@@ -154,9 +155,9 @@ update msg model =
             )
 
         ( RegisterAndDelegateToSumn a, Connected p w account NotDelegating ) ->
-            ( model, registerAndDelegateToSumn account.stake_address )
+            ( Delegating p w account, registerAndDelegateToSumn account.stake_address )
 
-        ( ReceiveRegisterAndDelegateStatus result, Connected p w account NotDelegating ) ->
+        ( ReceiveRegisterAndDelegateStatus result, Delegating p w account ) ->
             let
                 newModel =
                     if result == True then
@@ -191,7 +192,7 @@ view model =
                     NoOp
 
                 ConnectionEstablished sumnPoolId w ->
-                    Disconnect sumnPoolId w
+                    NoOp
 
                 Connected _ w acc d ->
                     case d of
@@ -207,6 +208,9 @@ view model =
                 Connecting _ ->
                     NoOp
 
+                Delegating _ _ _ ->
+                    NoOp
+
                 NullState ->
                     NoOp
             )
@@ -220,7 +224,7 @@ view model =
                     "No available wallet"
 
                 ConnectionEstablished _ w ->
-                    "Disconnect"
+                    "Connection established"
 
                 Connected _ w _ d ->
                     case d of
@@ -238,6 +242,9 @@ view model =
 
                 NullState ->
                     "Connect"
+
+                Delegating _ _ _ ->
+                    "Delegating"
             )
         ]
 
