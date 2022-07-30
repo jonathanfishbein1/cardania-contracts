@@ -20,6 +20,10 @@ import Json.Decode
 import Json.Decode.Pipeline
 
 
+type alias PoolId =
+    String
+
+
 decodeWallet : String -> Maybe SupportedWallet
 decodeWallet status =
     case status of
@@ -71,8 +75,8 @@ type SupportedWallet
 
 
 type Msg
-    = Connect String SupportedWallet
-    | Disconnect String SupportedWallet
+    = Connect PoolId SupportedWallet
+    | Disconnect PoolId SupportedWallet
     | NoOp
     | ReceiveWalletConnected (Maybe SupportedWallet)
     | GetAccountStatus
@@ -93,17 +97,17 @@ type DelegationStatus
 type Model
     = NotConnectedNotAbleTo
     | NotConnectedAbleTo String SupportedWallet
-    | Connecting String
-    | GettingAcountStatus String SupportedWallet
-    | ConnectionEstablished String SupportedWallet
-    | Connected String SupportedWallet Account DelegationStatus
+    | Connecting PoolId
+    | GettingAcountStatus PoolId SupportedWallet
+    | ConnectionEstablished PoolId SupportedWallet
+    | Connected PoolId SupportedWallet Account DelegationStatus
     | RegisteringAndDelegating String SupportedWallet Account
-    | Delegating String SupportedWallet Account
-    | Undelegating String SupportedWallet Account DelegationStatus
+    | Delegating PoolId SupportedWallet Account
+    | Undelegating PoolId SupportedWallet Account DelegationStatus
     | NullState
 
 
-init : ( String, String ) -> ( Model, Cmd Msg )
+init : ( String, PoolId ) -> ( Model, Cmd Msg )
 init ( supportedWallet, sumnPoolId ) =
     let
         wallet =
@@ -274,7 +278,7 @@ subscriptions _ =
         ]
 
 
-main : Program ( String, String ) Model Msg
+main : Program ( String, PoolId ) Model Msg
 main =
     Browser.element
         { init = init
