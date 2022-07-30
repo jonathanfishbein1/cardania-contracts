@@ -63,7 +63,7 @@ encodeWallet wallet =
 
 type alias Account =
     { stake_address : String
-    , pool_id : String
+    , pool_id : PoolId
     , active : Bool
     }
 
@@ -96,12 +96,12 @@ type DelegationStatus
 
 type Model
     = NotConnectedNotAbleTo
-    | NotConnectedAbleTo String SupportedWallet
+    | NotConnectedAbleTo PoolId SupportedWallet
     | Connecting PoolId
     | GettingAcountStatus PoolId SupportedWallet
     | ConnectionEstablished PoolId SupportedWallet
     | Connected PoolId SupportedWallet Account DelegationStatus
-    | RegisteringAndDelegating String SupportedWallet Account
+    | RegisteringAndDelegating PoolId SupportedWallet Account
     | Delegating PoolId SupportedWallet Account
     | Undelegating PoolId SupportedWallet Account DelegationStatus
     | NullState
