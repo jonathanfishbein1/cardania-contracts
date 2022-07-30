@@ -215,53 +215,105 @@ update msg model =
 view : Model -> Html.Html Msg
 view model =
     let
-        ( buttonOnPress, buttonText ) =
+        ( buttonOnPress, buttonText, styles ) =
             case model of
                 NotConnectedNotAbleTo ->
-                    ( NoOp, "No available wallet" )
+                    ( NoOp
+                    , "No available wallet"
+                    , []
+                    )
 
                 NotConnectedAbleTo sumnPoolId w ->
-                    ( Connect sumnPoolId w, "Connect" )
+                    ( Connect sumnPoolId w
+                    , "Connect"
+                    , [ Element.Background.color buttonHoverColor
+                      , Element.Border.glow buttonHoverColor 2
+                      ]
+                    )
 
                 ConnectionEstablished sumnPoolId w ->
-                    ( NoOp, "Connection established" )
+                    ( NoOp
+                    , "Connection established"
+                    , [ Element.Background.color buttonHoverColor
+                      , Element.Border.glow buttonHoverColor 2
+                      ]
+                    )
 
                 GettingAcountStatus _ _ ->
-                    ( NoOp, "Getting account status" )
+                    ( NoOp
+                    , "Getting account status"
+                    , []
+                    )
 
                 Connected _ w acc d ->
                     case d of
                         NotDelegating ->
-                            ( RegisterAndDelegateToSumn acc, "Delegate" )
+                            ( RegisterAndDelegateToSumn acc
+                            , "Delegate"
+                            , [ Element.Background.color buttonHoverColor
+                              , Element.Border.glow buttonHoverColor 2
+                              ]
+                            )
 
                         DelegatingToOther ->
-                            ( DelegateToSumn, "Delegate" )
+                            ( DelegateToSumn
+                            , "Delegate"
+                            , [ Element.Background.color buttonHoverColor
+                              , Element.Border.glow buttonHoverColor 2
+                              ]
+                            )
 
                         DelegatingToSumn ->
-                            ( UndelegateFromSumn, "Undelegate" )
+                            ( UndelegateFromSumn
+                            , "Undelegate"
+                            , [ Element.Background.color buttonHoverColor
+                              , Element.Border.glow buttonHoverColor 2
+                              ]
+                            )
 
                 Connecting _ ->
-                    ( NoOp, "Connecting" )
+                    ( NoOp
+                    , "Connecting"
+                    , [ Element.Background.color buttonHoverColor
+                      , Element.Border.glow buttonHoverColor 2
+                      ]
+                    )
 
                 RegisteringAndDelegating _ _ _ ->
-                    ( NoOp, "Registering and Delegating" )
+                    ( NoOp
+                    , "Registering and Delegating"
+                    , [ Element.Background.color buttonHoverColor
+                      , Element.Border.glow buttonHoverColor 2
+                      ]
+                    )
 
                 Delegating _ _ _ ->
                     ( NoOp
                     , "Delegating"
+                    , [ Element.Background.color buttonHoverColor
+                      , Element.Border.glow buttonHoverColor 2
+                      ]
                     )
 
                 Undelegating _ _ _ _ ->
-                    ( NoOp, "Undelegating" )
+                    ( NoOp
+                    , "Undelegating"
+                    , [ Element.Background.color buttonHoverColor
+                      , Element.Border.glow buttonHoverColor 2
+                      ]
+                    )
 
                 NullState ->
-                    ( NoOp, "Connect" )
+                    ( NoOp
+                    , "Connect"
+                    , [ Element.Background.color buttonHoverColor
+                      , Element.Border.glow buttonHoverColor 2
+                      ]
+                    )
     in
     Element.layout []
         (Element.Input.button
-            [ Element.Background.color buttonHoverColor
-            , Element.Border.glow buttonHoverColor 2
-            ]
+            styles
             { onPress =
                 Just
                     buttonOnPress
