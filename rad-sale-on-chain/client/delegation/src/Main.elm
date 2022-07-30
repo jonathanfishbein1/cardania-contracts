@@ -220,7 +220,7 @@ view model =
                 NotConnectedNotAbleTo ->
                     ( NoOp
                     , "No available wallet"
-                    , []
+                    , [ Element.htmlAttribute (Html.Attributes.disabled True) ]
                     )
 
                 NotConnectedAbleTo sumnPoolId w ->
@@ -236,6 +236,7 @@ view model =
                     , "Connection established"
                     , [ Element.Background.color buttonHoverColor
                       , Element.Border.glow buttonHoverColor 2
+                      , Element.htmlAttribute (Html.Attributes.disabled True)
                       ]
                     )
 
@@ -244,6 +245,7 @@ view model =
                     , "Getting account status"
                     , [ Element.Background.color buttonHoverColor
                       , Element.Border.glow buttonHoverColor 2
+                      , Element.htmlAttribute (Html.Attributes.disabled True)
                       ]
                     )
 
@@ -277,6 +279,7 @@ view model =
                     , "Connecting"
                     , [ Element.Background.color buttonHoverColor
                       , Element.Border.glow buttonHoverColor 2
+                      , Element.htmlAttribute (Html.Attributes.disabled True)
                       ]
                     )
 
@@ -285,6 +288,7 @@ view model =
                     , "Registering and Delegating"
                     , [ Element.Background.color buttonHoverColor
                       , Element.Border.glow buttonHoverColor 2
+                      , Element.htmlAttribute (Html.Attributes.disabled True)
                       ]
                     )
 
@@ -293,6 +297,7 @@ view model =
                     , "Delegating"
                     , [ Element.Background.color buttonHoverColor
                       , Element.Border.glow buttonHoverColor 2
+                      , Element.htmlAttribute (Html.Attributes.disabled True)
                       ]
                     )
 
@@ -300,6 +305,7 @@ view model =
                     ( NoOp
                     , "Undelegating"
                     , [ Element.Background.color buttonHoverColor
+                      , Element.htmlAttribute (Html.Attributes.disabled True)
                       ]
                     )
 
