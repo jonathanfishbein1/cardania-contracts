@@ -242,7 +242,9 @@ view model =
                 GettingAcountStatus _ _ ->
                     ( NoOp
                     , "Getting account status"
-                    , []
+                    , [ Element.Background.color buttonHoverColor
+                      , Element.Border.glow buttonHoverColor 2
+                      ]
                     )
 
                 Connected _ w acc d ->
@@ -267,7 +269,6 @@ view model =
                             ( UndelegateFromSumn
                             , "Undelegate"
                             , [ Element.Background.color buttonHoverColor
-                              , Element.Border.glow buttonHoverColor 2
                               ]
                             )
 
@@ -299,7 +300,6 @@ view model =
                     ( NoOp
                     , "Undelegating"
                     , [ Element.Background.color buttonHoverColor
-                      , Element.Border.glow buttonHoverColor 2
                       ]
                     )
 
