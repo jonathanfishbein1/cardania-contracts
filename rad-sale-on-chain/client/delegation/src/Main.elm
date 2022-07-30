@@ -13,6 +13,7 @@ port module Main exposing
 import Browser
 import Element
 import Element.Background
+import Element.Border
 import Element.Input
 import Html
 import Html.Attributes
@@ -258,7 +259,9 @@ view model =
     in
     Element.layout []
         (Element.Input.button
-            [ Element.Background.color buttonHoverColor ]
+            [ Element.Background.color buttonHoverColor
+            , Element.Border.glow buttonHoverColor 2
+            ]
             { onPress =
                 Just
                     buttonOnPress
