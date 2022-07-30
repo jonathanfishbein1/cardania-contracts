@@ -1,4 +1,3 @@
-import './style.css'
 import * as Lucid from 'lucid-cardano'
 import * as Wallet from '../wallet'
 var { Elm } = require('./src/Main.elm')

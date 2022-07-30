@@ -12,6 +12,7 @@ port module Main exposing
 
 import Browser
 import Element
+import Element.Background
 import Element.Input
 import Html
 import Html.Attributes
@@ -257,7 +258,7 @@ view model =
     in
     Element.layout []
         (Element.Input.button
-            []
+            [ Element.Background.color buttonHoverColor ]
             { onPress =
                 Just
                     buttonOnPress
@@ -266,6 +267,11 @@ view model =
                     buttonText
             }
         )
+
+
+buttonHoverColor : Element.Color
+buttonHoverColor =
+    Element.rgb255 3 233 244
 
 
 subscriptions : Model -> Sub Msg
