@@ -11,6 +11,8 @@ port module Main exposing
     )
 
 import Browser
+import Element
+import Element.Input
 import Html
 import Html.Attributes
 import Html.Events
@@ -206,89 +208,60 @@ update msg model =
 
 view : Model -> Html.Html Msg
 view model =
-    Html.button
-        [ Html.Events.onClick
-            (case model of
+    let
+        ( buttonOnPress, buttonText ) =
+            case model of
                 NotConnectedNotAbleTo ->
-                    NoOp
+                    ( NoOp, "No available wallet" )
 
                 NotConnectedAbleTo sumnPoolId w ->
-                    Connect sumnPoolId w
+                    ( Connect sumnPoolId w, "Connect" )
 
                 ConnectionEstablished sumnPoolId w ->
-                    NoOp
+                    ( NoOp, "Connection established" )
 
                 GettingAcountStatus _ _ ->
-                    NoOp
+                    ( NoOp, "Getting account status" )
 
                 Connected _ w acc d ->
                     case d of
                         NotDelegating ->
-                            RegisterAndDelegateToSumn acc
+                            ( RegisterAndDelegateToSumn acc, "Delegate" )
 
                         DelegatingToOther ->
-                            DelegateToSumn
+                            ( DelegateToSumn, "Delegate" )
 
                         DelegatingToSumn ->
-                            UndelegateFromSumn
+                            ( UndelegateFromSumn, "Undelegate" )
 
                 Connecting _ ->
-                    NoOp
+                    ( NoOp, "Connecting" )
 
                 RegisteringAndDelegating _ _ _ ->
-                    NoOp
+                    ( NoOp, "Registering and Delegating" )
 
                 Delegating _ _ _ ->
-                    NoOp
+                    ( NoOp
+                    , "Delegating"
+                    )
 
                 Undelegating _ _ _ _ ->
-                    NoOp
+                    ( NoOp, "Undelegating" )
 
                 NullState ->
-                    NoOp
-            )
-        ]
-        [ Html.text
-            (case model of
-                NotConnectedNotAbleTo ->
-                    "No available wallet"
-
-                NotConnectedAbleTo _ w ->
-                    "Connect"
-
-                ConnectionEstablished _ w ->
-                    "Connection established"
-
-                GettingAcountStatus _ _ ->
-                    "Getting account status"
-
-                Connected _ w _ d ->
-                    case d of
-                        NotDelegating ->
-                            "Delegate"
-
-                        DelegatingToOther ->
-                            "Delegate"
-
-                        DelegatingToSumn ->
-                            "Undelegate"
-
-                Connecting _ ->
-                    "Connecting"
-
-                RegisteringAndDelegating _ _ _ ->
-                    "Registering and Delegating"
-
-                Delegating _ _ _ ->
-                    "Delegating"
-
-                Undelegating _ _ _ _ ->
-                    "Undelegating"
-
-                NullState ->
-                    "Connect"
-            )
-        ]
+                    ( NoOp, "Connect" )
+    in
+    Element.layout []
+        (Element.Input.button
+            []
+            { onPress =
+                Just
+                    buttonOnPress
+            , label =
+                Element.text
+                    buttonText
+            }
+        )
 
 
 subscriptions : Model -> Sub Msg
