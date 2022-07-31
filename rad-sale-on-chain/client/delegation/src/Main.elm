@@ -238,13 +238,16 @@ update msg model =
 view : Model -> Html.Html Msg
 view model =
     let
+        id =
+            Element.htmlAttribute (Html.Attributes.id "delegationButton")
+
         ( buttonOnPress, buttonText, styles ) =
             case model of
                 NotConnectedNotAbleTo ->
                     ( NoOp
                     , "No available wallet"
                     , [ Element.htmlAttribute (Html.Attributes.disabled True)
-                      , Element.htmlAttribute (Html.Attributes.id "delegationButton")
+                      , id
                       ]
                     )
 
@@ -259,7 +262,7 @@ view model =
                              else
                                 2
                             )
-                      , Element.htmlAttribute (Html.Attributes.id "delegationButton")
+                      , id
                       ]
                     )
 
@@ -269,6 +272,7 @@ view model =
                     , [ Element.Background.color buttonHoverColor
                       , Element.Border.glow buttonHoverColor 2
                       , Element.htmlAttribute (Html.Attributes.disabled True)
+                      , id
                       ]
                     )
 
@@ -278,7 +282,7 @@ view model =
                     , [ Element.Background.color buttonHoverColor
                       , Element.Border.glow buttonHoverColor 2
                       , Element.htmlAttribute (Html.Attributes.disabled True)
-                      , Element.htmlAttribute (Html.Attributes.id "delegationButton")
+                      , id
                       ]
                     )
 
@@ -295,7 +299,7 @@ view model =
                                      else
                                         2
                                     )
-                              , Element.htmlAttribute (Html.Attributes.id "delegationButton")
+                              , id
                               ]
                             )
 
@@ -310,7 +314,7 @@ view model =
                                      else
                                         2
                                     )
-                              , Element.htmlAttribute (Html.Attributes.id "delegationButton")
+                              , id
                               ]
                             )
 
@@ -318,7 +322,7 @@ view model =
                             ( UndelegateFromSumn
                             , "Undelegate"
                             , [ Element.Background.color buttonHoverColor
-                              , Element.htmlAttribute (Html.Attributes.id "delegationButton")
+                              , id
                               ]
                             )
 
@@ -328,7 +332,7 @@ view model =
                     , [ Element.Background.color buttonHoverColor
                       , Element.Border.glow buttonHoverColor 2
                       , Element.htmlAttribute (Html.Attributes.disabled True)
-                      , Element.htmlAttribute (Html.Attributes.id "delegationButton")
+                      , id
                       ]
                     )
 
@@ -338,7 +342,7 @@ view model =
                     , [ Element.Background.color buttonHoverColor
                       , Element.Border.glow buttonHoverColor 2
                       , Element.htmlAttribute (Html.Attributes.disabled True)
-                      , Element.htmlAttribute (Html.Attributes.id "delegationButton")
+                      , id
                       ]
                     )
 
@@ -348,7 +352,7 @@ view model =
                     , [ Element.Background.color buttonHoverColor
                       , Element.Border.glow buttonHoverColor 2
                       , Element.htmlAttribute (Html.Attributes.disabled True)
-                      , Element.htmlAttribute (Html.Attributes.id "delegationButton")
+                      , id
                       ]
                     )
 
@@ -357,7 +361,7 @@ view model =
                     , "Undelegating"
                     , [ Element.Background.color buttonHoverColor
                       , Element.htmlAttribute (Html.Attributes.disabled True)
-                      , Element.htmlAttribute (Html.Attributes.id "delegationButton")
+                      , id
                       ]
                     )
 
@@ -366,7 +370,7 @@ view model =
                     , "Connect"
                     , [ Element.Background.color buttonHoverColor
                       , Element.Border.glow buttonHoverColor 2
-                      , Element.htmlAttribute (Html.Attributes.id "delegationButton")
+                      , id
                       ]
                     )
     in
