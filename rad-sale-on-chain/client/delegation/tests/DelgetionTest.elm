@@ -3,6 +3,8 @@ module DelgetionTest exposing (suite)
 import Expect
 import Main
 import Test
+import Test.Html.Query
+import Test.Html.Selector
 
 
 suite : Test.Test
@@ -161,4 +163,22 @@ suite =
                 Expect.equal
                     newModel
                     (Main.Connected "" Main.Nami account Main.DelegatingToSumn False)
+        , Test.test "test NotConnectedNotAbleTo view" <|
+            \_ ->
+                let
+                    initialModel =
+                        Main.NotConnectedNotAbleTo
+                in
+                Test.Html.Query.fromHtml (Main.view initialModel)
+                    |> Test.Html.Query.find [ Test.Html.Selector.id "delegationButton" ]
+                    |> Test.Html.Query.has [ Test.Html.Selector.text "No available wallet" ]
+        , Test.test "test NotConnectedAbleTo view" <|
+            \_ ->
+                let
+                    initialModel =
+                        Main.NotConnectedAbleTo "" Main.Nami False
+                in
+                Test.Html.Query.fromHtml (Main.view initialModel)
+                    |> Test.Html.Query.find [ Test.Html.Selector.id "delegationButton" ]
+                    |> Test.Html.Query.has [ Test.Html.Selector.text "Connect" ]
         ]

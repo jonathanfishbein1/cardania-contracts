@@ -8,6 +8,7 @@ port module Main exposing
     , init
     , main
     , update
+    , view
     )
 
 import Browser
