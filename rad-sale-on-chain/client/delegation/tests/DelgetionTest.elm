@@ -24,7 +24,7 @@ suite =
             \_ ->
                 let
                     initialModel =
-                        Main.NotConnectedAbleTo "" Main.Nami
+                        Main.NotConnectedAbleTo "" Main.Nami False
 
                     ( newModel, _ ) =
                         Main.update (Main.Connect "" Main.Nami) initialModel
@@ -70,7 +70,7 @@ suite =
                 in
                 Expect.equal
                     newModel
-                    (Main.Connected "" Main.Nami account Main.DelegatingToSumn)
+                    (Main.Connected "" Main.Nami account Main.DelegatingToSumn False)
         , Test.test "test RegisterAndDelegateToSumn with Connected" <|
             \_ ->
                 let
@@ -78,7 +78,7 @@ suite =
                         { stake_address = "", pool_id = "", active = True }
 
                     initialModel =
-                        Main.Connected "" Main.Nami account Main.NotDelegating
+                        Main.Connected "" Main.Nami account Main.NotDelegating False
 
                     ( newModel, _ ) =
                         Main.update (Main.RegisterAndDelegateToSumn account) initialModel
@@ -100,7 +100,7 @@ suite =
                 in
                 Expect.equal
                     newModel
-                    (Main.Connected "" Main.Nami account Main.DelegatingToSumn)
+                    (Main.Connected "" Main.Nami account Main.DelegatingToSumn False)
         , Test.test "test UndelegateFromSumn with Connected DelegatingToSumn" <|
             \_ ->
                 let
@@ -108,7 +108,7 @@ suite =
                         { stake_address = "", pool_id = "", active = True }
 
                     initialModel =
-                        Main.Connected "" Main.Nami account Main.DelegatingToSumn
+                        Main.Connected "" Main.Nami account Main.DelegatingToSumn False
 
                     ( newModel, _ ) =
                         Main.update Main.UndelegateFromSumn initialModel
@@ -130,5 +130,5 @@ suite =
                 in
                 Expect.equal
                     newModel
-                    (Main.Connected "" Main.Nami account Main.NotDelegating)
+                    (Main.Connected "" Main.Nami account Main.NotDelegating False)
         ]
