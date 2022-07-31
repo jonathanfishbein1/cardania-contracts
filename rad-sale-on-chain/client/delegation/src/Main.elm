@@ -26,6 +26,10 @@ type alias PoolId =
     String
 
 
+type alias TransactionSuccessStatus =
+    Bool
+
+
 decodeWallet : String -> Maybe SupportedWallet
 decodeWallet status =
     case status of
@@ -84,10 +88,10 @@ type Msg
     | GetAccountStatus
     | ReceiveAccountStatus (Result Json.Decode.Error Account)
     | RegisterAndDelegateToSumn Account
-    | ReceiveRegisterAndDelegateStatus Bool
+    | ReceiveRegisterAndDelegateStatus TransactionSuccessStatus
     | DelegateToSumn
     | UndelegateFromSumn
-    | ReceiveUndelegateStatus Bool
+    | ReceiveUndelegateStatus TransactionSuccessStatus
 
 
 type DelegationStatus
@@ -370,10 +374,10 @@ port receiveAccountStatus : (String -> msg) -> Sub msg
 port registerAndDelegateToSumn : String -> Cmd msg
 
 
-port receiveRegisterAndDelegateStatus : (Bool -> msg) -> Sub msg
+port receiveRegisterAndDelegateStatus : (TransactionSuccessStatus -> msg) -> Sub msg
 
 
 port undelegate : String -> Cmd msg
 
 
-port receiveUndelegateStatus : (Bool -> msg) -> Sub msg
+port receiveUndelegateStatus : (TransactionSuccessStatus -> msg) -> Sub msg
