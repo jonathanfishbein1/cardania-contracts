@@ -102,6 +102,16 @@ app.ports.registerAndDelegateToSumn.subscribe(async rewardAddress => {
     }
 })
 
+app.ports.delegateToSumn.subscribe(async rewardAddress => {
+    try {
+        const txHash = await registerAndDelegate(rewardAddress)
+        app.ports.receiveDelegateToSumnStatus.send(true)
+    }
+    catch (e) {
+        app.ports.receiveDelegateToSumnStatus.send(false)
+    }
+})
+
 app.ports.undelegate.subscribe(async rewardAddress => {
     try {
         const txHash = await deregister(rewardAddress)

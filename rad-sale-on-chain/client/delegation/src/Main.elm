@@ -94,6 +94,7 @@ type Msg
     | RegisterAndDelegateToSumn Account
     | ReceiveRegisterAndDelegateStatus TransactionSuccessStatus
     | DelegateToSumn
+    | ReceiveDelegateToSumnStatus TransactionSuccessStatus
     | UndelegateFromSumn
     | ReceiveUndelegateStatus TransactionSuccessStatus
     | ReceiveMousedOverEvent MouseOver
@@ -201,7 +202,20 @@ update msg model =
             )
 
         ( DelegateToSumn, Connected p w account DelegatingToOther _ ) ->
-            ( model, Cmd.none )
+            ( Delegating p w account, delegateToSumn account.stake_address )
+
+        ( ReceiveDelegateToSumnStatus result, Delegating p w account ) ->
+            let
+                newModel =
+                    if result == True then
+                        Connected p w account DelegatingToSumn False
+
+                    else
+                        Connected p w account NotDelegating False
+            in
+            ( newModel
+            , Cmd.none
+            )
 
         ( UndelegateFromSumn, Connected p w account DelegatingToSumn _ ) ->
             ( Undelegating p w account DelegatingToSumn, undelegate account.stake_address )
@@ -398,6 +412,7 @@ subscriptions _ =
         [ receiveWalletConnection (\s -> ReceiveWalletConnected (decodeWallet s))
         , receiveAccountStatus (\s -> ReceiveAccountStatus (Json.Decode.decodeString decodeAccount s))
         , receiveRegisterAndDelegateStatus ReceiveRegisterAndDelegateStatus
+        , receiveDelegateStatus ReceiveDelegateToSumnStatus
         , receiveUndelegateStatus ReceiveUndelegateStatus
         , receiveMousedOverEvent ReceiveMousedOverEvent
         , receiveMouseOutEvent ReceiveMouseOutEvent
@@ -430,6 +445,12 @@ port registerAndDelegateToSumn : String -> Cmd msg
 
 
 port receiveRegisterAndDelegateStatus : (TransactionSuccessStatus -> msg) -> Sub msg
+
+
+port delegateToSumn : String -> Cmd msg
+
+
+port receiveDelegateStatus : (TransactionSuccessStatus -> msg) -> Sub msg
 
 
 port undelegate : String -> Cmd msg

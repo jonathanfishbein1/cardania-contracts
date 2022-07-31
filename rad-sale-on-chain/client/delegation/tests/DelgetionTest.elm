@@ -131,4 +131,34 @@ suite =
                 Expect.equal
                     newModel
                     (Main.Connected "" Main.Nami account Main.NotDelegating False)
+        , Test.test "test Delegate with Connected DelegatingToOther" <|
+            \_ ->
+                let
+                    account =
+                        { stake_address = "", pool_id = "", active = True }
+
+                    initialModel =
+                        Main.Connected "" Main.Nami account Main.DelegatingToOther False
+
+                    ( newModel, _ ) =
+                        Main.update Main.DelegateToSumn initialModel
+                in
+                Expect.equal
+                    newModel
+                    (Main.Delegating "" Main.Nami account)
+        , Test.test "test ReceiveDelegateStatus with Connected DelegatingToOther" <|
+            \_ ->
+                let
+                    account =
+                        { stake_address = "", pool_id = "", active = True }
+
+                    initialModel =
+                        Main.Delegating "" Main.Nami account
+
+                    ( newModel, _ ) =
+                        Main.update (Main.ReceiveDelegateToSumnStatus True) initialModel
+                in
+                Expect.equal
+                    newModel
+                    (Main.Connected "" Main.Nami account Main.DelegatingToSumn False)
         ]
