@@ -114,3 +114,4 @@ app.ports.undelegate.subscribe(async rewardAddress => {
 
 const delegationButton = document.getElementById('delegationButton')
 delegationButton?.addEventListener('mouseover', event => app.ports.receiveMousedOverEvent.send(true))
+delegationButton?.addEventListener('mouseout', event => app.ports.receiveMouseOutEvent.send(false))

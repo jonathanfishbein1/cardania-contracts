@@ -30,7 +30,7 @@ type alias TransactionSuccessStatus =
     Bool
 
 
-type alias MousedOver =
+type alias MouseOver =
     Bool
 
 
@@ -86,7 +86,7 @@ type SupportedWallet
 
 type Msg
     = Connect PoolId SupportedWallet
-    | Disconnect PoolId SupportedWallet MousedOver
+    | Disconnect PoolId SupportedWallet MouseOver
     | NoOp
     | ReceiveWalletConnected (Maybe SupportedWallet)
     | GetAccountStatus
@@ -96,7 +96,8 @@ type Msg
     | DelegateToSumn
     | UndelegateFromSumn
     | ReceiveUndelegateStatus TransactionSuccessStatus
-    | ReceiveMousedOverEvent MousedOver
+    | ReceiveMousedOverEvent MouseOver
+    | ReceiveMouseOutEvent MouseOver
 
 
 type DelegationStatus
@@ -107,7 +108,7 @@ type DelegationStatus
 
 type Model
     = NotConnectedNotAbleTo
-    | NotConnectedAbleTo PoolId SupportedWallet MousedOver
+    | NotConnectedAbleTo PoolId SupportedWallet MouseOver
     | Connecting PoolId
     | GettingAcountStatus PoolId SupportedWallet
     | ConnectionEstablished PoolId SupportedWallet
@@ -218,6 +219,16 @@ update msg model =
             )
 
         ( ReceiveMousedOverEvent m, _ ) ->
+            ( case model of
+                NotConnectedAbleTo a b _ ->
+                    NotConnectedAbleTo a b m
+
+                _ ->
+                    NullState
+            , Cmd.none
+            )
+
+        ( ReceiveMouseOutEvent m, _ ) ->
             ( case model of
                 NotConnectedAbleTo a b _ ->
                     NotConnectedAbleTo a b m
@@ -380,6 +391,7 @@ subscriptions _ =
         , receiveRegisterAndDelegateStatus ReceiveRegisterAndDelegateStatus
         , receiveUndelegateStatus ReceiveUndelegateStatus
         , receiveMousedOverEvent ReceiveMousedOverEvent
+        , receiveMouseOutEvent ReceiveMouseOutEvent
         ]
 
 
@@ -417,4 +429,7 @@ port undelegate : String -> Cmd msg
 port receiveUndelegateStatus : (TransactionSuccessStatus -> msg) -> Sub msg
 
 
-port receiveMousedOverEvent : (MousedOver -> msg) -> Sub msg
+port receiveMousedOverEvent : (MouseOver -> msg) -> Sub msg
+
+
+port receiveMouseOutEvent : (MouseOver -> msg) -> Sub msg
