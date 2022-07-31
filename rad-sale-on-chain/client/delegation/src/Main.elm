@@ -303,7 +303,13 @@ view model =
                             ( DelegateToSumn
                             , "Delegate"
                             , [ Element.Background.color buttonHoverColor
-                              , Element.Border.glow buttonHoverColor 2
+                              , Element.Border.glow buttonHoverColor
+                                    (if m == True then
+                                        10
+
+                                     else
+                                        2
+                                    )
                               , Element.htmlAttribute (Html.Attributes.id "delegationButton")
                               ]
                             )
