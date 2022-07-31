@@ -112,7 +112,7 @@ type Model
     | Connecting PoolId
     | GettingAcountStatus PoolId SupportedWallet
     | ConnectionEstablished PoolId SupportedWallet
-    | Connected PoolId SupportedWallet Account DelegationStatus
+    | Connected PoolId SupportedWallet Account DelegationStatus MouseOver
     | RegisteringAndDelegating PoolId SupportedWallet Account
     | Delegating PoolId SupportedWallet Account
     | Undelegating PoolId SupportedWallet Account DelegationStatus
@@ -177,66 +177,59 @@ update msg model =
                          else
                             NotDelegating
                         )
+                        False
 
                 Err e ->
                     NullState
             , Cmd.none
             )
 
-        ( RegisterAndDelegateToSumn a, Connected p w account NotDelegating ) ->
+        ( RegisterAndDelegateToSumn a, Connected p w account NotDelegating _ ) ->
             ( RegisteringAndDelegating p w account, registerAndDelegateToSumn account.stake_address )
 
         ( ReceiveRegisterAndDelegateStatus result, RegisteringAndDelegating p w account ) ->
             let
                 newModel =
                     if result == True then
-                        Connected p w account DelegatingToSumn
+                        Connected p w account DelegatingToSumn False
 
                     else
-                        Connected p w account NotDelegating
+                        Connected p w account NotDelegating False
             in
             ( newModel
             , Cmd.none
             )
 
-        ( DelegateToSumn, Connected p w account DelegatingToOther ) ->
+        ( DelegateToSumn, Connected p w account DelegatingToOther _ ) ->
             ( model, Cmd.none )
 
-        ( UndelegateFromSumn, Connected p w account DelegatingToSumn ) ->
+        ( UndelegateFromSumn, Connected p w account DelegatingToSumn _ ) ->
             ( Undelegating p w account DelegatingToSumn, undelegate account.stake_address )
 
         ( ReceiveUndelegateStatus result, Undelegating p w account _ ) ->
             let
                 newModel =
                     if result == True then
-                        Connected p w account NotDelegating
+                        Connected p w account NotDelegating False
 
                     else
-                        Connected p w account DelegatingToSumn
+                        Connected p w account DelegatingToSumn False
             in
             ( newModel
             , Cmd.none
             )
 
-        ( ReceiveMousedOverEvent m, _ ) ->
-            ( case model of
-                NotConnectedAbleTo a b _ ->
-                    NotConnectedAbleTo a b m
+        ( ReceiveMousedOverEvent m, NotConnectedAbleTo a b _ ) ->
+            ( NotConnectedAbleTo a b m, Cmd.none )
 
-                _ ->
-                    NullState
-            , Cmd.none
-            )
+        ( ReceiveMouseOutEvent m, NotConnectedAbleTo a b _ ) ->
+            ( NotConnectedAbleTo a b m, Cmd.none )
 
-        ( ReceiveMouseOutEvent m, _ ) ->
-            ( case model of
-                NotConnectedAbleTo a b _ ->
-                    NotConnectedAbleTo a b m
+        ( ReceiveMousedOverEvent m, Connected a b c d _ ) ->
+            ( Connected a b c d m, Cmd.none )
 
-                _ ->
-                    NullState
-            , Cmd.none
-            )
+        ( ReceiveMouseOutEvent m, Connected a b c d _ ) ->
+            ( Connected a b c d m, Cmd.none )
 
         ( _, _ ) ->
             ( model, Cmd.none )
@@ -289,13 +282,19 @@ view model =
                       ]
                     )
 
-                Connected _ w acc d ->
+                Connected _ w acc d m ->
                     case d of
                         NotDelegating ->
                             ( RegisterAndDelegateToSumn acc
                             , "Delegate"
                             , [ Element.Background.color buttonHoverColor
-                              , Element.Border.glow buttonHoverColor 2
+                              , Element.Border.glow buttonHoverColor
+                                    (if m == True then
+                                        10
+
+                                     else
+                                        2
+                                    )
                               , Element.htmlAttribute (Html.Attributes.id "delegationButton")
                               ]
                             )
