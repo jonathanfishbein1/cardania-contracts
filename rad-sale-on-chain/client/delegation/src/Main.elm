@@ -18,7 +18,6 @@ import Element.Border
 import Element.Input
 import Html
 import Html.Attributes
-import Html.Events
 import Json.Decode
 import Json.Decode.Pipeline
 
