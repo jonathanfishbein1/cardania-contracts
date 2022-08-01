@@ -60,14 +60,6 @@ const
         return transactionHash
     }
 
-
-
-
-
-console.log('here')
-
-console.log('here')
-
 var app = Elm.Main.init({
     flags: [Wallet.hasWallet(), sumnPoolId],
     node: document.getElementById("elm-app-is-loaded-here")
