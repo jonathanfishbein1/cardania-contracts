@@ -1,11 +1,11 @@
 import path from 'path'
 import HtmlWebPackPlugin from "html-webpack-plugin"
-import webpack from 'webpack'
+import webpack from 'webpack';
 const __dirname = path.resolve()
 
 export default {
     mode: 'development',
-    entry: './rad-sale-on-chain/index.ts',
+    entry: './index.ts',
     output: {
         path: path.resolve(__dirname, 'dist'),
         publicPath: '/',
@@ -19,10 +19,6 @@ export default {
     module: {
         rules: [
             {
-                test: /\.css$/i,
-                use: ["style-loader", "css-loader"],
-            },
-            {
                 test: /\.html$/,
                 use: [
                     {
@@ -34,13 +30,19 @@ export default {
                 test: /\.tsx?$/,
                 use: 'ts-loader',
                 exclude: /node_modules/,
+            },
+            {
+                test: /\.elm$/,
+                use: 'elm-webpack-loader',
+                exclude: [/elm-stuff/, /node_modules/],
             }
-        ]
+        ],
+        noParse: /\.elm$/
     },
     plugins: [new HtmlWebPackPlugin({
         title: 'index',
         filename: `index.html`,
-        template: `./rad-sale-on-chain/index.html`,
+        template: `./index.html`,
     }),
     new webpack.ProvidePlugin({ Buffer: ['buffer', 'Buffer'] })
     ]

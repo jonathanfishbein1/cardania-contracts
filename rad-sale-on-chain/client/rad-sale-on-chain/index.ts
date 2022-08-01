@@ -1,23 +1,9 @@
-import './style.css'
 import * as Lucid from 'lucid-cardano'
 import * as Wallet from '../wallet'
+var { Elm } = require('./src/Main.elm')
 
 const
-    buyConnectButton = document.getElementById('buyConnect'),
-    startConnectButton = document.getElementById('startConnect'),
-    closeConnectButton = document.getElementById('closeConnect'),
-    bk = "testnetwIyK8IphOti170JCngH0NedP0yK8wBZs",
-    addWalletMessage = "Add a browser wallet",
-    connectMessage = "connect wallet",
-    startMessage = "Start",
-    closeMessage = "Close",
-    buyMessage = "Buy",
-    startingMessage = "Starting...",
-    buyingMessage = "Buying...",
-    closingMessage = "Closing..."
-    , startSuccessMessage = "Successfully started contract!"
-    , successMessage = "Successfully bought token!"
-    , closeSuccessMessage = "Successfully closed contract!"
+    bk = "testnetwIyK8IphOti170JCngH0NedP0yK8wBZs"
     , blockfrostApi = 'https://cardano-testnet.blockfrost.io/api/v0'
     , blockfrostClient = new Lucid.Blockfrost(blockfrostApi, bk)
     , lucid = await Lucid.Lucid.new(blockfrostClient,
@@ -34,19 +20,7 @@ const
     , minLovelaceAmount = BigInt(2000000)
     , priceOfTokenLovelace = BigInt(10000000)
     , datumHash = '923918e403bf43c34b4ef6b48eb2ee04babed17320d8d1b9ff9ad086e86f44ec'
-    , instantiateStartButton = () => {
-        startConnectButton!.innerText = startMessage
-        startConnectButton?.removeEventListener('click', instantiateStartButton)
-    },
-    instantiateBuyButton = () => {
-        buyConnectButton!.innerText = buyMessage
-        buyConnectButton?.removeEventListener('click', instantiateBuyButton)
-    }
-    , instantiateCloseButton = () => {
-        closeConnectButton!.innerText = closeMessage
-        closeConnectButton?.removeEventListener('click', instantiateCloseButton)
-
-    },
+    ,
     startContract = async () => {
         const transaction =
             await lucid
@@ -63,24 +37,7 @@ const
                 .complete()
             , transactionHash = await signedTx
                 .submit()
-        transactionHash ?
-            startConnectButton!.innerText = startSuccessMessage
-            :
-            console.log('Error starting contract')
-    }
-    , instantiateStartContract = () => {
-        startConnectButton?.addEventListener('click', async () => {
-            startConnectButton!.innerText = startingMessage
-            startContract()
-        })
-        startConnectButton?.removeEventListener('click', instantiateStartContract)
-    },
-    instantiateBuyContract = () => {
-        buyConnectButton?.addEventListener('click', async () => {
-            buyConnectButton!.innerText = buyingMessage
-            buyContract()
-        })
-        buyConnectButton?.removeEventListener('click', instantiateBuyContract)
+        return transactionHash
     },
     buyContract = async () => {
         const buyRedeemer = new Lucid.Construct(0, [])
@@ -113,20 +70,10 @@ const
                     .complete()
                 , transactionHash = await signedTx
                     .submit()
-            transactionHash ?
-                buyConnectButton!.innerText = successMessage
-                :
-                console.log('Error buy token')
+            return transactionHash
         }
         else
             console.log('utxo is undefined')
-    }
-    , instantiateCloseContract = () => {
-        closeConnectButton?.addEventListener('click', async () => {
-            closeConnectButton!.innerText = closingMessage
-            closeContract()
-        })
-        closeConnectButton?.removeEventListener('click', instantiateCloseContract)
     },
     closeContract = async () => {
         const closeRedeemer = new Lucid.Construct(1, [])
@@ -151,31 +98,10 @@ const
                 .complete()
             , transactionHash = await signedTx
                 .submit()
-        transactionHash ?
-            closeConnectButton!.innerText = closeSuccessMessage
-            :
-            console.log('Error closing contract')
+        return transactionHash
     }
 
-startConnectButton!.innerText = addWalletMessage
-buyConnectButton!.innerText = addWalletMessage
-closeConnectButton!.innerText = addWalletMessage
-const supportedWallet = Wallet.hasWallet()
-if (supportedWallet !== undefined) {
-    const wallet = await Wallet.getWalletApi(supportedWallet) as any
-    lucid.selectWallet(wallet)
-    startConnectButton!.innerText = connectMessage
-    buyConnectButton!.innerText = connectMessage
-    closeConnectButton!.innerText = connectMessage
-    startConnectButton?.addEventListener('click', instantiateStartButton)
-    startConnectButton?.addEventListener('click', instantiateStartContract)
-
-    buyConnectButton?.addEventListener('click', instantiateBuyButton)
-    buyConnectButton?.addEventListener('click', instantiateBuyContract)
-
-    closeConnectButton?.addEventListener('click', instantiateCloseButton)
-    closeConnectButton?.addEventListener('click', instantiateCloseContract)
-}
-else
-    console.log('No supported wallet')
-
+var app = Elm.Main.init({
+    flags: [Wallet.hasWallet()],
+    node: document.getElementById("elm-app-is-loaded-here")
+})
