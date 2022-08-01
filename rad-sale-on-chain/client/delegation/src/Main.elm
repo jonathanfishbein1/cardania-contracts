@@ -117,7 +117,7 @@ type Model
     | Connected PoolId SupportedWallet Account DelegationStatus MouseOver
     | RegisteringAndDelegating PoolId SupportedWallet Account
     | Delegating PoolId SupportedWallet Account
-    | Undelegating PoolId SupportedWallet Account DelegationStatus
+    | Undelegating PoolId SupportedWallet Account
     | NullState
 
 
@@ -219,9 +219,9 @@ update msg model =
             )
 
         ( UndelegateFromSumn, Connected p w account DelegatingToSumn _ ) ->
-            ( Undelegating p w account DelegatingToSumn, undelegate account.stake_address )
+            ( Undelegating p w account, undelegate account.stake_address )
 
-        ( ReceiveUndelegateStatus result, Undelegating p w account _ ) ->
+        ( ReceiveUndelegateStatus result, Undelegating p w account ) ->
             let
                 newModel =
                     if result == True then
@@ -305,7 +305,7 @@ view model =
                     case d of
                         NotDelegating ->
                             ( RegisterAndDelegateToSumn acc
-                            , "Delegate"
+                            , "Register and Delegate"
                             , [ Element.Background.color buttonHoverColor
                               , Element.Border.glow buttonHoverColor
                                     (if m == True then
@@ -371,7 +371,7 @@ view model =
                       ]
                     )
 
-                Undelegating _ _ _ _ ->
+                Undelegating _ _ _ ->
                     ( NoOp
                     , "Undelegating"
                     , [ Element.Background.color buttonHoverColor
