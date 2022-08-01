@@ -1,7 +1,5 @@
 port module Main exposing
-    ( Account
-    , DelegationStatus(..)
-    , Model(..)
+    ( Model(..)
     , Msg(..)
     , SupportedWallet(..)
     , encodeWallet
@@ -18,13 +16,8 @@ import Element.Border
 import Element.Input
 import Html
 import Html.Attributes
-import Html.Events
 import Json.Decode
 import Json.Decode.Pipeline
-
-
-type alias PoolId =
-    String
 
 
 type alias TransactionSuccessStatus =
@@ -51,14 +44,6 @@ decodeWallet status =
             Nothing
 
 
-decodeAccount : Json.Decode.Decoder Account
-decodeAccount =
-    Json.Decode.succeed Account
-        |> Json.Decode.Pipeline.required "stake_address" Json.Decode.string
-        |> Json.Decode.Pipeline.optional "pool_id" Json.Decode.string ""
-        |> Json.Decode.Pipeline.required "active" Json.Decode.bool
-
-
 encodeWallet : SupportedWallet -> String
 encodeWallet wallet =
     case wallet of
@@ -72,13 +57,6 @@ encodeWallet wallet =
             "flint"
 
 
-type alias Account =
-    { stake_address : String
-    , pool_id : PoolId
-    , active : Bool
-    }
-
-
 type SupportedWallet
     = Nami
     | Eternl
@@ -86,50 +64,32 @@ type SupportedWallet
 
 
 type Msg
-    = Connect PoolId SupportedWallet
-    | Disconnect PoolId SupportedWallet MouseOver
+    = Connect SupportedWallet
+    | Disconnect SupportedWallet MouseOver
     | NoOp
     | ReceiveWalletConnected (Maybe SupportedWallet)
-    | GetAccountStatus
-    | ReceiveAccountStatus (Result Json.Decode.Error Account)
-    | RegisterAndDelegateToSumn Account
-    | ReceiveRegisterAndDelegateStatus TransactionSuccessStatus
-    | DelegateToSumn
-    | ReceiveDelegateToSumnStatus TransactionSuccessStatus
-    | UndelegateFromSumn
-    | ReceiveUndelegateStatus TransactionSuccessStatus
     | ReceiveMousedOverEvent MouseOver
     | ReceiveMouseOutEvent MouseOver
 
 
-type DelegationStatus
-    = NotDelegating
-    | DelegatingToSumn
-    | DelegatingToOther
-
-
 type Model
     = NotConnectedNotAbleTo
-    | NotConnectedAbleTo PoolId SupportedWallet MouseOver
-    | Connecting PoolId
-    | GettingAcountStatus PoolId SupportedWallet
-    | ConnectionEstablished PoolId SupportedWallet
-    | Connected PoolId SupportedWallet Account DelegationStatus MouseOver
-    | RegisteringAndDelegating PoolId SupportedWallet Account
-    | Delegating PoolId SupportedWallet Account
-    | Undelegating PoolId SupportedWallet Account
+    | NotConnectedAbleTo SupportedWallet MouseOver
+    | Connecting
+    | ConnectionEstablished SupportedWallet
+    | Connected SupportedWallet MouseOver
     | NullState
 
 
-init : ( String, PoolId ) -> ( Model, Cmd Msg )
-init ( supportedWallet, sumnPoolId ) =
+init : String -> ( Model, Cmd Msg )
+init supportedWallet =
     let
         wallet =
             decodeWallet supportedWallet
     in
     ( case wallet of
         Just w ->
-            NotConnectedAbleTo sumnPoolId w False
+            NotConnectedAbleTo w False
 
         Nothing ->
             NotConnectedNotAbleTo
@@ -140,111 +100,31 @@ init ( supportedWallet, sumnPoolId ) =
 update : Msg -> Model -> ( Model, Cmd msg )
 update msg model =
     case ( msg, model ) of
-        ( Connect sumnPoolId w, NotConnectedAbleTo p wallet _ ) ->
-            ( Connecting sumnPoolId, connectWallet (encodeWallet w) )
+        ( Connect w, NotConnectedAbleTo wallet _ ) ->
+            ( Connecting, connectWallet (encodeWallet w) )
 
-        ( Disconnect sumnPoolId wallet m, _ ) ->
-            ( NotConnectedAbleTo sumnPoolId wallet m, Cmd.none )
+        ( Disconnect wallet m, _ ) ->
+            ( NotConnectedAbleTo wallet m, Cmd.none )
 
-        ( ReceiveWalletConnected wallet, Connecting sumnPoolId ) ->
+        ( ReceiveWalletConnected wallet, Connecting ) ->
             case wallet of
                 Just w ->
-                    let
-                        newModel =
-                            ConnectionEstablished sumnPoolId w
-                    in
-                    update GetAccountStatus newModel
+                    ( ConnectionEstablished w, Cmd.none )
 
                 Nothing ->
                     ( NotConnectedNotAbleTo, Cmd.none )
 
-        ( GetAccountStatus, ConnectionEstablished sumnPoolId w ) ->
-            ( GettingAcountStatus sumnPoolId w, getAccountStatus () )
+        ( ReceiveMousedOverEvent m, NotConnectedAbleTo b _ ) ->
+            ( NotConnectedAbleTo b m, Cmd.none )
 
-        ( ReceiveAccountStatus account, GettingAcountStatus sumnPoolId wallet ) ->
-            ( case account of
-                Ok acc ->
-                    Connected sumnPoolId
-                        wallet
-                        acc
-                        (if acc.active == False then
-                            NotDelegating
+        ( ReceiveMouseOutEvent m, NotConnectedAbleTo b _ ) ->
+            ( NotConnectedAbleTo b m, Cmd.none )
 
-                         else if acc.active == True && acc.pool_id /= sumnPoolId then
-                            DelegatingToOther
+        ( ReceiveMousedOverEvent m, Connected b d ) ->
+            ( Connected b m, Cmd.none )
 
-                         else if acc.active && acc.pool_id == sumnPoolId then
-                            DelegatingToSumn
-
-                         else
-                            NotDelegating
-                        )
-                        False
-
-                Err e ->
-                    NullState
-            , Cmd.none
-            )
-
-        ( RegisterAndDelegateToSumn a, Connected p w account NotDelegating _ ) ->
-            ( RegisteringAndDelegating p w account, registerAndDelegateToSumn account.stake_address )
-
-        ( ReceiveRegisterAndDelegateStatus result, RegisteringAndDelegating p w account ) ->
-            let
-                newModel =
-                    if result == True then
-                        Connected p w account DelegatingToSumn False
-
-                    else
-                        Connected p w account NotDelegating False
-            in
-            ( newModel
-            , Cmd.none
-            )
-
-        ( DelegateToSumn, Connected p w account DelegatingToOther _ ) ->
-            ( Delegating p w account, delegateToSumn account.stake_address )
-
-        ( ReceiveDelegateToSumnStatus result, Delegating p w account ) ->
-            let
-                newModel =
-                    if result == True then
-                        Connected p w account DelegatingToSumn False
-
-                    else
-                        Connected p w account NotDelegating False
-            in
-            ( newModel
-            , Cmd.none
-            )
-
-        ( UndelegateFromSumn, Connected p w account DelegatingToSumn _ ) ->
-            ( Undelegating p w account, undelegate account.stake_address )
-
-        ( ReceiveUndelegateStatus result, Undelegating p w account ) ->
-            let
-                newModel =
-                    if result == True then
-                        Connected p w account NotDelegating False
-
-                    else
-                        Connected p w account DelegatingToSumn False
-            in
-            ( newModel
-            , Cmd.none
-            )
-
-        ( ReceiveMousedOverEvent m, NotConnectedAbleTo a b _ ) ->
-            ( NotConnectedAbleTo a b m, Cmd.none )
-
-        ( ReceiveMouseOutEvent m, NotConnectedAbleTo a b _ ) ->
-            ( NotConnectedAbleTo a b m, Cmd.none )
-
-        ( ReceiveMousedOverEvent m, Connected a b c d _ ) ->
-            ( Connected a b c d m, Cmd.none )
-
-        ( ReceiveMouseOutEvent m, Connected a b c d _ ) ->
-            ( Connected a b c d m, Cmd.none )
+        ( ReceiveMouseOutEvent m, Connected b d ) ->
+            ( Connected b m, Cmd.none )
 
         ( _, _ ) ->
             ( model, Cmd.none )
@@ -266,8 +146,8 @@ view model =
                       ]
                     )
 
-                NotConnectedAbleTo sumnPoolId w m ->
-                    ( Connect sumnPoolId w
+                NotConnectedAbleTo w m ->
+                    ( Connect w
                     , "Connect"
                     , [ Element.Background.color buttonHoverColor
                       , Element.Border.glow buttonHoverColor
@@ -281,7 +161,7 @@ view model =
                       ]
                     )
 
-                ConnectionEstablished sumnPoolId w ->
+                ConnectionEstablished w ->
                     ( NoOp
                     , "Connection established"
                     , [ Element.Background.color buttonHoverColor
@@ -291,9 +171,9 @@ view model =
                       ]
                     )
 
-                GettingAcountStatus _ _ ->
+                Connected w m ->
                     ( NoOp
-                    , "Getting account status"
+                    , "Connection established"
                     , [ Element.Background.color buttonHoverColor
                       , Element.Border.glow buttonHoverColor 2
                       , Element.htmlAttribute (Html.Attributes.disabled True)
@@ -301,80 +181,11 @@ view model =
                       ]
                     )
 
-                Connected _ w acc d m ->
-                    case d of
-                        NotDelegating ->
-                            ( RegisterAndDelegateToSumn acc
-                            , "Register and Delegate"
-                            , [ Element.Background.color buttonHoverColor
-                              , Element.Border.glow buttonHoverColor
-                                    (if m == True then
-                                        10
-
-                                     else
-                                        2
-                                    )
-                              , id
-                              ]
-                            )
-
-                        DelegatingToOther ->
-                            ( DelegateToSumn
-                            , "Delegate"
-                            , [ Element.Background.color buttonHoverColor
-                              , Element.Border.glow buttonHoverColor
-                                    (if m == True then
-                                        10
-
-                                     else
-                                        2
-                                    )
-                              , id
-                              ]
-                            )
-
-                        DelegatingToSumn ->
-                            ( UndelegateFromSumn
-                            , "Undelegate"
-                            , [ Element.Background.color buttonHoverColor
-                              , id
-                              ]
-                            )
-
-                Connecting _ ->
+                Connecting ->
                     ( NoOp
                     , "Connecting"
                     , [ Element.Background.color buttonHoverColor
                       , Element.Border.glow buttonHoverColor 2
-                      , Element.htmlAttribute (Html.Attributes.disabled True)
-                      , id
-                      ]
-                    )
-
-                RegisteringAndDelegating _ _ _ ->
-                    ( NoOp
-                    , "Registering and Delegating"
-                    , [ Element.Background.color buttonHoverColor
-                      , Element.Border.glow buttonHoverColor 2
-                      , Element.htmlAttribute (Html.Attributes.disabled True)
-                      , id
-                      ]
-                    )
-
-                Delegating _ _ _ ->
-                    ( NoOp
-                    , "Delegating"
-                    , [ Element.Background.color buttonHoverColor
-                      , Element.Border.glow buttonHoverColor 2
-                      , Element.htmlAttribute (Html.Attributes.disabled True)
-                      , id
-                      ]
-                    )
-
-                Undelegating _ _ _ ->
-                    ( NoOp
-                    , "Undelegating"
-                    , [ Element.Background.color buttonHoverColor
                       , Element.htmlAttribute (Html.Attributes.disabled True)
                       , id
                       ]
@@ -411,16 +222,12 @@ subscriptions : Model -> Sub Msg
 subscriptions _ =
     Sub.batch
         [ receiveWalletConnection (\s -> ReceiveWalletConnected (decodeWallet s))
-        , receiveAccountStatus (\s -> ReceiveAccountStatus (Json.Decode.decodeString decodeAccount s))
-        , receiveRegisterAndDelegateStatus ReceiveRegisterAndDelegateStatus
-        , receiveDelegateStatus ReceiveDelegateToSumnStatus
-        , receiveUndelegateStatus ReceiveUndelegateStatus
         , receiveMousedOverEvent ReceiveMousedOverEvent
         , receiveMouseOutEvent ReceiveMouseOutEvent
         ]
 
 
-main : Program ( String, PoolId ) Model Msg
+main : Program String Model Msg
 main =
     Browser.element
         { init = init
@@ -434,30 +241,6 @@ port connectWallet : String -> Cmd msg
 
 
 port receiveWalletConnection : (String -> msg) -> Sub msg
-
-
-port getAccountStatus : () -> Cmd msg
-
-
-port receiveAccountStatus : (String -> msg) -> Sub msg
-
-
-port registerAndDelegateToSumn : String -> Cmd msg
-
-
-port receiveRegisterAndDelegateStatus : (TransactionSuccessStatus -> msg) -> Sub msg
-
-
-port delegateToSumn : String -> Cmd msg
-
-
-port receiveDelegateStatus : (TransactionSuccessStatus -> msg) -> Sub msg
-
-
-port undelegate : String -> Cmd msg
-
-
-port receiveUndelegateStatus : (TransactionSuccessStatus -> msg) -> Sub msg
 
 
 port receiveMousedOverEvent : (MouseOver -> msg) -> Sub msg
