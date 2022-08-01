@@ -171,7 +171,12 @@ suite =
                 in
                 Test.Html.Query.fromHtml (Main.view initialModel)
                     |> Test.Html.Query.find [ Test.Html.Selector.id "delegationButton" ]
-                    |> Test.Html.Query.has [ Test.Html.Selector.text "No available wallet" ]
+                    |> Test.Html.Query.has
+                        [ Test.Html.Selector.all
+                            [ Test.Html.Selector.disabled True
+                            , Test.Html.Selector.text "No available wallet"
+                            ]
+                        ]
         , Test.test "test NotConnectedAbleTo view" <|
             \_ ->
                 let
@@ -181,4 +186,18 @@ suite =
                 Test.Html.Query.fromHtml (Main.view initialModel)
                     |> Test.Html.Query.find [ Test.Html.Selector.id "delegationButton" ]
                     |> Test.Html.Query.has [ Test.Html.Selector.text "Connect" ]
+        , Test.test "test ConnectionEstablished view" <|
+            \_ ->
+                let
+                    initialModel =
+                        Main.ConnectionEstablished "" Main.Nami
+                in
+                Test.Html.Query.fromHtml (Main.view initialModel)
+                    |> Test.Html.Query.find [ Test.Html.Selector.id "delegationButton" ]
+                    |> Test.Html.Query.has
+                        [ Test.Html.Selector.all
+                            [ Test.Html.Selector.disabled True
+                            , Test.Html.Selector.text "Connection established"
+                            ]
+                        ]
         ]
