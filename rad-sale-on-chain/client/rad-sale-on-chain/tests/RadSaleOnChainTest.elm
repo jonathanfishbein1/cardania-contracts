@@ -1,4 +1,4 @@
-module BuyTest exposing (suite)
+module RadSaleOnChainTest exposing (suite)
 
 import Expect
 import Main
@@ -9,7 +9,7 @@ import Test.Html.Selector
 
 suite : Test.Test
 suite =
-    Test.describe "Delegation Tests"
+    Test.describe "rad-sale-on-chain Tests"
         [ Test.test "test Connect with NotConnectedNotAbleTo" <|
             \_ ->
                 let
@@ -41,7 +41,7 @@ suite =
                         Main.NotConnectedNotAbleTo
                 in
                 Test.Html.Query.fromHtml (Main.view initialModel)
-                    |> Test.Html.Query.find [ Test.Html.Selector.id "delegationButton" ]
+                    |> Test.Html.Query.find [ Test.Html.Selector.id "startButton" ]
                     |> Test.Html.Query.has
                         [ Test.Html.Selector.all
                             [ Test.Html.Selector.disabled True
@@ -55,7 +55,7 @@ suite =
                         Main.NotConnectedAbleTo Main.Nami False
                 in
                 Test.Html.Query.fromHtml (Main.view initialModel)
-                    |> Test.Html.Query.find [ Test.Html.Selector.id "delegationButton" ]
+                    |> Test.Html.Query.find [ Test.Html.Selector.id "startButton" ]
                     |> Test.Html.Query.has [ Test.Html.Selector.text "Connect" ]
         , Test.test "test ConnectionEstablished view" <|
             \_ ->
@@ -64,7 +64,7 @@ suite =
                         Main.ConnectionEstablished Main.Nami
                 in
                 Test.Html.Query.fromHtml (Main.view initialModel)
-                    |> Test.Html.Query.find [ Test.Html.Selector.id "delegationButton" ]
+                    |> Test.Html.Query.find [ Test.Html.Selector.id "startButton" ]
                     |> Test.Html.Query.has
                         [ Test.Html.Selector.all
                             [ Test.Html.Selector.disabled True
@@ -81,7 +81,7 @@ suite =
                         Main.Connecting
                 in
                 Test.Html.Query.fromHtml (Main.view initialModel)
-                    |> Test.Html.Query.find [ Test.Html.Selector.id "delegationButton" ]
+                    |> Test.Html.Query.find [ Test.Html.Selector.id "startButton" ]
                     |> Test.Html.Query.has
                         [ Test.Html.Selector.all
                             [ Test.Html.Selector.disabled True
