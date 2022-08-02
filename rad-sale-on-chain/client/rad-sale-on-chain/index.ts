@@ -105,3 +105,14 @@ var app = Elm.Main.init({
     flags: Wallet.hasWallet(),
     node: document.getElementById("elm-app-is-loaded-here")
 })
+
+app.ports.connectWallet.subscribe(async supportedWallet => {
+    const wallet = await Wallet.getWalletApi(supportedWallet!) as any
+    lucid.selectWallet(wallet)
+    console.log(wallet)
+    app.ports.receiveWalletConnection.send(supportedWallet)
+})
+
+const delegationButton = document.getElementById('delegationButton')
+delegationButton?.addEventListener('mouseover', event => app.ports.receiveMousedOverEvent.send(true))
+delegationButton?.addEventListener('mouseout', event => app.ports.receiveMouseOutEvent.send(false))

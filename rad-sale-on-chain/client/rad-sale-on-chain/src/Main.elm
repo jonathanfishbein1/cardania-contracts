@@ -68,6 +68,7 @@ type Msg
     | Disconnect SupportedWallet MouseOver
     | NoOp
     | ReceiveWalletConnected (Maybe SupportedWallet)
+    | ReceiveConnectionEstablished
     | ReceiveMousedOverEvent MouseOver
     | ReceiveMouseOutEvent MouseOver
 
@@ -109,10 +110,13 @@ update msg model =
         ( ReceiveWalletConnected wallet, Connecting ) ->
             case wallet of
                 Just w ->
-                    ( ConnectionEstablished w, Cmd.none )
+                    update ReceiveConnectionEstablished (ConnectionEstablished w)
 
                 Nothing ->
                     ( NotConnectedNotAbleTo, Cmd.none )
+
+        ( ReceiveConnectionEstablished, ConnectionEstablished w ) ->
+            ( Connected w False, Cmd.none )
 
         ( ReceiveMousedOverEvent m, NotConnectedAbleTo b _ ) ->
             ( NotConnectedAbleTo b m, Cmd.none )
