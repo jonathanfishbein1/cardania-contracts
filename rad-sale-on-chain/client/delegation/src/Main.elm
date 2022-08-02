@@ -97,8 +97,7 @@ type Msg
     | ReceiveDelegateToSumnStatus TransactionSuccessStatus
     | UndelegateFromSumn
     | ReceiveUndelegateStatus TransactionSuccessStatus
-    | ReceiveMousedOverEvent MouseOver
-    | ReceiveMouseOutEvent MouseOver
+    | ReceiveMouseEvent MouseOver
 
 
 type DelegationStatus
@@ -233,16 +232,10 @@ update msg model =
             , Cmd.none
             )
 
-        ( ReceiveMousedOverEvent m, NotConnectedAbleTo a b _ ) ->
+        ( ReceiveMouseEvent m, NotConnectedAbleTo a b _ ) ->
             ( NotConnectedAbleTo a b m, Cmd.none )
 
-        ( ReceiveMouseOutEvent m, NotConnectedAbleTo a b _ ) ->
-            ( NotConnectedAbleTo a b m, Cmd.none )
-
-        ( ReceiveMousedOverEvent m, Connected a b c d _ ) ->
-            ( Connected a b c d m, Cmd.none )
-
-        ( ReceiveMouseOutEvent m, Connected a b c d _ ) ->
+        ( ReceiveMouseEvent m, Connected a b c d _ ) ->
             ( Connected a b c d m, Cmd.none )
 
         ( _, _ ) ->
@@ -414,8 +407,7 @@ subscriptions _ =
         , receiveRegisterAndDelegateStatus ReceiveRegisterAndDelegateStatus
         , receiveDelegateStatus ReceiveDelegateToSumnStatus
         , receiveUndelegateStatus ReceiveUndelegateStatus
-        , receiveMousedOverEvent ReceiveMousedOverEvent
-        , receiveMouseOutEvent ReceiveMouseOutEvent
+        , receiveMouseEvent ReceiveMouseEvent
         ]
 
 
@@ -459,7 +451,4 @@ port undelegate : String -> Cmd msg
 port receiveUndelegateStatus : (TransactionSuccessStatus -> msg) -> Sub msg
 
 
-port receiveMousedOverEvent : (MouseOver -> msg) -> Sub msg
-
-
-port receiveMouseOutEvent : (MouseOver -> msg) -> Sub msg
+port receiveMouseEvent : (MouseOver -> msg) -> Sub msg

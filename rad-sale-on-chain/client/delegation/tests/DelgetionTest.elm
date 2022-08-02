@@ -163,6 +163,36 @@ suite =
                 Expect.equal
                     newModel
                     (Main.Connected "" Main.Nami account Main.DelegatingToSumn False)
+        , Test.test "test ReceiveMouseOverEvent with Connected DelegatingToOther" <|
+            \_ ->
+                let
+                    account =
+                        { stake_address = "", pool_id = "", active = True }
+
+                    initialModel =
+                        Main.Connected "" Main.Nami account Main.DelegatingToSumn False
+
+                    ( newModel, _ ) =
+                        Main.update (Main.ReceiveMouseEvent True) initialModel
+                in
+                Expect.equal
+                    newModel
+                    (Main.Connected "" Main.Nami account Main.DelegatingToSumn True)
+        , Test.test "test ReceiveMousedOutEvent with Connected DelegatingToOther" <|
+            \_ ->
+                let
+                    account =
+                        { stake_address = "", pool_id = "", active = True }
+
+                    initialModel =
+                        Main.Connected "" Main.Nami account Main.DelegatingToSumn True
+
+                    ( newModel, _ ) =
+                        Main.update (Main.ReceiveMouseEvent False) initialModel
+                in
+                Expect.equal
+                    newModel
+                    (Main.Connected "" Main.Nami account Main.DelegatingToSumn False)
         , Test.test "test NotConnectedNotAbleTo view" <|
             \_ ->
                 let
