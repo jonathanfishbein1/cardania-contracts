@@ -69,8 +69,28 @@ type Msg
     | NoOp
     | ReceiveWalletConnected (Maybe SupportedWallet)
     | ReceiveConnectionEstablished
-    | ReceiveMousedOverEvent MouseOver
-    | ReceiveMouseOutEvent MouseOver
+    | ReceiveMousedOverStartButtonEvent MouseOver
+    | ReceiveMouseOutStartButtonEvent MouseOver
+    | ReceiveMousedOverBuyButtonEvent MouseOver
+    | ReceiveMouseOutBuyButtonEvent MouseOver
+    | StartContract
+    | ReceiveStartContractStatus Bool
+    | BuyContract
+    | ReceiveBuyContractStatus Bool
+
+
+type StartButtonState
+    = NotStarted
+    | Starting
+    | Started
+    | StartError
+
+
+type BuyButtonState
+    = NotBought
+    | Buying
+    | Bought
+    | BuyError
 
 
 type Model
@@ -78,7 +98,7 @@ type Model
     | NotConnectedAbleTo SupportedWallet MouseOver
     | Connecting
     | ConnectionEstablished SupportedWallet
-    | Connected SupportedWallet MouseOver
+    | Connected SupportedWallet MouseOver StartButtonState BuyButtonState
     | NullState
 
 
@@ -116,19 +136,63 @@ update msg model =
                     ( NotConnectedNotAbleTo, Cmd.none )
 
         ( ReceiveConnectionEstablished, ConnectionEstablished w ) ->
-            ( Connected w False, Cmd.none )
+            ( Connected w False NotStarted NotBought, Cmd.none )
 
-        ( ReceiveMousedOverEvent m, NotConnectedAbleTo b _ ) ->
+        ( ReceiveMousedOverStartButtonEvent m, NotConnectedAbleTo b _ ) ->
             ( NotConnectedAbleTo b m, Cmd.none )
 
-        ( ReceiveMouseOutEvent m, NotConnectedAbleTo b _ ) ->
+        ( ReceiveMouseOutStartButtonEvent m, NotConnectedAbleTo b _ ) ->
             ( NotConnectedAbleTo b m, Cmd.none )
 
-        ( ReceiveMousedOverEvent m, Connected b d ) ->
-            ( Connected b m, Cmd.none )
+        ( ReceiveMousedOverStartButtonEvent m, Connected b d ss bs ) ->
+            ( Connected b m ss bs, Cmd.none )
 
-        ( ReceiveMouseOutEvent m, Connected b d ) ->
-            ( Connected b m, Cmd.none )
+        ( ReceiveMouseOutStartButtonEvent m, Connected b d ss bs ) ->
+            ( Connected b m ss bs, Cmd.none )
+
+        ( ReceiveMousedOverBuyButtonEvent m, NotConnectedAbleTo b _ ) ->
+            ( NotConnectedAbleTo b m, Cmd.none )
+
+        ( ReceiveMouseOutBuyButtonEvent m, NotConnectedAbleTo b _ ) ->
+            ( NotConnectedAbleTo b m, Cmd.none )
+
+        ( ReceiveMousedOverBuyButtonEvent m, Connected b d ss bs ) ->
+            ( Connected b m ss bs, Cmd.none )
+
+        ( ReceiveMouseOutBuyButtonEvent m, Connected b d ss bs ) ->
+            ( Connected b m ss bs, Cmd.none )
+
+        ( StartContract, Connected b d ss bs ) ->
+            ( Connected b d Starting bs, startContract () )
+
+        ( ReceiveStartContractStatus result, Connected b d ss bs ) ->
+            let
+                newModel =
+                    if result == True then
+                        Connected b d Started bs
+
+                    else
+                        Connected b d StartError bs
+            in
+            ( newModel
+            , Cmd.none
+            )
+
+        ( BuyContract, Connected b d ss bs ) ->
+            ( Connected b d ss Buying, buyContract () )
+
+        ( ReceiveBuyContractStatus result, Connected b d ss bs ) ->
+            let
+                newModel =
+                    if result == True then
+                        Connected b d ss Bought
+
+                    else
+                        Connected b d ss BuyError
+            in
+            ( newModel
+            , Cmd.none
+            )
 
         ( _, _ ) ->
             ( model, Cmd.none )
@@ -137,83 +201,239 @@ update msg model =
 view : Model -> Html.Html Msg
 view model =
     let
-        id =
-            Element.htmlAttribute (Html.Attributes.id "delegationButton")
+        startId =
+            Element.htmlAttribute (Html.Attributes.id "startButton")
 
-        ( buttonOnPress, buttonText, styles ) =
+        buyId =
+            Element.htmlAttribute (Html.Attributes.id "buyButton")
+
+        startButtonProperties =
             case model of
                 NotConnectedNotAbleTo ->
-                    ( NoOp
-                    , "No available wallet"
-                    , [ Element.htmlAttribute (Html.Attributes.disabled True)
-                      , id
-                      ]
-                    )
+                    { msg = NoOp
+                    , text = "No available wallet"
+                    , attributes =
+                        [ Element.htmlAttribute (Html.Attributes.disabled True)
+                        , startId
+                        ]
+                    }
 
                 NotConnectedAbleTo w m ->
-                    ( Connect w
-                    , "Connect"
-                    , [ Element.Background.color buttonHoverColor
-                      , Element.Border.glow buttonHoverColor
+                    { msg = Connect w
+                    , text = "Connect"
+                    , attributes =
+                        [ Element.Background.color buttonHoverColor
+                        , Element.Border.glow buttonHoverColor
                             (if m == True then
                                 10
 
                              else
                                 2
                             )
-                      , id
-                      ]
-                    )
+                        , startId
+                        ]
+                    }
 
                 ConnectionEstablished w ->
-                    ( NoOp
-                    , "Connection established"
-                    , [ Element.Background.color buttonHoverColor
-                      , Element.Border.glow buttonHoverColor 2
-                      , Element.htmlAttribute (Html.Attributes.disabled True)
-                      , id
-                      ]
-                    )
-
-                Connected w m ->
-                    ( NoOp
-                    , "Connection established"
-                    , [ Element.Background.color buttonHoverColor
-                      , Element.Border.glow buttonHoverColor 2
-                      , Element.htmlAttribute (Html.Attributes.disabled True)
-                      , id
-                      ]
-                    )
+                    { msg = NoOp
+                    , text = "Connection established"
+                    , attributes =
+                        [ Element.Background.color buttonHoverColor
+                        , Element.Border.glow buttonHoverColor 2
+                        , Element.htmlAttribute (Html.Attributes.disabled True)
+                        , startId
+                        ]
+                    }
 
                 Connecting ->
-                    ( NoOp
-                    , "Connecting"
-                    , [ Element.Background.color buttonHoverColor
-                      , Element.Border.glow buttonHoverColor 2
-                      , Element.htmlAttribute (Html.Attributes.disabled True)
-                      , id
-                      ]
-                    )
+                    { msg = NoOp
+                    , text = "Connecting"
+                    , attributes =
+                        [ Element.Background.color buttonHoverColor
+                        , Element.Border.glow buttonHoverColor 2
+                        , Element.htmlAttribute (Html.Attributes.disabled True)
+                        , startId
+                        ]
+                    }
+
+                Connected w m NotStarted _ ->
+                    { msg = StartContract
+                    , text = "Start"
+                    , attributes =
+                        [ Element.Background.color buttonHoverColor
+                        , Element.Border.glow buttonHoverColor 2
+                        , Element.htmlAttribute (Html.Attributes.disabled True)
+                        , startId
+                        ]
+                    }
+
+                Connected w m Starting _ ->
+                    { msg = NoOp
+                    , text = "Starting"
+                    , attributes =
+                        [ Element.Background.color buttonHoverColor
+                        , Element.Border.glow buttonHoverColor 2
+                        , Element.htmlAttribute (Html.Attributes.disabled True)
+                        , startId
+                        ]
+                    }
+
+                Connected w m Started _ ->
+                    { msg = NoOp
+                    , text = "Started"
+                    , attributes =
+                        [ Element.Background.color buttonHoverColor
+                        , Element.Border.glow buttonHoverColor 2
+                        , Element.htmlAttribute (Html.Attributes.disabled True)
+                        , startId
+                        ]
+                    }
+
+                Connected w m StartError _ ->
+                    { msg = NoOp
+                    , text = "Start Error"
+                    , attributes =
+                        [ Element.Background.color buttonHoverColor
+                        , Element.Border.glow buttonHoverColor 2
+                        , Element.htmlAttribute (Html.Attributes.disabled True)
+                        , startId
+                        ]
+                    }
 
                 NullState ->
-                    ( NoOp
-                    , "Connect"
-                    , [ Element.Background.color buttonHoverColor
-                      , Element.Border.glow buttonHoverColor 2
-                      , id
-                      ]
-                    )
+                    { msg = NoOp
+                    , text = "Connect"
+                    , attributes =
+                        [ Element.Background.color buttonHoverColor
+                        , Element.Border.glow buttonHoverColor 2
+                        , startId
+                        ]
+                    }
+
+        buyBttonProperties =
+            case model of
+                NotConnectedNotAbleTo ->
+                    { msg = NoOp
+                    , text = "No available wallet"
+                    , attributes =
+                        [ Element.htmlAttribute (Html.Attributes.disabled True)
+                        , buyId
+                        ]
+                    }
+
+                NotConnectedAbleTo w m ->
+                    { msg = Connect w
+                    , text = "Connect"
+                    , attributes =
+                        [ Element.Background.color buttonHoverColor
+                        , Element.Border.glow buttonHoverColor
+                            (if m == True then
+                                10
+
+                             else
+                                2
+                            )
+                        , buyId
+                        ]
+                    }
+
+                ConnectionEstablished w ->
+                    { msg = NoOp
+                    , text = "Connection established"
+                    , attributes =
+                        [ Element.Background.color buttonHoverColor
+                        , Element.Border.glow buttonHoverColor 2
+                        , Element.htmlAttribute (Html.Attributes.disabled True)
+                        , buyId
+                        ]
+                    }
+
+                Connecting ->
+                    { msg = NoOp
+                    , text = "Connecting"
+                    , attributes =
+                        [ Element.Background.color buttonHoverColor
+                        , Element.Border.glow buttonHoverColor 2
+                        , Element.htmlAttribute (Html.Attributes.disabled True)
+                        , buyId
+                        ]
+                    }
+
+                Connected w m s NotBought ->
+                    { msg = BuyContract
+                    , text = "Buy"
+                    , attributes =
+                        [ Element.Background.color buttonHoverColor
+                        , Element.Border.glow buttonHoverColor 2
+                        , Element.htmlAttribute (Html.Attributes.disabled True)
+                        , startId
+                        ]
+                    }
+
+                Connected w m s Buying ->
+                    { msg = NoOp
+                    , text = "Buying"
+                    , attributes =
+                        [ Element.Background.color buttonHoverColor
+                        , Element.Border.glow buttonHoverColor 2
+                        , Element.htmlAttribute (Html.Attributes.disabled True)
+                        , startId
+                        ]
+                    }
+
+                Connected w m s Bought ->
+                    { msg = NoOp
+                    , text = "Bought"
+                    , attributes =
+                        [ Element.Background.color buttonHoverColor
+                        , Element.Border.glow buttonHoverColor 2
+                        , Element.htmlAttribute (Html.Attributes.disabled True)
+                        , startId
+                        ]
+                    }
+
+                Connected w m s BuyError ->
+                    { msg = NoOp
+                    , text = "Buy Error"
+                    , attributes =
+                        [ Element.Background.color buttonHoverColor
+                        , Element.Border.glow buttonHoverColor 2
+                        , Element.htmlAttribute (Html.Attributes.disabled True)
+                        , startId
+                        ]
+                    }
+
+                NullState ->
+                    { msg = NoOp
+                    , text = "Connect"
+                    , attributes =
+                        [ Element.Background.color buttonHoverColor
+                        , Element.Border.glow buttonHoverColor 2
+                        , buyId
+                        ]
+                    }
     in
     Element.layout []
-        (Element.Input.button
-            styles
-            { onPress =
-                Just
-                    buttonOnPress
-            , label =
-                Element.text
-                    buttonText
-            }
+        (Element.column []
+            [ Element.Input.button
+                startButtonProperties.attributes
+                { onPress =
+                    Just
+                        startButtonProperties.msg
+                , label =
+                    Element.text
+                        startButtonProperties.text
+                }
+            , Element.Input.button
+                buyBttonProperties.attributes
+                { onPress =
+                    Just
+                        buyBttonProperties.msg
+                , label =
+                    Element.text
+                        buyBttonProperties.text
+                }
+            ]
         )
 
 
@@ -226,8 +446,12 @@ subscriptions : Model -> Sub Msg
 subscriptions _ =
     Sub.batch
         [ receiveWalletConnection (\s -> ReceiveWalletConnected (decodeWallet s))
-        , receiveMousedOverEvent ReceiveMousedOverEvent
-        , receiveMouseOutEvent ReceiveMouseOutEvent
+        , receiveMouseOverStartButtonEvent ReceiveMousedOverStartButtonEvent
+        , receiveMouseOutStartButtonEvent ReceiveMouseOutStartButtonEvent
+        , receiveMouseOverBuyButtonEvent ReceiveMousedOverBuyButtonEvent
+        , receiveMouseOutBuyButtonEvent ReceiveMouseOutBuyButtonEvent
+        , receiveStartContractStatus ReceiveStartContractStatus
+        , receiveBuyContractStatus ReceiveBuyContractStatus
         ]
 
 
@@ -247,7 +471,25 @@ port connectWallet : String -> Cmd msg
 port receiveWalletConnection : (String -> msg) -> Sub msg
 
 
-port receiveMousedOverEvent : (MouseOver -> msg) -> Sub msg
+port receiveMouseOverStartButtonEvent : (MouseOver -> msg) -> Sub msg
 
 
-port receiveMouseOutEvent : (MouseOver -> msg) -> Sub msg
+port receiveMouseOutStartButtonEvent : (MouseOver -> msg) -> Sub msg
+
+
+port receiveMouseOverBuyButtonEvent : (MouseOver -> msg) -> Sub msg
+
+
+port receiveMouseOutBuyButtonEvent : (MouseOver -> msg) -> Sub msg
+
+
+port startContract : () -> Cmd msg
+
+
+port receiveStartContractStatus : (Bool -> msg) -> Sub msg
+
+
+port buyContract : () -> Cmd msg
+
+
+port receiveBuyContractStatus : (Bool -> msg) -> Sub msg

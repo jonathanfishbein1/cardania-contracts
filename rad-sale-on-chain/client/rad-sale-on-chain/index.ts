@@ -113,6 +113,30 @@ app.ports.connectWallet.subscribe(async supportedWallet => {
     app.ports.receiveWalletConnection.send(supportedWallet)
 })
 
-const delegationButton = document.getElementById('delegationButton')
-delegationButton?.addEventListener('mouseover', event => app.ports.receiveMousedOverEvent.send(true))
-delegationButton?.addEventListener('mouseout', event => app.ports.receiveMouseOutEvent.send(false))
+const startButton = document.getElementById('startButton')
+startButton?.addEventListener('mouseover', event => app.ports.receiveMouseOverStartButtonEvent.send(true))
+startButton?.addEventListener('mouseout', event => app.ports.receiveMouseOutStartButtonEvent.send(false))
+
+const buyButton = document.getElementById('buyButton')
+buyButton?.addEventListener('mouseover', event => app.ports.receiveMouseOverBuyButtonEvent.send(true))
+buyButton?.addEventListener('mouseout', event => app.ports.receiveMouseOutBuyButtonEvent.send(false))
+
+app.ports.startContract.subscribe(async () => {
+    try {
+        const txHash = await startContract()
+        app.ports.receiveStartContractStatus.send(true)
+    }
+    catch (e) {
+        app.ports.receiveStartContractStatus.send(false)
+    }
+})
+
+app.ports.buyContract.subscribe(async () => {
+    try {
+        const txHash = await buyContract()
+        app.ports.receiveBuyContractStatus.send(true)
+    }
+    catch (e) {
+        app.ports.receiveBuyContractStatus.send(false)
+    }
+})
