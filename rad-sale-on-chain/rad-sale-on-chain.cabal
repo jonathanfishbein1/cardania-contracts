@@ -1,0 +1,161 @@
+cabal-version: 2.4
+name:          rad-sale-on-chain
+version:       0.2.10.1
+
+flag defer-plugin-errors
+    description:
+        Defer errors from the plugin, useful for things like Haddock that can't handle it.
+
+    default:     False
+    manual:      True
+    
+common lang
+    default-language:   Haskell2010
+    default-extensions:
+        DeriveFoldable
+        DeriveFunctor
+        DeriveGeneric
+        DeriveLift
+        DeriveTraversable
+        ExplicitForAll
+        GeneralizedNewtypeDeriving
+        ImportQualifiedPost
+        ScopedTypeVariables
+        StandaloneDeriving
+
+    ghc-options:
+        -Wall -Wnoncanonical-monad-instances -Wincomplete-uni-patterns
+        -Wincomplete-record-updates -Wredundant-constraints -Widentities
+        -fobject-code -fno-ignore-interface-pragmas
+        -fno-omit-interface-pragmas
+        -Wunused-packages
+
+    -- See Plutus Tx readme
+    if flag(defer-plugin-errors)
+        ghc-options: -fplugin-opt PlutusTx.Plugin:defer-errors
+
+library
+    default-language: Haskell2010
+    exposed-modules: Script OffChain
+    build-depends:
+        base,
+        plutus-tx-plugin,
+        plutus-tx,
+        plutus-core,
+        plutus-ledger-api,
+        plutus-ledger,
+        plutus-contract,
+        plutus-ledger-constraints,
+        text,
+        containers,
+        aeson,
+        flat,
+        bytestring,
+        cardano-api,
+        serialise,
+        cardano-crypto-class,
+        cardano-ledger-core,
+        cardano-ledger-shelley,
+        playground-common,
+        freer-extras,
+        openapi3 -any,
+
+executable rad-sale-on-chain
+    main-is:          Main.hs
+    other-modules:    Script
+    default-language: Haskell2010
+    build-depends:
+        base,
+        plutus-tx-plugin,
+        plutus-tx,
+        plutus-core,
+        plutus-ledger-api,
+        plutus-ledger,
+        plutus-contract,
+        plutus-ledger-constraints,
+        text,
+        containers,
+        aeson,
+        flat,
+        bytestring,
+        cardano-api,
+        serialise,
+        cardano-crypto-class,
+        cardano-ledger-core,
+        cardano-ledger-shelley,
+        playground-common,
+        freer-extras,
+        serialize-to-cardano-api,
+        openapi3 -any,
+
+executable plutus-pab-nami-rad
+  import: lang
+  main-is: Main.hs
+  hs-source-dirs: pab-nami/pab/app
+  other-modules:
+    RadSaleContracts
+  ghc-options:
+    -threaded
+  build-depends:
+    aeson -any,
+    base >= 4.9 && < 5,
+    openapi3 -any,
+    plutus-contract -any,
+    plutus-pab -any,
+    plutus-pab-executables -any,
+    playground-common -any,
+    prettyprinter -any,
+    purescript-bridge -any,
+    plutus-ledger -any,
+    plutus-ledger-constraints -any,
+    rad-sale-on-chain,
+    plutus-ledger-api,
+    plutus-tx
+
+executable plutus-pab-nami-demo-generator
+  import: lang
+  main-is: Generator.hs
+  hs-source-dirs: pab-nami/pab/app
+  other-modules:
+    RadSaleContracts
+  ghc-options:
+    -threaded
+  build-depends:
+    aeson -any,
+    base >= 4.9 && < 5,
+    openapi3 -any,
+    optparse-applicative -any,
+    plutus-contract -any,
+    plutus-pab -any,
+    plutus-pab-executables -any,
+    playground-common -any,
+    prettyprinter -any,
+    purescript-bridge -any,
+    plutus-ledger -any,
+    plutus-ledger-constraints -any,
+    rad-sale-on-chain,
+    plutus-ledger-api,
+    plutus-tx
+
+test-suite rad-sale-on-chain-tests
+  type: exitcode-stdio-1.0
+  main-is: Spec.hs
+  hs-source-dirs: test
+  default-language: Haskell2010
+  ghc-options:         -Wall -fobject-code -fno-ignore-interface-pragmas -fno-omit-interface-pragmas
+  build-depends:       base ^>=4.14.1.0
+                     , containers
+                     , data-default
+                     , freer-extras
+                     , lens
+                     , plutus-contract
+                     , plutus-ledger
+                     , plutus-tx
+                     , QuickCheck
+                     , rad-sale-on-chain
+                     , tasty
+                     , tasty-hunit
+                     , tasty-quickcheck
+                     , text
+  if !(impl(ghcjs) || os(ghcjs))
+    build-depends: plutus-tx-plugin -any

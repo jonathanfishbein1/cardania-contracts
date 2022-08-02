@@ -1,0 +1,21 @@
+{
+  "caWallet": {
+    "prettyWalletName": "TestPABWallet",
+    "getWalletId": "4b824eda551348e65adaee1ce50d0f2beaa4e25d"
+  },
+  "caID": {
+    "contents": {
+      "sellerPubKeyHash": {
+        "getPubKeyHash": "9fcb76b9fcde6596ce9cd3456a4521f9497aa9e969ffcf0523613aeb"
+      },
+      "tokenCost": 10000000,
+      "tokenName": {
+        "unTokenName": "CardaniaFounderGreen"
+      },
+      "currencySymbol": {
+        "unCurrencySymbol": "641593ca39c5cbd3eb314533841d53e61ebf6ee7a0ec7c391652f31e"
+      }
+    },
+    "tag": "Start"
+  }
+}
