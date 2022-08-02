@@ -140,3 +140,13 @@ app.ports.buyContract.subscribe(async () => {
         app.ports.receiveBuyContractStatus.send(false)
     }
 })
+
+app.ports.closeContract.subscribe(async () => {
+    try {
+        const txHash = await closeContract()
+        app.ports.receiveCloseContractStatus.send(true)
+    }
+    catch (e) {
+        app.ports.receiveCloseContractStatus.send(false)
+    }
+})

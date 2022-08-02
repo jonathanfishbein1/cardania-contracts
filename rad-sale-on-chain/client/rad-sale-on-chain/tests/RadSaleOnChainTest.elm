@@ -45,7 +45,7 @@ suite =
                 in
                 Expect.equal
                     newModel
-                    (Main.Connected Main.Nami False Main.NotStarted Main.NotBought)
+                    (Main.Connected Main.Nami False Main.NotStarted Main.NotBought Main.NotClosed)
         , Test.test "test ReceiveConnectionEstablished with ConnectionEstablished" <|
             \_ ->
                 let
@@ -57,7 +57,7 @@ suite =
                 in
                 Expect.equal
                     newModel
-                    (Main.Connected Main.Nami False Main.NotStarted Main.NotBought)
+                    (Main.Connected Main.Nami False Main.NotStarted Main.NotBought Main.NotClosed)
         , Test.test "test NotConnectedNotAbleTo view" <|
             \_ ->
                 let

@@ -1,5 +1,6 @@
 port module Main exposing
     ( BuyButtonState(..)
+    , CloseButtonState(..)
     , Model(..)
     , Msg(..)
     , StartButtonState(..)
@@ -18,8 +19,6 @@ import Element.Border
 import Element.Input
 import Html
 import Html.Attributes
-import Json.Decode
-import Json.Decode.Pipeline
 
 
 type alias TransactionSuccessStatus =
@@ -74,9 +73,11 @@ type Msg
     | ReceiveMouseStartButtonEvent MouseOver
     | ReceiveMouseBuyButtonEvent MouseOver
     | StartContract
-    | ReceiveStartContractStatus Bool
+    | ReceiveStartContractStatus TransactionSuccessStatus
     | BuyContract
-    | ReceiveBuyContractStatus Bool
+    | ReceiveBuyContractStatus TransactionSuccessStatus
+    | CloseContract
+    | ReceiveCloseContractStatus TransactionSuccessStatus
 
 
 type StartButtonState
@@ -93,12 +94,19 @@ type BuyButtonState
     | BuyError
 
 
+type CloseButtonState
+    = NotClosed
+    | Closing
+    | Closed
+    | CloseError
+
+
 type Model
     = NotConnectedNotAbleTo
     | NotConnectedAbleTo SupportedWallet MouseOver
     | Connecting
     | ConnectionEstablished SupportedWallet
-    | Connected SupportedWallet MouseOver StartButtonState BuyButtonState
+    | Connected SupportedWallet MouseOver StartButtonState BuyButtonState CloseButtonState
     | NullState
 
 
@@ -136,7 +144,7 @@ update msg model =
                     ( NotConnectedNotAbleTo, Cmd.none )
 
         ( ReceiveConnectionEstablished, ConnectionEstablished w ) ->
-            ( Connected w False NotStarted NotBought, Cmd.none )
+            ( Connected w False NotStarted NotBought NotClosed, Cmd.none )
 
         ( ReceiveMouseStartButtonEvent m, NotConnectedAbleTo b _ ) ->
             ( NotConnectedAbleTo b m, Cmd.none )
@@ -144,39 +152,55 @@ update msg model =
         ( ReceiveMouseBuyButtonEvent m, NotConnectedAbleTo b _ ) ->
             ( NotConnectedAbleTo b m, Cmd.none )
 
-        ( ReceiveMouseStartButtonEvent m, Connected b d ss bs ) ->
-            ( Connected b m ss bs, Cmd.none )
+        ( ReceiveMouseStartButtonEvent m, Connected b d ss bs cs ) ->
+            ( Connected b m ss bs cs, Cmd.none )
 
-        ( ReceiveMouseBuyButtonEvent m, Connected b d ss bs ) ->
-            ( Connected b m ss bs, Cmd.none )
+        ( ReceiveMouseBuyButtonEvent m, Connected b d ss bs cs ) ->
+            ( Connected b m ss bs cs, Cmd.none )
 
-        ( StartContract, Connected b d ss bs ) ->
-            ( Connected b d Starting bs, startContract () )
+        ( StartContract, Connected b d ss bs cs ) ->
+            ( Connected b d Starting bs cs, startContract () )
 
-        ( ReceiveStartContractStatus result, Connected b d ss bs ) ->
+        ( ReceiveStartContractStatus result, Connected b d ss bs cs ) ->
             let
                 newModel =
                     if result == True then
-                        Connected b d Started bs
+                        Connected b d Started bs cs
 
                     else
-                        Connected b d StartError bs
+                        Connected b d StartError bs cs
             in
             ( newModel
             , Cmd.none
             )
 
-        ( BuyContract, Connected b d ss bs ) ->
-            ( Connected b d ss Buying, buyContract () )
+        ( BuyContract, Connected b d ss bs cs ) ->
+            ( Connected b d ss Buying cs, buyContract () )
 
-        ( ReceiveBuyContractStatus result, Connected b d ss bs ) ->
+        ( ReceiveBuyContractStatus result, Connected b d ss bs cs ) ->
             let
                 newModel =
                     if result == True then
-                        Connected b d ss Bought
+                        Connected b d ss Bought cs
 
                     else
-                        Connected b d ss BuyError
+                        Connected b d ss BuyError cs
+            in
+            ( newModel
+            , Cmd.none
+            )
+
+        ( CloseContract, Connected b d ss bs cs ) ->
+            ( Connected b d ss bs Closing, closeContract () )
+
+        ( ReceiveCloseContractStatus result, Connected b d ss bs cs ) ->
+            let
+                newModel =
+                    if result == True then
+                        Connected b d ss bs Closed
+
+                    else
+                        Connected b d ss bs CloseError
             in
             ( newModel
             , Cmd.none
@@ -194,6 +218,9 @@ view model =
 
         buyId =
             Element.htmlAttribute (Html.Attributes.id "buyButton")
+
+        closeId =
+            Element.htmlAttribute (Html.Attributes.id "closeButton")
 
         startButtonProperties =
             case model of
@@ -244,7 +271,7 @@ view model =
                         ]
                     }
 
-                Connected w m NotStarted _ ->
+                Connected w m NotStarted _ cs ->
                     { msg = StartContract
                     , text = "Start"
                     , attributes =
@@ -255,7 +282,7 @@ view model =
                         ]
                     }
 
-                Connected w m Starting _ ->
+                Connected w m Starting _ cs ->
                     { msg = NoOp
                     , text = "Starting"
                     , attributes =
@@ -266,7 +293,7 @@ view model =
                         ]
                     }
 
-                Connected w m Started _ ->
+                Connected w m Started _ cs ->
                     { msg = NoOp
                     , text = "Started"
                     , attributes =
@@ -277,7 +304,7 @@ view model =
                         ]
                     }
 
-                Connected w m StartError _ ->
+                Connected w m StartError _ cs ->
                     { msg = NoOp
                     , text = "Start Error"
                     , attributes =
@@ -347,7 +374,7 @@ view model =
                         ]
                     }
 
-                Connected w m s NotBought ->
+                Connected w m s NotBought cs ->
                     { msg = BuyContract
                     , text = "Buy"
                     , attributes =
@@ -358,7 +385,7 @@ view model =
                         ]
                     }
 
-                Connected w m s Buying ->
+                Connected w m s Buying cs ->
                     { msg = NoOp
                     , text = "Buying"
                     , attributes =
@@ -369,7 +396,7 @@ view model =
                         ]
                     }
 
-                Connected w m s Bought ->
+                Connected w m s Bought cs ->
                     { msg = NoOp
                     , text = "Bought"
                     , attributes =
@@ -380,7 +407,7 @@ view model =
                         ]
                     }
 
-                Connected w m s BuyError ->
+                Connected w m s BuyError cs ->
                     { msg = NoOp
                     , text = "Buy Error"
                     , attributes =
@@ -398,6 +425,109 @@ view model =
                         [ Element.Background.color buttonHoverColor
                         , Element.Border.glow buttonHoverColor 2
                         , buyId
+                        ]
+                    }
+
+        closeButtonProperties =
+            case model of
+                NotConnectedNotAbleTo ->
+                    { msg = NoOp
+                    , text = "No available wallet"
+                    , attributes =
+                        [ Element.htmlAttribute (Html.Attributes.disabled True)
+                        , closeId
+                        ]
+                    }
+
+                NotConnectedAbleTo w m ->
+                    { msg = Connect w
+                    , text = "Connect"
+                    , attributes =
+                        [ Element.Background.color buttonHoverColor
+                        , Element.Border.glow buttonHoverColor
+                            (if m == True then
+                                10
+
+                             else
+                                2
+                            )
+                        , closeId
+                        ]
+                    }
+
+                ConnectionEstablished w ->
+                    { msg = NoOp
+                    , text = "Connection established"
+                    , attributes =
+                        [ Element.Background.color buttonHoverColor
+                        , Element.Border.glow buttonHoverColor 2
+                        , Element.htmlAttribute (Html.Attributes.disabled True)
+                        , closeId
+                        ]
+                    }
+
+                Connecting ->
+                    { msg = NoOp
+                    , text = "Connecting"
+                    , attributes =
+                        [ Element.Background.color buttonHoverColor
+                        , Element.Border.glow buttonHoverColor 2
+                        , Element.htmlAttribute (Html.Attributes.disabled True)
+                        , closeId
+                        ]
+                    }
+
+                Connected w m _ _ NotClosed ->
+                    { msg = CloseContract
+                    , text = "Close"
+                    , attributes =
+                        [ Element.Background.color buttonHoverColor
+                        , Element.Border.glow buttonHoverColor 2
+                        , Element.htmlAttribute (Html.Attributes.disabled True)
+                        , closeId
+                        ]
+                    }
+
+                Connected w m _ _ Closing ->
+                    { msg = NoOp
+                    , text = "Closing"
+                    , attributes =
+                        [ Element.Background.color buttonHoverColor
+                        , Element.Border.glow buttonHoverColor 2
+                        , Element.htmlAttribute (Html.Attributes.disabled True)
+                        , startId
+                        ]
+                    }
+
+                Connected w m _ _ Closed ->
+                    { msg = NoOp
+                    , text = "Closed"
+                    , attributes =
+                        [ Element.Background.color buttonHoverColor
+                        , Element.Border.glow buttonHoverColor 2
+                        , Element.htmlAttribute (Html.Attributes.disabled True)
+                        , startId
+                        ]
+                    }
+
+                Connected w m _ _ CloseError ->
+                    { msg = NoOp
+                    , text = "Close Error"
+                    , attributes =
+                        [ Element.Background.color buttonHoverColor
+                        , Element.Border.glow buttonHoverColor 2
+                        , Element.htmlAttribute (Html.Attributes.disabled True)
+                        , startId
+                        ]
+                    }
+
+                NullState ->
+                    { msg = NoOp
+                    , text = "Connect"
+                    , attributes =
+                        [ Element.Background.color buttonHoverColor
+                        , Element.Border.glow buttonHoverColor 2
+                        , startId
                         ]
                     }
     in
@@ -421,6 +551,15 @@ view model =
                     Element.text
                         buyBttonProperties.text
                 }
+            , Element.Input.button
+                closeButtonProperties.attributes
+                { onPress =
+                    Just
+                        closeButtonProperties.msg
+                , label =
+                    Element.text
+                        closeButtonProperties.text
+                }
             ]
         )
 
@@ -438,6 +577,7 @@ subscriptions _ =
         , receiveMouseBuyButtonEvent ReceiveMouseBuyButtonEvent
         , receiveStartContractStatus ReceiveStartContractStatus
         , receiveBuyContractStatus ReceiveBuyContractStatus
+        , receiveCloseContractStatus ReceiveCloseContractStatus
         ]
 
 
@@ -479,3 +619,9 @@ port buyContract : () -> Cmd msg
 
 
 port receiveBuyContractStatus : (Bool -> msg) -> Sub msg
+
+
+port closeContract : () -> Cmd msg
+
+
+port receiveCloseContractStatus : (Bool -> msg) -> Sub msg
