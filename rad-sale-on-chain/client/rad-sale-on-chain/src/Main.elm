@@ -71,10 +71,8 @@ type Msg
     | NoOp
     | ReceiveWalletConnected (Maybe SupportedWallet)
     | ReceiveConnectionEstablished
-    | ReceiveMousedOverStartButtonEvent MouseOver
-    | ReceiveMouseOutStartButtonEvent MouseOver
-    | ReceiveMousedOverBuyButtonEvent MouseOver
-    | ReceiveMouseOutBuyButtonEvent MouseOver
+    | ReceiveMouseStartButtonEvent MouseOver
+    | ReceiveMouseBuyButtonEvent MouseOver
     | StartContract
     | ReceiveStartContractStatus Bool
     | BuyContract
@@ -140,28 +138,16 @@ update msg model =
         ( ReceiveConnectionEstablished, ConnectionEstablished w ) ->
             ( Connected w False NotStarted NotBought, Cmd.none )
 
-        ( ReceiveMousedOverStartButtonEvent m, NotConnectedAbleTo b _ ) ->
+        ( ReceiveMouseStartButtonEvent m, NotConnectedAbleTo b _ ) ->
             ( NotConnectedAbleTo b m, Cmd.none )
 
-        ( ReceiveMouseOutStartButtonEvent m, NotConnectedAbleTo b _ ) ->
+        ( ReceiveMouseBuyButtonEvent m, NotConnectedAbleTo b _ ) ->
             ( NotConnectedAbleTo b m, Cmd.none )
 
-        ( ReceiveMousedOverStartButtonEvent m, Connected b d ss bs ) ->
+        ( ReceiveMouseStartButtonEvent m, Connected b d ss bs ) ->
             ( Connected b m ss bs, Cmd.none )
 
-        ( ReceiveMouseOutStartButtonEvent m, Connected b d ss bs ) ->
-            ( Connected b m ss bs, Cmd.none )
-
-        ( ReceiveMousedOverBuyButtonEvent m, NotConnectedAbleTo b _ ) ->
-            ( NotConnectedAbleTo b m, Cmd.none )
-
-        ( ReceiveMouseOutBuyButtonEvent m, NotConnectedAbleTo b _ ) ->
-            ( NotConnectedAbleTo b m, Cmd.none )
-
-        ( ReceiveMousedOverBuyButtonEvent m, Connected b d ss bs ) ->
-            ( Connected b m ss bs, Cmd.none )
-
-        ( ReceiveMouseOutBuyButtonEvent m, Connected b d ss bs ) ->
+        ( ReceiveMouseBuyButtonEvent m, Connected b d ss bs ) ->
             ( Connected b m ss bs, Cmd.none )
 
         ( StartContract, Connected b d ss bs ) ->
@@ -448,10 +434,8 @@ subscriptions : Model -> Sub Msg
 subscriptions _ =
     Sub.batch
         [ receiveWalletConnection (\s -> ReceiveWalletConnected (decodeWallet s))
-        , receiveMouseOverStartButtonEvent ReceiveMousedOverStartButtonEvent
-        , receiveMouseOutStartButtonEvent ReceiveMouseOutStartButtonEvent
-        , receiveMouseOverBuyButtonEvent ReceiveMousedOverBuyButtonEvent
-        , receiveMouseOutBuyButtonEvent ReceiveMouseOutBuyButtonEvent
+        , receiveMouseStartButtonEvent ReceiveMouseStartButtonEvent
+        , receiveMouseBuyButtonEvent ReceiveMouseBuyButtonEvent
         , receiveStartContractStatus ReceiveStartContractStatus
         , receiveBuyContractStatus ReceiveBuyContractStatus
         ]
@@ -473,10 +457,10 @@ port connectWallet : String -> Cmd msg
 port receiveWalletConnection : (String -> msg) -> Sub msg
 
 
-port receiveMouseOverStartButtonEvent : (MouseOver -> msg) -> Sub msg
+port receiveMouseStartButtonEvent : (MouseOver -> msg) -> Sub msg
 
 
-port receiveMouseOutStartButtonEvent : (MouseOver -> msg) -> Sub msg
+port receiveMouseBuyButtonEvent : (MouseOver -> msg) -> Sub msg
 
 
 port receiveMouseOverBuyButtonEvent : (MouseOver -> msg) -> Sub msg
