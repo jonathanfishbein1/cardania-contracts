@@ -1,6 +1,8 @@
 port module Main exposing
-    ( Model(..)
+    ( BuyButtonState(..)
+    , Model(..)
     , Msg(..)
+    , StartButtonState(..)
     , SupportedWallet(..)
     , encodeWallet
     , init

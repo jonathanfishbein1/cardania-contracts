@@ -34,6 +34,30 @@ suite =
                 Expect.equal
                     newModel
                     Main.Connecting
+        , Test.test "test ReceiveWalletConnected with Connecting" <|
+            \_ ->
+                let
+                    initialModel =
+                        Main.Connecting
+
+                    ( newModel, _ ) =
+                        Main.update (Main.ReceiveWalletConnected (Maybe.Just Main.Nami)) initialModel
+                in
+                Expect.equal
+                    newModel
+                    (Main.Connected Main.Nami False Main.NotStarted Main.NotBought)
+        , Test.test "test ReceiveConnectionEstablished with ConnectionEstablished" <|
+            \_ ->
+                let
+                    initialModel =
+                        Main.ConnectionEstablished Main.Nami
+
+                    ( newModel, _ ) =
+                        Main.update Main.ReceiveConnectionEstablished initialModel
+                in
+                Expect.equal
+                    newModel
+                    (Main.Connected Main.Nami False Main.NotStarted Main.NotBought)
         , Test.test "test NotConnectedNotAbleTo view" <|
             \_ ->
                 let
@@ -74,9 +98,6 @@ suite =
         , Test.test "test Connecting view" <|
             \_ ->
                 let
-                    account =
-                        { stake_address = "", pool_id = "", active = True }
-
                     initialModel =
                         Main.Connecting
                 in
