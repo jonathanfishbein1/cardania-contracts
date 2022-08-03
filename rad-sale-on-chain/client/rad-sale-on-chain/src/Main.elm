@@ -1,6 +1,7 @@
 port module Main exposing
     ( BuyButtonState(..)
     , CloseButtonState(..)
+    , Environment(..)
     , Model(..)
     , Msg(..)
     , StartButtonState(..)
@@ -45,6 +46,19 @@ decodeWallet status =
             Nothing
 
 
+decodeEnvironment : String -> Maybe Environment
+decodeEnvironment env =
+    case env of
+        "development" ->
+            Just Development
+
+        "production" ->
+            Just Production
+
+        _ ->
+            Nothing
+
+
 encodeWallet : SupportedWallet -> String
 encodeWallet wallet =
     case wallet of
@@ -62,6 +76,11 @@ type SupportedWallet
     = Nami
     | Eternl
     | Flint
+
+
+type Environment
+    = Development
+    | Production
 
 
 type Msg
@@ -100,26 +119,29 @@ type CloseButtonState
 
 
 type Model
-    = NotConnectedNotAbleTo
-    | NotConnectedAbleTo SupportedWallet MouseOver
-    | Connecting
-    | ConnectionEstablished SupportedWallet
-    | Connected SupportedWallet MouseOver StartButtonState BuyButtonState CloseButtonState
-    | NullState
+    = NotConnectedNotAbleTo Environment
+    | NotConnectedAbleTo Environment SupportedWallet MouseOver
+    | Connecting Environment
+    | ConnectionEstablished Environment SupportedWallet
+    | Connected Environment SupportedWallet MouseOver StartButtonState BuyButtonState CloseButtonState
+    | NullState Environment
 
 
-init : String -> ( Model, Cmd Msg )
-init supportedWallet =
+init : ( String, String ) -> ( Model, Cmd Msg )
+init ( supportedWallet, env ) =
     let
         wallet =
             decodeWallet supportedWallet
+
+        environment =
+            decodeEnvironment env
     in
     ( case wallet of
         Just w ->
-            NotConnectedAbleTo w False
+            NotConnectedAbleTo (Maybe.withDefault Production environment) w False
 
         Nothing ->
-            NotConnectedNotAbleTo
+            NotConnectedNotAbleTo (Maybe.withDefault Production environment)
     , Cmd.none
     )
 
@@ -127,66 +149,66 @@ init supportedWallet =
 update : Msg -> Model -> ( Model, Cmd msg )
 update msg model =
     case ( msg, model ) of
-        ( Connect w, NotConnectedAbleTo wallet _ ) ->
-            ( Connecting, connectWallet (encodeWallet w) )
+        ( Connect w, NotConnectedAbleTo environment wallet _ ) ->
+            ( Connecting environment, connectWallet (encodeWallet w) )
 
-        ( Disconnect wallet m, _ ) ->
-            ( NotConnectedAbleTo wallet m, Cmd.none )
+        ( Disconnect wallet m, Connected environment b d ss bs cs ) ->
+            ( NotConnectedAbleTo environment wallet m, Cmd.none )
 
-        ( ReceiveWalletConnected wallet, Connecting ) ->
+        ( ReceiveWalletConnected wallet, Connecting environment ) ->
             case wallet of
                 Just w ->
-                    update ReceiveConnectionEstablished (ConnectionEstablished w)
+                    update ReceiveConnectionEstablished (ConnectionEstablished environment w)
 
                 Nothing ->
-                    ( NotConnectedNotAbleTo, Cmd.none )
+                    ( NotConnectedNotAbleTo environment, Cmd.none )
 
-        ( ReceiveConnectionEstablished, ConnectionEstablished w ) ->
-            ( Connected w False NotStarted NotBought NotClosed, Cmd.none )
+        ( ReceiveConnectionEstablished, ConnectionEstablished environment w ) ->
+            ( Connected environment w False NotStarted NotBought NotClosed, Cmd.none )
 
-        ( StartContract, Connected b d ss bs cs ) ->
-            ( Connected b d Starting bs cs, startContract () )
+        ( StartContract, Connected environment b d ss bs cs ) ->
+            ( Connected environment b d Starting bs cs, startContract () )
 
-        ( ReceiveStartContractStatus result, Connected b d ss bs cs ) ->
+        ( ReceiveStartContractStatus result, Connected environment b d ss bs cs ) ->
             let
                 newModel =
                     if result == True then
-                        Connected b d Started bs cs
+                        Connected environment b d Started bs cs
 
                     else
-                        Connected b d StartError bs cs
+                        Connected environment b d StartError bs cs
             in
             ( newModel
             , Cmd.none
             )
 
-        ( BuyContract, Connected b d ss bs cs ) ->
-            ( Connected b d ss Buying cs, buyContract () )
+        ( BuyContract, Connected environment b d ss bs cs ) ->
+            ( Connected environment b d ss Buying cs, buyContract () )
 
-        ( ReceiveBuyContractStatus result, Connected b d ss bs cs ) ->
+        ( ReceiveBuyContractStatus result, Connected environment b d ss bs cs ) ->
             let
                 newModel =
                     if result == True then
-                        Connected b d ss Bought cs
+                        Connected environment b d ss Bought cs
 
                     else
-                        Connected b d ss BuyError cs
+                        Connected environment b d ss BuyError cs
             in
             ( newModel
             , Cmd.none
             )
 
-        ( CloseContract, Connected b d ss bs cs ) ->
-            ( Connected b d ss bs Closing, closeContract () )
+        ( CloseContract, Connected environment b d ss bs cs ) ->
+            ( Connected environment b d ss bs Closing, closeContract () )
 
-        ( ReceiveCloseContractStatus result, Connected b d ss bs cs ) ->
+        ( ReceiveCloseContractStatus result, Connected environment b d ss bs cs ) ->
             let
                 newModel =
                     if result == True then
-                        Connected b d ss bs Closed
+                        Connected environment b d ss bs Closed
 
                     else
-                        Connected b d ss bs CloseError
+                        Connected environment b d ss bs CloseError
             in
             ( newModel
             , Cmd.none
@@ -208,21 +230,26 @@ view model =
         closeId =
             Element.htmlAttribute (Html.Attributes.id "closeButton")
 
-        startButtonProperties =
+        startButton =
             case model of
-                NotConnectedNotAbleTo ->
-                    { msg = NoOp
-                    , text = "No available wallet"
-                    , attributes =
+                NotConnectedNotAbleTo Development ->
+                    Element.Input.button
                         [ Element.htmlAttribute (Html.Attributes.disabled True)
                         , startId
                         ]
-                    }
+                        { onPress =
+                            Just
+                                NoOp
+                        , label =
+                            Element.text
+                                "No available wallet"
+                        }
 
-                NotConnectedAbleTo w m ->
-                    { msg = Connect w
-                    , text = "Connect"
-                    , attributes =
+                NotConnectedNotAbleTo Production ->
+                    Element.none
+
+                NotConnectedAbleTo Development w m ->
+                    Element.Input.button
                         [ Element.Background.color buttonHoverColor
                         , Element.mouseOver
                             [ Element.Border.glow buttonHoverColor
@@ -230,32 +257,53 @@ view model =
                             ]
                         , startId
                         ]
-                    }
+                        { onPress =
+                            Just
+                                (Connect w)
+                        , label =
+                            Element.text
+                                "Connect"
+                        }
 
-                ConnectionEstablished w ->
-                    { msg = NoOp
-                    , text = "Connection established"
-                    , attributes =
+                NotConnectedAbleTo Production _ _ ->
+                    Element.none
+
+                ConnectionEstablished Development w ->
+                    Element.Input.button
                         [ Element.Background.color buttonHoverColor
                         , Element.htmlAttribute (Html.Attributes.disabled True)
                         , startId
                         ]
-                    }
+                        { onPress =
+                            Just
+                                NoOp
+                        , label =
+                            Element.text
+                                "Connection established"
+                        }
 
-                Connecting ->
-                    { msg = NoOp
-                    , text = "Connecting"
-                    , attributes =
+                ConnectionEstablished Production _ ->
+                    Element.none
+
+                Connecting Development ->
+                    Element.Input.button
                         [ Element.Background.color buttonHoverColor
                         , Element.htmlAttribute (Html.Attributes.disabled True)
                         , startId
                         ]
-                    }
+                        { onPress =
+                            Just
+                                NoOp
+                        , label =
+                            Element.text
+                                "Connecting"
+                        }
 
-                Connected w m NotStarted _ cs ->
-                    { msg = StartContract
-                    , text = "Start"
-                    , attributes =
+                Connecting Production ->
+                    Element.none
+
+                Connected Development w m NotStarted _ cs ->
+                    Element.Input.button
                         [ Element.Background.color buttonHoverColor
                         , Element.mouseOver
                             [ Element.Border.glow buttonHoverColor
@@ -264,62 +312,92 @@ view model =
                         , Element.htmlAttribute (Html.Attributes.disabled True)
                         , startId
                         ]
-                    }
+                        { onPress =
+                            Just
+                                StartContract
+                        , label =
+                            Element.text
+                                "Start"
+                        }
 
-                Connected w m Starting _ cs ->
-                    { msg = NoOp
-                    , text = "Starting"
-                    , attributes =
+                Connected Production _ _ _ _ _ ->
+                    Element.none
+
+                Connected Development w m Starting _ cs ->
+                    Element.Input.button
                         [ Element.Background.color buttonHoverColor
                         , Element.htmlAttribute (Html.Attributes.disabled True)
                         , startId
                         ]
-                    }
+                        { onPress =
+                            Just
+                                NoOp
+                        , label =
+                            Element.text
+                                "Starting"
+                        }
 
-                Connected w m Started _ cs ->
-                    { msg = NoOp
-                    , text = "Started"
-                    , attributes =
+                Connected Development w m Started _ cs ->
+                    Element.Input.button
                         [ Element.Background.color buttonHoverColor
                         , Element.htmlAttribute (Html.Attributes.disabled True)
                         , startId
                         ]
-                    }
+                        { onPress =
+                            Just
+                                NoOp
+                        , label =
+                            Element.text
+                                "Started"
+                        }
 
-                Connected w m StartError _ cs ->
-                    { msg = NoOp
-                    , text = "Start Error"
-                    , attributes =
+                Connected Development w m StartError _ cs ->
+                    Element.Input.button
                         [ Element.Background.color buttonHoverColor
                         , Element.htmlAttribute (Html.Attributes.disabled True)
                         , startId
                         ]
-                    }
+                        { onPress =
+                            Just
+                                NoOp
+                        , label =
+                            Element.text
+                                "Start Error"
+                        }
 
-                NullState ->
-                    { msg = NoOp
-                    , text = "Connect"
-                    , attributes =
+                NullState Development ->
+                    Element.Input.button
                         [ Element.Background.color buttonHoverColor
                         , startId
                         ]
-                    }
+                        { onPress =
+                            Just
+                                NoOp
+                        , label =
+                            Element.text
+                                "Connect"
+                        }
 
-        buyBttonProperties =
+                NullState Production ->
+                    Element.none
+
+        buyBtton =
             case model of
-                NotConnectedNotAbleTo ->
-                    { msg = NoOp
-                    , text = "No available wallet"
-                    , attributes =
+                NotConnectedNotAbleTo _ ->
+                    Element.Input.button
                         [ Element.htmlAttribute (Html.Attributes.disabled True)
                         , buyId
                         ]
-                    }
+                        { onPress =
+                            Just
+                                NoOp
+                        , label =
+                            Element.text
+                                "No available wallet"
+                        }
 
-                NotConnectedAbleTo w m ->
-                    { msg = Connect w
-                    , text = "Connect"
-                    , attributes =
+                NotConnectedAbleTo _ w m ->
+                    Element.Input.button
                         [ Element.Background.color buttonHoverColor
                         , Element.mouseOver
                             [ Element.Border.glow buttonHoverColor
@@ -327,207 +405,271 @@ view model =
                             ]
                         , buyId
                         ]
-                    }
+                        { onPress =
+                            Just
+                                (Connect w)
+                        , label =
+                            Element.text
+                                "Connect"
+                        }
 
-                ConnectionEstablished w ->
-                    { msg = NoOp
-                    , text = "Connection established"
-                    , attributes =
+                ConnectionEstablished _ w ->
+                    Element.Input.button
                         [ Element.Background.color buttonHoverColor
                         , Element.htmlAttribute (Html.Attributes.disabled True)
                         , buyId
                         ]
-                    }
+                        { onPress =
+                            Just
+                                NoOp
+                        , label =
+                            Element.text
+                                "Connection established"
+                        }
 
-                Connecting ->
-                    { msg = NoOp
-                    , text = "Connecting"
-                    , attributes =
+                Connecting _ ->
+                    Element.Input.button
                         [ Element.Background.color buttonHoverColor
                         , Element.htmlAttribute (Html.Attributes.disabled True)
                         , buyId
                         ]
-                    }
+                        { onPress =
+                            Just
+                                NoOp
+                        , label =
+                            Element.text
+                                "Connecting"
+                        }
 
-                Connected w m s NotBought cs ->
-                    { msg = BuyContract
-                    , text = "Buy"
-                    , attributes =
+                Connected _ w m s NotBought cs ->
+                    Element.Input.button
                         [ Element.Background.color buttonHoverColor
                         , Element.mouseOver
                             [ Element.Border.glow buttonHoverColor
                                 10
                             ]
                         , Element.htmlAttribute (Html.Attributes.disabled True)
-                        , startId
+                        , buyId
                         ]
-                    }
+                        { onPress =
+                            Just
+                                BuyContract
+                        , label =
+                            Element.text
+                                "Buy"
+                        }
 
-                Connected w m s Buying cs ->
-                    { msg = NoOp
-                    , text = "Buying"
-                    , attributes =
+                Connected _ w m s Buying cs ->
+                    Element.Input.button
                         [ Element.Background.color buttonHoverColor
                         , Element.htmlAttribute (Html.Attributes.disabled True)
-                        , startId
+                        , buyId
                         ]
-                    }
+                        { onPress =
+                            Just
+                                NoOp
+                        , label =
+                            Element.text
+                                "Buying"
+                        }
 
-                Connected w m s Bought cs ->
-                    { msg = NoOp
-                    , text = "Bought"
-                    , attributes =
+                Connected _ w m s Bought cs ->
+                    Element.Input.button
                         [ Element.Background.color buttonHoverColor
                         , Element.htmlAttribute (Html.Attributes.disabled True)
-                        , startId
+                        , buyId
                         ]
-                    }
+                        { onPress =
+                            Just
+                                NoOp
+                        , label =
+                            Element.text
+                                "Bought"
+                        }
 
-                Connected w m s BuyError cs ->
-                    { msg = NoOp
-                    , text = "Buy Error"
-                    , attributes =
+                Connected _ w m s BuyError cs ->
+                    Element.Input.button
                         [ Element.Background.color buttonHoverColor
                         , Element.htmlAttribute (Html.Attributes.disabled True)
-                        , startId
+                        , buyId
                         ]
-                    }
+                        { onPress =
+                            Just
+                                NoOp
+                        , label =
+                            Element.text
+                                "Buy Error"
+                        }
 
-                NullState ->
-                    { msg = NoOp
-                    , text = "Connect"
-                    , attributes =
+                NullState _ ->
+                    Element.Input.button
                         [ Element.Background.color buttonHoverColor
                         , buyId
                         ]
-                    }
+                        { onPress =
+                            Just
+                                NoOp
+                        , label =
+                            Element.text
+                                "Connect"
+                        }
 
-        closeButtonProperties =
+        closeButton =
             case model of
-                NotConnectedNotAbleTo ->
-                    { msg = NoOp
-                    , text = "No available wallet"
-                    , attributes =
+                NotConnectedNotAbleTo Development ->
+                    Element.Input.button
                         [ Element.htmlAttribute (Html.Attributes.disabled True)
-                        , closeId
+                        , buyId
                         ]
-                    }
+                        { onPress =
+                            Just
+                                NoOp
+                        , label =
+                            Element.text
+                                "No available wallet"
+                        }
 
-                NotConnectedAbleTo w m ->
-                    { msg = Connect w
-                    , text = "Connect"
-                    , attributes =
+                NotConnectedNotAbleTo Production ->
+                    Element.none
+
+                NotConnectedAbleTo Development w m ->
+                    Element.Input.button
                         [ Element.Background.color buttonHoverColor
                         , Element.mouseOver
                             [ Element.Border.glow buttonHoverColor
                                 10
                             ]
-                        , closeId
+                        , buyId
                         ]
-                    }
+                        { onPress =
+                            Just
+                                (Connect w)
+                        , label =
+                            Element.text
+                                "Connect"
+                        }
 
-                ConnectionEstablished w ->
-                    { msg = NoOp
-                    , text = "Connection established"
-                    , attributes =
+                NotConnectedAbleTo Production _ _ ->
+                    Element.none
+
+                ConnectionEstablished Development w ->
+                    Element.Input.button
                         [ Element.Background.color buttonHoverColor
                         , Element.htmlAttribute (Html.Attributes.disabled True)
-                        , closeId
+                        , buyId
                         ]
-                    }
+                        { onPress =
+                            Just
+                                NoOp
+                        , label =
+                            Element.text
+                                "Connection established"
+                        }
 
-                Connecting ->
-                    { msg = NoOp
-                    , text = "Connecting"
-                    , attributes =
+                ConnectionEstablished Production _ ->
+                    Element.none
+
+                Connecting Development ->
+                    Element.Input.button
                         [ Element.Background.color buttonHoverColor
                         , Element.htmlAttribute (Html.Attributes.disabled True)
-                        , closeId
+                        , buyId
                         ]
-                    }
+                        { onPress =
+                            Just
+                                NoOp
+                        , label =
+                            Element.text
+                                "Connecting"
+                        }
 
-                Connected w m _ _ NotClosed ->
-                    { msg = CloseContract
-                    , text = "Close"
-                    , attributes =
+                Connecting Production ->
+                    Element.none
+
+                Connected Production _ _ _ _ _ ->
+                    Element.none
+
+                Connected Development w m s _ NotClosed ->
+                    Element.Input.button
                         [ Element.Background.color buttonHoverColor
                         , Element.mouseOver
                             [ Element.Border.glow buttonHoverColor
                                 10
                             ]
                         , Element.htmlAttribute (Html.Attributes.disabled True)
-                        , closeId
+                        , buyId
                         ]
-                    }
+                        { onPress =
+                            Just
+                                CloseContract
+                        , label =
+                            Element.text
+                                "Close"
+                        }
 
-                Connected w m _ _ Closing ->
-                    { msg = NoOp
-                    , text = "Closing"
-                    , attributes =
+                Connected Development w m s _ Closing ->
+                    Element.Input.button
                         [ Element.Background.color buttonHoverColor
                         , Element.htmlAttribute (Html.Attributes.disabled True)
-                        , startId
+                        , buyId
                         ]
-                    }
+                        { onPress =
+                            Just
+                                NoOp
+                        , label =
+                            Element.text
+                                "Closinging"
+                        }
 
-                Connected w m _ _ Closed ->
-                    { msg = NoOp
-                    , text = "Closed"
-                    , attributes =
+                Connected Development w m s _ Closed ->
+                    Element.Input.button
                         [ Element.Background.color buttonHoverColor
                         , Element.htmlAttribute (Html.Attributes.disabled True)
-                        , startId
+                        , buyId
                         ]
-                    }
+                        { onPress =
+                            Just
+                                NoOp
+                        , label =
+                            Element.text
+                                "Closed"
+                        }
 
-                Connected w m _ _ CloseError ->
-                    { msg = NoOp
-                    , text = "Close Error"
-                    , attributes =
+                Connected Development w m s _ CloseError ->
+                    Element.Input.button
                         [ Element.Background.color buttonHoverColor
                         , Element.htmlAttribute (Html.Attributes.disabled True)
-                        , startId
+                        , buyId
                         ]
-                    }
+                        { onPress =
+                            Just
+                                NoOp
+                        , label =
+                            Element.text
+                                "Close Error"
+                        }
 
-                NullState ->
-                    { msg = NoOp
-                    , text = "Connect"
-                    , attributes =
+                NullState Development ->
+                    Element.Input.button
                         [ Element.Background.color buttonHoverColor
-                        , startId
+                        , buyId
                         ]
-                    }
+                        { onPress =
+                            Just
+                                NoOp
+                        , label =
+                            Element.text
+                                "Connect"
+                        }
+
+                NullState Production ->
+                    Element.none
     in
     Element.layout []
         (Element.column []
-            [ Element.Input.button
-                startButtonProperties.attributes
-                { onPress =
-                    Just
-                        startButtonProperties.msg
-                , label =
-                    Element.text
-                        startButtonProperties.text
-                }
-            , Element.Input.button
-                buyBttonProperties.attributes
-                { onPress =
-                    Just
-                        buyBttonProperties.msg
-                , label =
-                    Element.text
-                        buyBttonProperties.text
-                }
-            , Element.Input.button
-                closeButtonProperties.attributes
-                { onPress =
-                    Just
-                        closeButtonProperties.msg
-                , label =
-                    Element.text
-                        closeButtonProperties.text
-                }
+            [ startButton
+            , buyBtton
+            , closeButton
             ]
         )
 
@@ -547,7 +689,7 @@ subscriptions _ =
         ]
 
 
-main : Program String Model Msg
+main : Program ( String, String ) Model Msg
 main =
     Browser.element
         { init = init

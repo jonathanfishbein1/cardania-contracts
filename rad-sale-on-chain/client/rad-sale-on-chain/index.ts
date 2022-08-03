@@ -102,7 +102,7 @@ const
     }
 
 var app = Elm.Main.init({
-    flags: Wallet.hasWallet(),
+    flags: [Wallet.hasWallet(), 'development'],
     node: document.getElementById("elm-app-is-loaded-here")
 })
 
