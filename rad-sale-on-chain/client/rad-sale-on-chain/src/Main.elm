@@ -70,8 +70,6 @@ type Msg
     | NoOp
     | ReceiveWalletConnected (Maybe SupportedWallet)
     | ReceiveConnectionEstablished
-    | ReceiveMouseStartButtonEvent MouseOver
-    | ReceiveMouseBuyButtonEvent MouseOver
     | StartContract
     | ReceiveStartContractStatus TransactionSuccessStatus
     | BuyContract
@@ -145,18 +143,6 @@ update msg model =
 
         ( ReceiveConnectionEstablished, ConnectionEstablished w ) ->
             ( Connected w False NotStarted NotBought NotClosed, Cmd.none )
-
-        ( ReceiveMouseStartButtonEvent m, NotConnectedAbleTo b _ ) ->
-            ( NotConnectedAbleTo b m, Cmd.none )
-
-        ( ReceiveMouseBuyButtonEvent m, NotConnectedAbleTo b _ ) ->
-            ( NotConnectedAbleTo b m, Cmd.none )
-
-        ( ReceiveMouseStartButtonEvent m, Connected b d ss bs cs ) ->
-            ( Connected b m ss bs cs, Cmd.none )
-
-        ( ReceiveMouseBuyButtonEvent m, Connected b d ss bs cs ) ->
-            ( Connected b m ss bs cs, Cmd.none )
 
         ( StartContract, Connected b d ss bs cs ) ->
             ( Connected b d Starting bs cs, startContract () )
@@ -238,13 +224,10 @@ view model =
                     , text = "Connect"
                     , attributes =
                         [ Element.Background.color buttonHoverColor
-                        , Element.Border.glow buttonHoverColor
-                            (if m == True then
+                        , Element.mouseOver
+                            [ Element.Border.glow buttonHoverColor
                                 10
-
-                             else
-                                2
-                            )
+                            ]
                         , startId
                         ]
                     }
@@ -254,7 +237,6 @@ view model =
                     , text = "Connection established"
                     , attributes =
                         [ Element.Background.color buttonHoverColor
-                        , Element.Border.glow buttonHoverColor 2
                         , Element.htmlAttribute (Html.Attributes.disabled True)
                         , startId
                         ]
@@ -265,7 +247,6 @@ view model =
                     , text = "Connecting"
                     , attributes =
                         [ Element.Background.color buttonHoverColor
-                        , Element.Border.glow buttonHoverColor 2
                         , Element.htmlAttribute (Html.Attributes.disabled True)
                         , startId
                         ]
@@ -276,7 +257,10 @@ view model =
                     , text = "Start"
                     , attributes =
                         [ Element.Background.color buttonHoverColor
-                        , Element.Border.glow buttonHoverColor 2
+                        , Element.mouseOver
+                            [ Element.Border.glow buttonHoverColor
+                                10
+                            ]
                         , Element.htmlAttribute (Html.Attributes.disabled True)
                         , startId
                         ]
@@ -287,7 +271,6 @@ view model =
                     , text = "Starting"
                     , attributes =
                         [ Element.Background.color buttonHoverColor
-                        , Element.Border.glow buttonHoverColor 2
                         , Element.htmlAttribute (Html.Attributes.disabled True)
                         , startId
                         ]
@@ -298,7 +281,6 @@ view model =
                     , text = "Started"
                     , attributes =
                         [ Element.Background.color buttonHoverColor
-                        , Element.Border.glow buttonHoverColor 2
                         , Element.htmlAttribute (Html.Attributes.disabled True)
                         , startId
                         ]
@@ -309,7 +291,6 @@ view model =
                     , text = "Start Error"
                     , attributes =
                         [ Element.Background.color buttonHoverColor
-                        , Element.Border.glow buttonHoverColor 2
                         , Element.htmlAttribute (Html.Attributes.disabled True)
                         , startId
                         ]
@@ -320,7 +301,6 @@ view model =
                     , text = "Connect"
                     , attributes =
                         [ Element.Background.color buttonHoverColor
-                        , Element.Border.glow buttonHoverColor 2
                         , startId
                         ]
                     }
@@ -341,13 +321,10 @@ view model =
                     , text = "Connect"
                     , attributes =
                         [ Element.Background.color buttonHoverColor
-                        , Element.Border.glow buttonHoverColor
-                            (if m == True then
+                        , Element.mouseOver
+                            [ Element.Border.glow buttonHoverColor
                                 10
-
-                             else
-                                2
-                            )
+                            ]
                         , buyId
                         ]
                     }
@@ -357,7 +334,6 @@ view model =
                     , text = "Connection established"
                     , attributes =
                         [ Element.Background.color buttonHoverColor
-                        , Element.Border.glow buttonHoverColor 2
                         , Element.htmlAttribute (Html.Attributes.disabled True)
                         , buyId
                         ]
@@ -368,7 +344,6 @@ view model =
                     , text = "Connecting"
                     , attributes =
                         [ Element.Background.color buttonHoverColor
-                        , Element.Border.glow buttonHoverColor 2
                         , Element.htmlAttribute (Html.Attributes.disabled True)
                         , buyId
                         ]
@@ -379,7 +354,10 @@ view model =
                     , text = "Buy"
                     , attributes =
                         [ Element.Background.color buttonHoverColor
-                        , Element.Border.glow buttonHoverColor 2
+                        , Element.mouseOver
+                            [ Element.Border.glow buttonHoverColor
+                                10
+                            ]
                         , Element.htmlAttribute (Html.Attributes.disabled True)
                         , startId
                         ]
@@ -390,7 +368,6 @@ view model =
                     , text = "Buying"
                     , attributes =
                         [ Element.Background.color buttonHoverColor
-                        , Element.Border.glow buttonHoverColor 2
                         , Element.htmlAttribute (Html.Attributes.disabled True)
                         , startId
                         ]
@@ -401,7 +378,6 @@ view model =
                     , text = "Bought"
                     , attributes =
                         [ Element.Background.color buttonHoverColor
-                        , Element.Border.glow buttonHoverColor 2
                         , Element.htmlAttribute (Html.Attributes.disabled True)
                         , startId
                         ]
@@ -412,7 +388,6 @@ view model =
                     , text = "Buy Error"
                     , attributes =
                         [ Element.Background.color buttonHoverColor
-                        , Element.Border.glow buttonHoverColor 2
                         , Element.htmlAttribute (Html.Attributes.disabled True)
                         , startId
                         ]
@@ -423,7 +398,6 @@ view model =
                     , text = "Connect"
                     , attributes =
                         [ Element.Background.color buttonHoverColor
-                        , Element.Border.glow buttonHoverColor 2
                         , buyId
                         ]
                     }
@@ -444,13 +418,10 @@ view model =
                     , text = "Connect"
                     , attributes =
                         [ Element.Background.color buttonHoverColor
-                        , Element.Border.glow buttonHoverColor
-                            (if m == True then
+                        , Element.mouseOver
+                            [ Element.Border.glow buttonHoverColor
                                 10
-
-                             else
-                                2
-                            )
+                            ]
                         , closeId
                         ]
                     }
@@ -460,7 +431,6 @@ view model =
                     , text = "Connection established"
                     , attributes =
                         [ Element.Background.color buttonHoverColor
-                        , Element.Border.glow buttonHoverColor 2
                         , Element.htmlAttribute (Html.Attributes.disabled True)
                         , closeId
                         ]
@@ -471,7 +441,6 @@ view model =
                     , text = "Connecting"
                     , attributes =
                         [ Element.Background.color buttonHoverColor
-                        , Element.Border.glow buttonHoverColor 2
                         , Element.htmlAttribute (Html.Attributes.disabled True)
                         , closeId
                         ]
@@ -482,7 +451,10 @@ view model =
                     , text = "Close"
                     , attributes =
                         [ Element.Background.color buttonHoverColor
-                        , Element.Border.glow buttonHoverColor 2
+                        , Element.mouseOver
+                            [ Element.Border.glow buttonHoverColor
+                                10
+                            ]
                         , Element.htmlAttribute (Html.Attributes.disabled True)
                         , closeId
                         ]
@@ -493,7 +465,6 @@ view model =
                     , text = "Closing"
                     , attributes =
                         [ Element.Background.color buttonHoverColor
-                        , Element.Border.glow buttonHoverColor 2
                         , Element.htmlAttribute (Html.Attributes.disabled True)
                         , startId
                         ]
@@ -504,7 +475,6 @@ view model =
                     , text = "Closed"
                     , attributes =
                         [ Element.Background.color buttonHoverColor
-                        , Element.Border.glow buttonHoverColor 2
                         , Element.htmlAttribute (Html.Attributes.disabled True)
                         , startId
                         ]
@@ -515,7 +485,6 @@ view model =
                     , text = "Close Error"
                     , attributes =
                         [ Element.Background.color buttonHoverColor
-                        , Element.Border.glow buttonHoverColor 2
                         , Element.htmlAttribute (Html.Attributes.disabled True)
                         , startId
                         ]
@@ -526,7 +495,6 @@ view model =
                     , text = "Connect"
                     , attributes =
                         [ Element.Background.color buttonHoverColor
-                        , Element.Border.glow buttonHoverColor 2
                         , startId
                         ]
                     }
@@ -573,8 +541,6 @@ subscriptions : Model -> Sub Msg
 subscriptions _ =
     Sub.batch
         [ receiveWalletConnection (\s -> ReceiveWalletConnected (decodeWallet s))
-        , receiveMouseStartButtonEvent ReceiveMouseStartButtonEvent
-        , receiveMouseBuyButtonEvent ReceiveMouseBuyButtonEvent
         , receiveStartContractStatus ReceiveStartContractStatus
         , receiveBuyContractStatus ReceiveBuyContractStatus
         , receiveCloseContractStatus ReceiveCloseContractStatus
@@ -595,12 +561,6 @@ port connectWallet : String -> Cmd msg
 
 
 port receiveWalletConnection : (String -> msg) -> Sub msg
-
-
-port receiveMouseStartButtonEvent : (MouseOver -> msg) -> Sub msg
-
-
-port receiveMouseBuyButtonEvent : (MouseOver -> msg) -> Sub msg
 
 
 port receiveMouseOverBuyButtonEvent : (MouseOver -> msg) -> Sub msg

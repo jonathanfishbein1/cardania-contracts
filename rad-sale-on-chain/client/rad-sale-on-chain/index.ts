@@ -113,14 +113,6 @@ app.ports.connectWallet.subscribe(async supportedWallet => {
     app.ports.receiveWalletConnection.send(supportedWallet)
 })
 
-const startButton = document.getElementById('startButton')
-startButton?.addEventListener('mouseover', event => app.ports.receiveMouseStartButtonEvent.send(true))
-startButton?.addEventListener('mouseout', event => app.ports.receiveMouseStartButtonEvent.send(false))
-
-const buyButton = document.getElementById('buyButton')
-buyButton?.addEventListener('mouseover', event => app.ports.receiveMouseBuyButtonEvent.send(true))
-buyButton?.addEventListener('mouseout', event => app.ports.receiveMouseBuyButtonEvent.send(false))
-
 app.ports.startContract.subscribe(async () => {
     try {
         const txHash = await startContract()
