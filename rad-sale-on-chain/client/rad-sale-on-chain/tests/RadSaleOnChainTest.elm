@@ -26,7 +26,7 @@ suite =
             \_ ->
                 let
                     initialModel =
-                        Main.NotConnectedAbleTo Main.Development Main.Nami False
+                        Main.NotConnectedAbleTo Main.Development Main.Nami
 
                     ( newModel, _ ) =
                         Main.update (Main.Connect Main.Nami) initialModel
@@ -45,7 +45,7 @@ suite =
                 in
                 Expect.equal
                     newModel
-                    (Main.Connected Main.Development Main.Nami False Main.NotStarted Main.NotBought Main.NotClosed)
+                    (Main.Connected Main.Development Main.Nami Main.NotStarted Main.NotBought Main.NotClosed)
         , Test.test "test ReceiveConnectionEstablished with ConnectionEstablished" <|
             \_ ->
                 let
@@ -57,7 +57,7 @@ suite =
                 in
                 Expect.equal
                     newModel
-                    (Main.Connected Main.Development Main.Nami False Main.NotStarted Main.NotBought Main.NotClosed)
+                    (Main.Connected Main.Development Main.Nami Main.NotStarted Main.NotBought Main.NotClosed)
         , Test.test "test NotConnectedNotAbleTo view" <|
             \_ ->
                 let
@@ -76,7 +76,7 @@ suite =
             \_ ->
                 let
                     initialModel =
-                        Main.NotConnectedAbleTo Main.Development Main.Nami False
+                        Main.NotConnectedAbleTo Main.Development Main.Nami
                 in
                 Test.Html.Query.fromHtml (Main.view initialModel)
                     |> Test.Html.Query.find [ Test.Html.Selector.id "startButton" ]

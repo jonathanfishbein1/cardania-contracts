@@ -120,10 +120,10 @@ type CloseButtonState
 
 type Model
     = NotConnectedNotAbleTo Environment
-    | NotConnectedAbleTo Environment SupportedWallet MouseOver
+    | NotConnectedAbleTo Environment SupportedWallet
     | Connecting Environment
     | ConnectionEstablished Environment SupportedWallet
-    | Connected Environment SupportedWallet MouseOver StartButtonState BuyButtonState CloseButtonState
+    | Connected Environment SupportedWallet StartButtonState BuyButtonState CloseButtonState
     | NullState Environment
 
 
@@ -138,7 +138,7 @@ init ( supportedWallet, env ) =
     in
     ( case wallet of
         Just w ->
-            NotConnectedAbleTo (Maybe.withDefault Production environment) w False
+            NotConnectedAbleTo (Maybe.withDefault Production environment) w
 
         Nothing ->
             NotConnectedNotAbleTo (Maybe.withDefault Production environment)
@@ -149,11 +149,11 @@ init ( supportedWallet, env ) =
 update : Msg -> Model -> ( Model, Cmd msg )
 update msg model =
     case ( msg, model ) of
-        ( Connect w, NotConnectedAbleTo environment wallet _ ) ->
+        ( Connect w, NotConnectedAbleTo environment wallet ) ->
             ( Connecting environment, connectWallet (encodeWallet w) )
 
-        ( Disconnect wallet m, Connected environment b d ss bs cs ) ->
-            ( NotConnectedAbleTo environment wallet m, Cmd.none )
+        ( Disconnect wallet m, Connected environment b d bs cs ) ->
+            ( NotConnectedAbleTo environment wallet, Cmd.none )
 
         ( ReceiveWalletConnected wallet, Connecting environment ) ->
             case wallet of
@@ -164,51 +164,51 @@ update msg model =
                     ( NotConnectedNotAbleTo environment, Cmd.none )
 
         ( ReceiveConnectionEstablished, ConnectionEstablished environment w ) ->
-            ( Connected environment w False NotStarted NotBought NotClosed, Cmd.none )
+            ( Connected environment w NotStarted NotBought NotClosed, Cmd.none )
 
-        ( StartContract, Connected environment b d ss bs cs ) ->
-            ( Connected environment b d Starting bs cs, startContract () )
+        ( StartContract, Connected environment b d bs cs ) ->
+            ( Connected environment b Starting bs cs, startContract () )
 
-        ( ReceiveStartContractStatus result, Connected environment b d ss bs cs ) ->
+        ( ReceiveStartContractStatus result, Connected environment b d bs cs ) ->
             let
                 newModel =
                     if result == True then
-                        Connected environment b d Started bs cs
+                        Connected environment b Started bs cs
 
                     else
-                        Connected environment b d StartError bs cs
+                        Connected environment b StartError bs cs
             in
             ( newModel
             , Cmd.none
             )
 
-        ( BuyContract, Connected environment b d ss bs cs ) ->
-            ( Connected environment b d ss Buying cs, buyContract () )
+        ( BuyContract, Connected environment b d bs cs ) ->
+            ( Connected environment b d Buying cs, buyContract () )
 
-        ( ReceiveBuyContractStatus result, Connected environment b d ss bs cs ) ->
+        ( ReceiveBuyContractStatus result, Connected environment b d bs cs ) ->
             let
                 newModel =
                     if result == True then
-                        Connected environment b d ss Bought cs
+                        Connected environment b d Bought cs
 
                     else
-                        Connected environment b d ss BuyError cs
+                        Connected environment b d BuyError cs
             in
             ( newModel
             , Cmd.none
             )
 
-        ( CloseContract, Connected environment b d ss bs cs ) ->
-            ( Connected environment b d ss bs Closing, closeContract () )
+        ( CloseContract, Connected environment b d bs cs ) ->
+            ( Connected environment b d bs Closing, closeContract () )
 
-        ( ReceiveCloseContractStatus result, Connected environment b d ss bs cs ) ->
+        ( ReceiveCloseContractStatus result, Connected environment b d bs cs ) ->
             let
                 newModel =
                     if result == True then
-                        Connected environment b d ss bs Closed
+                        Connected environment b d bs Closed
 
                     else
-                        Connected environment b d ss bs CloseError
+                        Connected environment b d bs CloseError
             in
             ( newModel
             , Cmd.none
@@ -248,7 +248,7 @@ view model =
                 NotConnectedNotAbleTo Production ->
                     Element.none
 
-                NotConnectedAbleTo Development w m ->
+                NotConnectedAbleTo Development w ->
                     Element.Input.button
                         [ Element.Background.color buttonHoverColor
                         , Element.mouseOver
@@ -265,7 +265,7 @@ view model =
                                 "Connect"
                         }
 
-                NotConnectedAbleTo Production _ _ ->
+                NotConnectedAbleTo Production _ ->
                     Element.none
 
                 ConnectionEstablished Development w ->
@@ -302,7 +302,7 @@ view model =
                 Connecting Production ->
                     Element.none
 
-                Connected Development w m NotStarted _ cs ->
+                Connected Development w NotStarted _ cs ->
                     Element.Input.button
                         [ Element.Background.color buttonHoverColor
                         , Element.mouseOver
@@ -320,10 +320,10 @@ view model =
                                 "Start"
                         }
 
-                Connected Production _ _ _ _ _ ->
+                Connected Production _ _ _ _ ->
                     Element.none
 
-                Connected Development w m Starting _ cs ->
+                Connected Development w Starting _ cs ->
                     Element.Input.button
                         [ Element.Background.color buttonHoverColor
                         , Element.htmlAttribute (Html.Attributes.disabled True)
@@ -337,7 +337,7 @@ view model =
                                 "Starting"
                         }
 
-                Connected Development w m Started _ cs ->
+                Connected Development w Started _ cs ->
                     Element.Input.button
                         [ Element.Background.color buttonHoverColor
                         , Element.htmlAttribute (Html.Attributes.disabled True)
@@ -351,7 +351,7 @@ view model =
                                 "Started"
                         }
 
-                Connected Development w m StartError _ cs ->
+                Connected Development w StartError _ cs ->
                     Element.Input.button
                         [ Element.Background.color buttonHoverColor
                         , Element.htmlAttribute (Html.Attributes.disabled True)
@@ -396,7 +396,7 @@ view model =
                                 "No available wallet"
                         }
 
-                NotConnectedAbleTo _ w m ->
+                NotConnectedAbleTo _ w ->
                     Element.Input.button
                         [ Element.Background.color buttonHoverColor
                         , Element.mouseOver
@@ -441,7 +441,7 @@ view model =
                                 "Connecting"
                         }
 
-                Connected _ w m s NotBought cs ->
+                Connected _ w s NotBought cs ->
                     Element.Input.button
                         [ Element.Background.color buttonHoverColor
                         , Element.mouseOver
@@ -459,7 +459,7 @@ view model =
                                 "Buy"
                         }
 
-                Connected _ w m s Buying cs ->
+                Connected _ w s Buying cs ->
                     Element.Input.button
                         [ Element.Background.color buttonHoverColor
                         , Element.htmlAttribute (Html.Attributes.disabled True)
@@ -473,7 +473,7 @@ view model =
                                 "Buying"
                         }
 
-                Connected _ w m s Bought cs ->
+                Connected _ w s Bought cs ->
                     Element.Input.button
                         [ Element.Background.color buttonHoverColor
                         , Element.htmlAttribute (Html.Attributes.disabled True)
@@ -487,7 +487,7 @@ view model =
                                 "Bought"
                         }
 
-                Connected _ w m s BuyError cs ->
+                Connected _ w s BuyError cs ->
                     Element.Input.button
                         [ Element.Background.color buttonHoverColor
                         , Element.htmlAttribute (Html.Attributes.disabled True)
@@ -532,7 +532,7 @@ view model =
                 NotConnectedNotAbleTo Production ->
                     Element.none
 
-                NotConnectedAbleTo Development w m ->
+                NotConnectedAbleTo Development w ->
                     Element.Input.button
                         [ Element.Background.color buttonHoverColor
                         , Element.mouseOver
@@ -549,7 +549,7 @@ view model =
                                 "Connect"
                         }
 
-                NotConnectedAbleTo Production _ _ ->
+                NotConnectedAbleTo Production _ ->
                     Element.none
 
                 ConnectionEstablished Development w ->
@@ -586,10 +586,10 @@ view model =
                 Connecting Production ->
                     Element.none
 
-                Connected Production _ _ _ _ _ ->
+                Connected Production _ _ _ _ ->
                     Element.none
 
-                Connected Development w m s _ NotClosed ->
+                Connected Development w s _ NotClosed ->
                     Element.Input.button
                         [ Element.Background.color buttonHoverColor
                         , Element.mouseOver
@@ -607,7 +607,7 @@ view model =
                                 "Close"
                         }
 
-                Connected Development w m s _ Closing ->
+                Connected Development w s _ Closing ->
                     Element.Input.button
                         [ Element.Background.color buttonHoverColor
                         , Element.htmlAttribute (Html.Attributes.disabled True)
@@ -621,7 +621,7 @@ view model =
                                 "Closinging"
                         }
 
-                Connected Development w m s _ Closed ->
+                Connected Development w s _ Closed ->
                     Element.Input.button
                         [ Element.Background.color buttonHoverColor
                         , Element.htmlAttribute (Html.Attributes.disabled True)
@@ -635,7 +635,7 @@ view model =
                                 "Closed"
                         }
 
-                Connected Development w m s _ CloseError ->
+                Connected Development w s _ CloseError ->
                     Element.Input.button
                         [ Element.Background.color buttonHoverColor
                         , Element.htmlAttribute (Html.Attributes.disabled True)
