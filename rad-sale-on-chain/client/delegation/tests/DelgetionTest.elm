@@ -26,7 +26,7 @@ suite =
             \_ ->
                 let
                     initialModel =
-                        Main.NotConnectedAbleTo "" Main.Nami False
+                        Main.NotConnectedAbleTo "" Main.Nami
 
                     ( newModel, _ ) =
                         Main.update (Main.Connect "" Main.Nami) initialModel
@@ -72,7 +72,7 @@ suite =
                 in
                 Expect.equal
                     newModel
-                    (Main.Connected "" Main.Nami account Main.DelegatingToSumn False)
+                    (Main.Connected "" Main.Nami account Main.DelegatingToSumn)
         , Test.test "test RegisterAndDelegateToSumn with Connected" <|
             \_ ->
                 let
@@ -80,7 +80,7 @@ suite =
                         { stake_address = "", pool_id = "", active = True }
 
                     initialModel =
-                        Main.Connected "" Main.Nami account Main.NotDelegating False
+                        Main.Connected "" Main.Nami account Main.NotDelegating
 
                     ( newModel, _ ) =
                         Main.update (Main.RegisterAndDelegateToSumn account) initialModel
@@ -102,7 +102,7 @@ suite =
                 in
                 Expect.equal
                     newModel
-                    (Main.Connected "" Main.Nami account Main.DelegatingToSumn False)
+                    (Main.Connected "" Main.Nami account Main.DelegatingToSumn)
         , Test.test "test UndelegateFromSumn with Connected DelegatingToSumn" <|
             \_ ->
                 let
@@ -110,7 +110,7 @@ suite =
                         { stake_address = "", pool_id = "", active = True }
 
                     initialModel =
-                        Main.Connected "" Main.Nami account Main.DelegatingToSumn False
+                        Main.Connected "" Main.Nami account Main.DelegatingToSumn
 
                     ( newModel, _ ) =
                         Main.update Main.UndelegateFromSumn initialModel
@@ -132,7 +132,7 @@ suite =
                 in
                 Expect.equal
                     newModel
-                    (Main.Connected "" Main.Nami account Main.NotDelegating False)
+                    (Main.Connected "" Main.Nami account Main.NotDelegating)
         , Test.test "test Delegate with Connected DelegatingToOther" <|
             \_ ->
                 let
@@ -140,7 +140,7 @@ suite =
                         { stake_address = "", pool_id = "", active = True }
 
                     initialModel =
-                        Main.Connected "" Main.Nami account Main.DelegatingToOther False
+                        Main.Connected "" Main.Nami account Main.DelegatingToOther
 
                     ( newModel, _ ) =
                         Main.update Main.DelegateToSumn initialModel
@@ -162,37 +162,7 @@ suite =
                 in
                 Expect.equal
                     newModel
-                    (Main.Connected "" Main.Nami account Main.DelegatingToSumn False)
-        , Test.test "test ReceiveMouseOverEvent with Connected DelegatingToOther" <|
-            \_ ->
-                let
-                    account =
-                        { stake_address = "", pool_id = "", active = True }
-
-                    initialModel =
-                        Main.Connected "" Main.Nami account Main.DelegatingToSumn False
-
-                    ( newModel, _ ) =
-                        Main.update (Main.ReceiveMouseEvent True) initialModel
-                in
-                Expect.equal
-                    newModel
-                    (Main.Connected "" Main.Nami account Main.DelegatingToSumn True)
-        , Test.test "test ReceiveMousedOutEvent with Connected DelegatingToOther" <|
-            \_ ->
-                let
-                    account =
-                        { stake_address = "", pool_id = "", active = True }
-
-                    initialModel =
-                        Main.Connected "" Main.Nami account Main.DelegatingToSumn True
-
-                    ( newModel, _ ) =
-                        Main.update (Main.ReceiveMouseEvent False) initialModel
-                in
-                Expect.equal
-                    newModel
-                    (Main.Connected "" Main.Nami account Main.DelegatingToSumn False)
+                    (Main.Connected "" Main.Nami account Main.DelegatingToSumn)
         , Test.test "test NotConnectedNotAbleTo view" <|
             \_ ->
                 let
@@ -211,7 +181,7 @@ suite =
             \_ ->
                 let
                     initialModel =
-                        Main.NotConnectedAbleTo "" Main.Nami False
+                        Main.NotConnectedAbleTo "" Main.Nami
                 in
                 Test.Html.Query.fromHtml (Main.view initialModel)
                     |> Test.Html.Query.find [ Test.Html.Selector.id "delegationButton" ]
@@ -251,7 +221,7 @@ suite =
                         { stake_address = "", pool_id = "", active = True }
 
                     initialModel =
-                        Main.Connected "" Main.Nami account Main.NotDelegating False
+                        Main.Connected "" Main.Nami account Main.NotDelegating
                 in
                 Test.Html.Query.fromHtml (Main.view initialModel)
                     |> Test.Html.Query.find [ Test.Html.Selector.id "delegationButton" ]
@@ -265,7 +235,7 @@ suite =
                         { stake_address = "", pool_id = "", active = True }
 
                     initialModel =
-                        Main.Connected "" Main.Nami account Main.DelegatingToOther False
+                        Main.Connected "" Main.Nami account Main.DelegatingToOther
                 in
                 Test.Html.Query.fromHtml (Main.view initialModel)
                     |> Test.Html.Query.find [ Test.Html.Selector.id "delegationButton" ]
@@ -279,7 +249,7 @@ suite =
                         { stake_address = "", pool_id = "", active = True }
 
                     initialModel =
-                        Main.Connected "" Main.Nami account Main.DelegatingToSumn False
+                        Main.Connected "" Main.Nami account Main.DelegatingToSumn
                 in
                 Test.Html.Query.fromHtml (Main.view initialModel)
                     |> Test.Html.Query.find [ Test.Html.Selector.id "delegationButton" ]

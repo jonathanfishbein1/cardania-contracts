@@ -30,10 +30,6 @@ type alias TransactionSuccessStatus =
     Bool
 
 
-type alias MouseOver =
-    Bool
-
-
 decodeWallet : String -> Maybe SupportedWallet
 decodeWallet status =
     case status of
@@ -86,7 +82,7 @@ type SupportedWallet
 
 type Msg
     = Connect PoolId SupportedWallet
-    | Disconnect PoolId SupportedWallet MouseOver
+    | Disconnect PoolId SupportedWallet
     | NoOp
     | ReceiveWalletConnected (Maybe SupportedWallet)
     | GetAccountStatus
@@ -97,7 +93,6 @@ type Msg
     | ReceiveDelegateToSumnStatus TransactionSuccessStatus
     | UndelegateFromSumn
     | ReceiveUndelegateStatus TransactionSuccessStatus
-    | ReceiveMouseEvent MouseOver
 
 
 type DelegationStatus
@@ -108,11 +103,11 @@ type DelegationStatus
 
 type Model
     = NotConnectedNotAbleTo
-    | NotConnectedAbleTo PoolId SupportedWallet MouseOver
+    | NotConnectedAbleTo PoolId SupportedWallet
     | Connecting PoolId
     | GettingAcountStatus PoolId SupportedWallet
     | ConnectionEstablished PoolId SupportedWallet
-    | Connected PoolId SupportedWallet Account DelegationStatus MouseOver
+    | Connected PoolId SupportedWallet Account DelegationStatus
     | RegisteringAndDelegating PoolId SupportedWallet Account
     | Delegating PoolId SupportedWallet Account
     | Undelegating PoolId SupportedWallet Account
@@ -127,7 +122,7 @@ init ( supportedWallet, sumnPoolId ) =
     in
     ( case wallet of
         Just w ->
-            NotConnectedAbleTo sumnPoolId w False
+            NotConnectedAbleTo sumnPoolId w
 
         Nothing ->
             NotConnectedNotAbleTo
@@ -138,11 +133,11 @@ init ( supportedWallet, sumnPoolId ) =
 update : Msg -> Model -> ( Model, Cmd msg )
 update msg model =
     case ( msg, model ) of
-        ( Connect sumnPoolId w, NotConnectedAbleTo p wallet _ ) ->
+        ( Connect sumnPoolId w, NotConnectedAbleTo p wallet ) ->
             ( Connecting sumnPoolId, connectWallet (encodeWallet w) )
 
-        ( Disconnect sumnPoolId wallet m, _ ) ->
-            ( NotConnectedAbleTo sumnPoolId wallet m, Cmd.none )
+        ( Disconnect sumnPoolId wallet, _ ) ->
+            ( NotConnectedAbleTo sumnPoolId wallet, Cmd.none )
 
         ( ReceiveWalletConnected wallet, Connecting sumnPoolId ) ->
             case wallet of
@@ -177,66 +172,59 @@ update msg model =
                          else
                             NotDelegating
                         )
-                        False
 
                 Err e ->
                     NullState
             , Cmd.none
             )
 
-        ( RegisterAndDelegateToSumn a, Connected p w account NotDelegating _ ) ->
+        ( RegisterAndDelegateToSumn a, Connected p w account NotDelegating ) ->
             ( RegisteringAndDelegating p w account, registerAndDelegateToSumn account.stake_address )
 
         ( ReceiveRegisterAndDelegateStatus result, RegisteringAndDelegating p w account ) ->
             let
                 newModel =
                     if result == True then
-                        Connected p w account DelegatingToSumn False
+                        Connected p w account DelegatingToSumn
 
                     else
-                        Connected p w account NotDelegating False
+                        Connected p w account NotDelegating
             in
             ( newModel
             , Cmd.none
             )
 
-        ( DelegateToSumn, Connected p w account DelegatingToOther _ ) ->
+        ( DelegateToSumn, Connected p w account DelegatingToOther ) ->
             ( Delegating p w account, delegateToSumn account.stake_address )
 
         ( ReceiveDelegateToSumnStatus result, Delegating p w account ) ->
             let
                 newModel =
                     if result == True then
-                        Connected p w account DelegatingToSumn False
+                        Connected p w account DelegatingToSumn
 
                     else
-                        Connected p w account NotDelegating False
+                        Connected p w account NotDelegating
             in
             ( newModel
             , Cmd.none
             )
 
-        ( UndelegateFromSumn, Connected p w account DelegatingToSumn _ ) ->
+        ( UndelegateFromSumn, Connected p w account DelegatingToSumn ) ->
             ( Undelegating p w account, undelegate account.stake_address )
 
         ( ReceiveUndelegateStatus result, Undelegating p w account ) ->
             let
                 newModel =
                     if result == True then
-                        Connected p w account NotDelegating False
+                        Connected p w account NotDelegating
 
                     else
-                        Connected p w account DelegatingToSumn False
+                        Connected p w account DelegatingToSumn
             in
             ( newModel
             , Cmd.none
             )
-
-        ( ReceiveMouseEvent m, NotConnectedAbleTo a b _ ) ->
-            ( NotConnectedAbleTo a b m, Cmd.none )
-
-        ( ReceiveMouseEvent m, Connected a b c d _ ) ->
-            ( Connected a b c d m, Cmd.none )
 
         ( _, _ ) ->
             ( model, Cmd.none )
@@ -258,17 +246,14 @@ view model =
                       ]
                     )
 
-                NotConnectedAbleTo sumnPoolId w m ->
+                NotConnectedAbleTo sumnPoolId w ->
                     ( Connect sumnPoolId w
                     , "Connect"
                     , [ Element.Background.color buttonHoverColor
-                      , Element.Border.glow buttonHoverColor
-                            (if m == True then
+                      , Element.mouseOver
+                            [ Element.Border.glow buttonHoverColor
                                 10
-
-                             else
-                                2
-                            )
+                            ]
                       , id
                       ]
                     )
@@ -277,7 +262,6 @@ view model =
                     ( NoOp
                     , "Connection established"
                     , [ Element.Background.color buttonHoverColor
-                      , Element.Border.glow buttonHoverColor 2
                       , Element.htmlAttribute (Html.Attributes.disabled True)
                       , id
                       ]
@@ -287,25 +271,21 @@ view model =
                     ( NoOp
                     , "Getting account status"
                     , [ Element.Background.color buttonHoverColor
-                      , Element.Border.glow buttonHoverColor 2
                       , Element.htmlAttribute (Html.Attributes.disabled True)
                       , id
                       ]
                     )
 
-                Connected _ w acc d m ->
+                Connected _ w acc d ->
                     case d of
                         NotDelegating ->
                             ( RegisterAndDelegateToSumn acc
                             , "Register and Delegate"
                             , [ Element.Background.color buttonHoverColor
-                              , Element.Border.glow buttonHoverColor
-                                    (if m == True then
+                              , Element.mouseOver
+                                    [ Element.Border.glow buttonHoverColor
                                         10
-
-                                     else
-                                        2
-                                    )
+                                    ]
                               , id
                               ]
                             )
@@ -314,13 +294,10 @@ view model =
                             ( DelegateToSumn
                             , "Delegate"
                             , [ Element.Background.color buttonHoverColor
-                              , Element.Border.glow buttonHoverColor
-                                    (if m == True then
+                              , Element.mouseOver
+                                    [ Element.Border.glow buttonHoverColor
                                         10
-
-                                     else
-                                        2
-                                    )
+                                    ]
                               , id
                               ]
                             )
@@ -337,7 +314,6 @@ view model =
                     ( NoOp
                     , "Connecting"
                     , [ Element.Background.color buttonHoverColor
-                      , Element.Border.glow buttonHoverColor 2
                       , Element.htmlAttribute (Html.Attributes.disabled True)
                       , id
                       ]
@@ -347,7 +323,6 @@ view model =
                     ( NoOp
                     , "Registering and Delegating"
                     , [ Element.Background.color buttonHoverColor
-                      , Element.Border.glow buttonHoverColor 2
                       , Element.htmlAttribute (Html.Attributes.disabled True)
                       , id
                       ]
@@ -357,7 +332,6 @@ view model =
                     ( NoOp
                     , "Delegating"
                     , [ Element.Background.color buttonHoverColor
-                      , Element.Border.glow buttonHoverColor 2
                       , Element.htmlAttribute (Html.Attributes.disabled True)
                       , id
                       ]
@@ -376,7 +350,6 @@ view model =
                     ( NoOp
                     , "Connect"
                     , [ Element.Background.color buttonHoverColor
-                      , Element.Border.glow buttonHoverColor 2
                       , id
                       ]
                     )
@@ -407,7 +380,6 @@ subscriptions _ =
         , receiveRegisterAndDelegateStatus ReceiveRegisterAndDelegateStatus
         , receiveDelegateStatus ReceiveDelegateToSumnStatus
         , receiveUndelegateStatus ReceiveUndelegateStatus
-        , receiveMouseEvent ReceiveMouseEvent
         ]
 
 
@@ -449,6 +421,3 @@ port undelegate : String -> Cmd msg
 
 
 port receiveUndelegateStatus : (TransactionSuccessStatus -> msg) -> Sub msg
-
-
-port receiveMouseEvent : (MouseOver -> msg) -> Sub msg
