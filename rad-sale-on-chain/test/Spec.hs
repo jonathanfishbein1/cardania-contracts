@@ -109,7 +109,7 @@ buyPredicate :: Plutus.Contract.Test.TracePredicate
 buyPredicate =
   Plutus.Contract.Test.walletFundsChange
     Plutus.Contract.Test.w1
-    (Ledger.Ada.lovelaceValueOf 4_000_000 Prelude.<> Ledger.Value.assetClassValue token (-2))
+    (Ledger.Ada.lovelaceValueOf 24_000_000 Prelude.<> Ledger.Value.assetClassValue token (-2))
     Plutus.Contract.Test..&&. Plutus.Contract.Test.walletFundsChange
       Plutus.Contract.Test.w2
       (Ledger.Ada.lovelaceValueOf (- tokenCost) Prelude.<> Ledger.Value.assetClassValue token 1)
@@ -139,7 +139,7 @@ token :: Ledger.Value.AssetClass
 token = Ledger.Value.AssetClass (currencySymbol, tokenName)
 
 tokenCost :: Prelude.Integer
-tokenCost = 10_000_000
+tokenCost = 30_000_000
 
 initialDistributionBuy :: Plutus.Contract.Test.InitialDistribution
 initialDistributionBuy =
