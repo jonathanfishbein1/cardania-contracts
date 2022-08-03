@@ -26,10 +26,6 @@ type alias TransactionSuccessStatus =
     Bool
 
 
-type alias MouseOver =
-    Bool
-
-
 decodeWallet : String -> Maybe SupportedWallet
 decodeWallet status =
     case status of
@@ -85,7 +81,7 @@ type Environment
 
 type Msg
     = Connect SupportedWallet
-    | Disconnect SupportedWallet MouseOver
+    | Disconnect SupportedWallet
     | NoOp
     | ReceiveWalletConnected (Maybe SupportedWallet)
     | ReceiveConnectionEstablished
@@ -152,7 +148,7 @@ update msg model =
         ( Connect w, NotConnectedAbleTo environment wallet ) ->
             ( Connecting environment, connectWallet (encodeWallet w) )
 
-        ( Disconnect wallet m, Connected environment b d bs cs ) ->
+        ( Disconnect wallet, Connected environment b d bs cs ) ->
             ( NotConnectedAbleTo environment wallet, Cmd.none )
 
         ( ReceiveWalletConnected wallet, Connecting environment ) ->
@@ -703,12 +699,6 @@ port connectWallet : String -> Cmd msg
 
 
 port receiveWalletConnection : (String -> msg) -> Sub msg
-
-
-port receiveMouseOverBuyButtonEvent : (MouseOver -> msg) -> Sub msg
-
-
-port receiveMouseOutBuyButtonEvent : (MouseOver -> msg) -> Sub msg
 
 
 port startContract : () -> Cmd msg
