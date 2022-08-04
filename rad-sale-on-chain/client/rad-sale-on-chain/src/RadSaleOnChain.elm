@@ -1,4 +1,4 @@
-port module Main exposing
+port module RadSaleOnChain exposing
     ( BuyButtonState(..)
     , CloseButtonState(..)
     , Environment(..)

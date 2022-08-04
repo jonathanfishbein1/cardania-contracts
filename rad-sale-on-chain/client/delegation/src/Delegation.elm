@@ -1,4 +1,4 @@
-port module Main exposing
+port module Delegation exposing
     ( Account
     , DelegationStatus(..)
     , Model(..)
@@ -134,7 +134,7 @@ update : Msg -> Model -> ( Model, Cmd msg )
 update msg model =
     case ( msg, model ) of
         ( Connect sumnPoolId w, NotConnectedAbleTo p wallet ) ->
-            ( Connecting sumnPoolId, connectWallet (encodeWallet w) )
+            ( Connecting sumnPoolId, connectWalletDelegation (encodeWallet w) )
 
         ( Disconnect sumnPoolId wallet, _ ) ->
             ( NotConnectedAbleTo sumnPoolId wallet, Cmd.none )
@@ -375,7 +375,7 @@ buttonHoverColor =
 subscriptions : Model -> Sub Msg
 subscriptions _ =
     Sub.batch
-        [ receiveWalletConnection (\s -> ReceiveWalletConnected (decodeWallet s))
+        [ receiveWalletConnectionDelegation (\s -> ReceiveWalletConnected (decodeWallet s))
         , receiveAccountStatus (\s -> ReceiveAccountStatus (Json.Decode.decodeString decodeAccount s))
         , receiveRegisterAndDelegateStatus ReceiveRegisterAndDelegateStatus
         , receiveDelegateStatus ReceiveDelegateToSumnStatus
@@ -393,10 +393,10 @@ main =
         }
 
 
-port connectWallet : String -> Cmd msg
+port connectWalletDelegation : String -> Cmd msg
 
 
-port receiveWalletConnection : (String -> msg) -> Sub msg
+port receiveWalletConnectionDelegation : (String -> msg) -> Sub msg
 
 
 port getAccountStatus : () -> Cmd msg

@@ -1,6 +1,6 @@
 import * as Lucid from 'lucid-cardano'
 import * as Wallet from '../wallet'
-var { Elm } = require('./src/Main.elm')
+var { Elm } = require('./src/Delegation.elm')
 
 const
     sumnPoolId = "pool13dgxp4ph2ut5datuh5na4wy7hrnqgkj4fyvac3e8fzfqcc7qh0h",
@@ -60,16 +60,16 @@ const
         return transactionHash
     }
 
-var app = Elm.Main.init({
+var app = Elm.Delegation.init({
     flags: [Wallet.hasWallet(), sumnPoolId],
     node: document.getElementById("elm-app-is-loaded-here")
 })
 
-app.ports.connectWallet.subscribe(async supportedWallet => {
+app.ports.connectWalletDelegation.subscribe(async supportedWallet => {
     const wallet = await Wallet.getWalletApi(supportedWallet!) as any
     lucid.selectWallet(wallet)
     console.log(wallet)
-    app.ports.receiveWalletConnection.send(supportedWallet)
+    app.ports.receiveWalletConnectionDelegation.send(supportedWallet)
 })
 
 app.ports.getAccountStatus.subscribe(async () => {

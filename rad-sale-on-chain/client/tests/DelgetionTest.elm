@@ -1,7 +1,7 @@
 module DelgetionTest exposing (suite)
 
+import Delegation
 import Expect
-import Main
 import Test
 import Test.Html.Query
 import Test.Html.Selector
@@ -14,65 +14,65 @@ suite =
             \_ ->
                 let
                     initialModel =
-                        Main.NotConnectedNotAbleTo
+                        Delegation.NotConnectedNotAbleTo
 
                     ( newModel, _ ) =
-                        Main.update (Main.Connect "" Main.Nami) initialModel
+                        Delegation.update (Delegation.Connect "" Delegation.Nami) initialModel
                 in
                 Expect.equal
                     newModel
-                    Main.NotConnectedNotAbleTo
+                    Delegation.NotConnectedNotAbleTo
         , Test.test "test Connect with NotConnectedAbleTo" <|
             \_ ->
                 let
                     initialModel =
-                        Main.NotConnectedAbleTo "" Main.Nami
+                        Delegation.NotConnectedAbleTo "" Delegation.Nami
 
                     ( newModel, _ ) =
-                        Main.update (Main.Connect "" Main.Nami) initialModel
+                        Delegation.update (Delegation.Connect "" Delegation.Nami) initialModel
                 in
                 Expect.equal
                     newModel
-                    (Main.Connecting "")
+                    (Delegation.Connecting "")
         , Test.test "test ReceiveWalletConnected with Connecting" <|
             \_ ->
                 let
                     initialModel =
-                        Main.Connecting ""
+                        Delegation.Connecting ""
 
                     ( newModel, _ ) =
-                        Main.update (Main.ReceiveWalletConnected (Maybe.Just Main.Nami)) initialModel
+                        Delegation.update (Delegation.ReceiveWalletConnected (Maybe.Just Delegation.Nami)) initialModel
                 in
                 Expect.equal
                     newModel
-                    (Main.GettingAcountStatus "" Main.Nami)
+                    (Delegation.GettingAcountStatus "" Delegation.Nami)
         , Test.test "test GetAccountStatus with ConnectionEstablished" <|
             \_ ->
                 let
                     initialModel =
-                        Main.ConnectionEstablished "" Main.Nami
+                        Delegation.ConnectionEstablished "" Delegation.Nami
 
                     ( newModel, _ ) =
-                        Main.update Main.GetAccountStatus initialModel
+                        Delegation.update Delegation.GetAccountStatus initialModel
                 in
                 Expect.equal
                     newModel
-                    (Main.GettingAcountStatus "" Main.Nami)
+                    (Delegation.GettingAcountStatus "" Delegation.Nami)
         , Test.test "test ReceiveAccountStatus with GettingAcountStatus" <|
             \_ ->
                 let
                     initialModel =
-                        Main.GettingAcountStatus "" Main.Nami
+                        Delegation.GettingAcountStatus "" Delegation.Nami
 
                     account =
                         { stake_address = "", pool_id = "", active = True }
 
                     ( newModel, _ ) =
-                        Main.update (Main.ReceiveAccountStatus (Result.Ok account)) initialModel
+                        Delegation.update (Delegation.ReceiveAccountStatus (Result.Ok account)) initialModel
                 in
                 Expect.equal
                     newModel
-                    (Main.Connected "" Main.Nami account Main.DelegatingToSumn)
+                    (Delegation.Connected "" Delegation.Nami account Delegation.DelegatingToSumn)
         , Test.test "test RegisterAndDelegateToSumn with Connected" <|
             \_ ->
                 let
@@ -80,14 +80,14 @@ suite =
                         { stake_address = "", pool_id = "", active = True }
 
                     initialModel =
-                        Main.Connected "" Main.Nami account Main.NotDelegating
+                        Delegation.Connected "" Delegation.Nami account Delegation.NotDelegating
 
                     ( newModel, _ ) =
-                        Main.update (Main.RegisterAndDelegateToSumn account) initialModel
+                        Delegation.update (Delegation.RegisterAndDelegateToSumn account) initialModel
                 in
                 Expect.equal
                     newModel
-                    (Main.RegisteringAndDelegating "" Main.Nami account)
+                    (Delegation.RegisteringAndDelegating "" Delegation.Nami account)
         , Test.test "test ReceiveRegisterAndDelegateStatus with Connected NotDelegating" <|
             \_ ->
                 let
@@ -95,14 +95,14 @@ suite =
                         { stake_address = "", pool_id = "", active = True }
 
                     initialModel =
-                        Main.RegisteringAndDelegating "" Main.Nami account
+                        Delegation.RegisteringAndDelegating "" Delegation.Nami account
 
                     ( newModel, _ ) =
-                        Main.update (Main.ReceiveRegisterAndDelegateStatus True) initialModel
+                        Delegation.update (Delegation.ReceiveRegisterAndDelegateStatus True) initialModel
                 in
                 Expect.equal
                     newModel
-                    (Main.Connected "" Main.Nami account Main.DelegatingToSumn)
+                    (Delegation.Connected "" Delegation.Nami account Delegation.DelegatingToSumn)
         , Test.test "test UndelegateFromSumn with Connected DelegatingToSumn" <|
             \_ ->
                 let
@@ -110,14 +110,14 @@ suite =
                         { stake_address = "", pool_id = "", active = True }
 
                     initialModel =
-                        Main.Connected "" Main.Nami account Main.DelegatingToSumn
+                        Delegation.Connected "" Delegation.Nami account Delegation.DelegatingToSumn
 
                     ( newModel, _ ) =
-                        Main.update Main.UndelegateFromSumn initialModel
+                        Delegation.update Delegation.UndelegateFromSumn initialModel
                 in
                 Expect.equal
                     newModel
-                    (Main.Undelegating "" Main.Nami account)
+                    (Delegation.Undelegating "" Delegation.Nami account)
         , Test.test "test ReceiveUndelegateStatus with Undelegating" <|
             \_ ->
                 let
@@ -125,14 +125,14 @@ suite =
                         { stake_address = "", pool_id = "", active = True }
 
                     initialModel =
-                        Main.Undelegating "" Main.Nami account
+                        Delegation.Undelegating "" Delegation.Nami account
 
                     ( newModel, _ ) =
-                        Main.update (Main.ReceiveUndelegateStatus True) initialModel
+                        Delegation.update (Delegation.ReceiveUndelegateStatus True) initialModel
                 in
                 Expect.equal
                     newModel
-                    (Main.Connected "" Main.Nami account Main.NotDelegating)
+                    (Delegation.Connected "" Delegation.Nami account Delegation.NotDelegating)
         , Test.test "test Delegate with Connected DelegatingToOther" <|
             \_ ->
                 let
@@ -140,14 +140,14 @@ suite =
                         { stake_address = "", pool_id = "", active = True }
 
                     initialModel =
-                        Main.Connected "" Main.Nami account Main.DelegatingToOther
+                        Delegation.Connected "" Delegation.Nami account Delegation.DelegatingToOther
 
                     ( newModel, _ ) =
-                        Main.update Main.DelegateToSumn initialModel
+                        Delegation.update Delegation.DelegateToSumn initialModel
                 in
                 Expect.equal
                     newModel
-                    (Main.Delegating "" Main.Nami account)
+                    (Delegation.Delegating "" Delegation.Nami account)
         , Test.test "test ReceiveDelegateStatus with Connected DelegatingToOther" <|
             \_ ->
                 let
@@ -155,21 +155,21 @@ suite =
                         { stake_address = "", pool_id = "", active = True }
 
                     initialModel =
-                        Main.Delegating "" Main.Nami account
+                        Delegation.Delegating "" Delegation.Nami account
 
                     ( newModel, _ ) =
-                        Main.update (Main.ReceiveDelegateToSumnStatus True) initialModel
+                        Delegation.update (Delegation.ReceiveDelegateToSumnStatus True) initialModel
                 in
                 Expect.equal
                     newModel
-                    (Main.Connected "" Main.Nami account Main.DelegatingToSumn)
+                    (Delegation.Connected "" Delegation.Nami account Delegation.DelegatingToSumn)
         , Test.test "test NotConnectedNotAbleTo view" <|
             \_ ->
                 let
                     initialModel =
-                        Main.NotConnectedNotAbleTo
+                        Delegation.NotConnectedNotAbleTo
                 in
-                Test.Html.Query.fromHtml (Main.view initialModel)
+                Test.Html.Query.fromHtml (Delegation.view initialModel)
                     |> Test.Html.Query.find [ Test.Html.Selector.id "delegationButton" ]
                     |> Test.Html.Query.has
                         [ Test.Html.Selector.all
@@ -181,18 +181,18 @@ suite =
             \_ ->
                 let
                     initialModel =
-                        Main.NotConnectedAbleTo "" Main.Nami
+                        Delegation.NotConnectedAbleTo "" Delegation.Nami
                 in
-                Test.Html.Query.fromHtml (Main.view initialModel)
+                Test.Html.Query.fromHtml (Delegation.view initialModel)
                     |> Test.Html.Query.find [ Test.Html.Selector.id "delegationButton" ]
                     |> Test.Html.Query.has [ Test.Html.Selector.text "Connect" ]
         , Test.test "test ConnectionEstablished view" <|
             \_ ->
                 let
                     initialModel =
-                        Main.ConnectionEstablished "" Main.Nami
+                        Delegation.ConnectionEstablished "" Delegation.Nami
                 in
-                Test.Html.Query.fromHtml (Main.view initialModel)
+                Test.Html.Query.fromHtml (Delegation.view initialModel)
                     |> Test.Html.Query.find [ Test.Html.Selector.id "delegationButton" ]
                     |> Test.Html.Query.has
                         [ Test.Html.Selector.all
@@ -204,9 +204,9 @@ suite =
             \_ ->
                 let
                     initialModel =
-                        Main.GettingAcountStatus "" Main.Nami
+                        Delegation.GettingAcountStatus "" Delegation.Nami
                 in
-                Test.Html.Query.fromHtml (Main.view initialModel)
+                Test.Html.Query.fromHtml (Delegation.view initialModel)
                     |> Test.Html.Query.find [ Test.Html.Selector.id "delegationButton" ]
                     |> Test.Html.Query.has
                         [ Test.Html.Selector.all
@@ -221,9 +221,9 @@ suite =
                         { stake_address = "", pool_id = "", active = True }
 
                     initialModel =
-                        Main.Connected "" Main.Nami account Main.NotDelegating
+                        Delegation.Connected "" Delegation.Nami account Delegation.NotDelegating
                 in
-                Test.Html.Query.fromHtml (Main.view initialModel)
+                Test.Html.Query.fromHtml (Delegation.view initialModel)
                     |> Test.Html.Query.find [ Test.Html.Selector.id "delegationButton" ]
                     |> Test.Html.Query.has
                         [ Test.Html.Selector.text "Register and Delegate"
@@ -235,9 +235,9 @@ suite =
                         { stake_address = "", pool_id = "", active = True }
 
                     initialModel =
-                        Main.Connected "" Main.Nami account Main.DelegatingToOther
+                        Delegation.Connected "" Delegation.Nami account Delegation.DelegatingToOther
                 in
-                Test.Html.Query.fromHtml (Main.view initialModel)
+                Test.Html.Query.fromHtml (Delegation.view initialModel)
                     |> Test.Html.Query.find [ Test.Html.Selector.id "delegationButton" ]
                     |> Test.Html.Query.has
                         [ Test.Html.Selector.text "Delegate"
@@ -249,9 +249,9 @@ suite =
                         { stake_address = "", pool_id = "", active = True }
 
                     initialModel =
-                        Main.Connected "" Main.Nami account Main.DelegatingToSumn
+                        Delegation.Connected "" Delegation.Nami account Delegation.DelegatingToSumn
                 in
-                Test.Html.Query.fromHtml (Main.view initialModel)
+                Test.Html.Query.fromHtml (Delegation.view initialModel)
                     |> Test.Html.Query.find [ Test.Html.Selector.id "delegationButton" ]
                     |> Test.Html.Query.has
                         [ Test.Html.Selector.text "Undelegate"
@@ -263,9 +263,9 @@ suite =
                         { stake_address = "", pool_id = "", active = True }
 
                     initialModel =
-                        Main.Connecting ""
+                        Delegation.Connecting ""
                 in
-                Test.Html.Query.fromHtml (Main.view initialModel)
+                Test.Html.Query.fromHtml (Delegation.view initialModel)
                     |> Test.Html.Query.find [ Test.Html.Selector.id "delegationButton" ]
                     |> Test.Html.Query.has
                         [ Test.Html.Selector.all
@@ -280,9 +280,9 @@ suite =
                         { stake_address = "", pool_id = "", active = True }
 
                     initialModel =
-                        Main.RegisteringAndDelegating "" Main.Nami account
+                        Delegation.RegisteringAndDelegating "" Delegation.Nami account
                 in
-                Test.Html.Query.fromHtml (Main.view initialModel)
+                Test.Html.Query.fromHtml (Delegation.view initialModel)
                     |> Test.Html.Query.find [ Test.Html.Selector.id "delegationButton" ]
                     |> Test.Html.Query.has
                         [ Test.Html.Selector.all
@@ -297,9 +297,9 @@ suite =
                         { stake_address = "", pool_id = "", active = True }
 
                     initialModel =
-                        Main.Delegating "" Main.Nami account
+                        Delegation.Delegating "" Delegation.Nami account
                 in
-                Test.Html.Query.fromHtml (Main.view initialModel)
+                Test.Html.Query.fromHtml (Delegation.view initialModel)
                     |> Test.Html.Query.find [ Test.Html.Selector.id "delegationButton" ]
                     |> Test.Html.Query.has
                         [ Test.Html.Selector.all

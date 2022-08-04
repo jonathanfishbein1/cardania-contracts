@@ -1,7 +1,7 @@
 module RadSaleOnChainTest exposing (suite)
 
 import Expect
-import Main
+import RadSaleOnChain
 import Test
 import Test.Html.Query
 import Test.Html.Selector
@@ -14,57 +14,57 @@ suite =
             \_ ->
                 let
                     initialModel =
-                        Main.NotConnectedNotAbleTo Main.Development
+                        RadSaleOnChain.NotConnectedNotAbleTo RadSaleOnChain.Development
 
                     ( newModel, _ ) =
-                        Main.update (Main.Connect Main.Nami) initialModel
+                        RadSaleOnChain.update (RadSaleOnChain.Connect RadSaleOnChain.Nami) initialModel
                 in
                 Expect.equal
                     newModel
-                    (Main.NotConnectedNotAbleTo Main.Development)
+                    (RadSaleOnChain.NotConnectedNotAbleTo RadSaleOnChain.Development)
         , Test.test "test Connect with NotConnectedAbleTo" <|
             \_ ->
                 let
                     initialModel =
-                        Main.NotConnectedAbleTo Main.Development Main.Nami
+                        RadSaleOnChain.NotConnectedAbleTo RadSaleOnChain.Development RadSaleOnChain.Nami
 
                     ( newModel, _ ) =
-                        Main.update (Main.Connect Main.Nami) initialModel
+                        RadSaleOnChain.update (RadSaleOnChain.Connect RadSaleOnChain.Nami) initialModel
                 in
                 Expect.equal
                     newModel
-                    (Main.Connecting Main.Development)
+                    (RadSaleOnChain.Connecting RadSaleOnChain.Development)
         , Test.test "test ReceiveWalletConnected with Connecting" <|
             \_ ->
                 let
                     initialModel =
-                        Main.Connecting Main.Development
+                        RadSaleOnChain.Connecting RadSaleOnChain.Development
 
                     ( newModel, _ ) =
-                        Main.update (Main.ReceiveWalletConnected (Maybe.Just Main.Nami)) initialModel
+                        RadSaleOnChain.update (RadSaleOnChain.ReceiveWalletConnected (Maybe.Just RadSaleOnChain.Nami)) initialModel
                 in
                 Expect.equal
                     newModel
-                    (Main.Connected Main.Development Main.Nami Main.NotStarted Main.NotBought Main.NotClosed)
+                    (RadSaleOnChain.Connected RadSaleOnChain.Development RadSaleOnChain.Nami RadSaleOnChain.NotStarted RadSaleOnChain.NotBought RadSaleOnChain.NotClosed)
         , Test.test "test ReceiveConnectionEstablished with ConnectionEstablished" <|
             \_ ->
                 let
                     initialModel =
-                        Main.ConnectionEstablished Main.Development Main.Nami
+                        RadSaleOnChain.ConnectionEstablished RadSaleOnChain.Development RadSaleOnChain.Nami
 
                     ( newModel, _ ) =
-                        Main.update Main.ReceiveConnectionEstablished initialModel
+                        RadSaleOnChain.update RadSaleOnChain.ReceiveConnectionEstablished initialModel
                 in
                 Expect.equal
                     newModel
-                    (Main.Connected Main.Development Main.Nami Main.NotStarted Main.NotBought Main.NotClosed)
+                    (RadSaleOnChain.Connected RadSaleOnChain.Development RadSaleOnChain.Nami RadSaleOnChain.NotStarted RadSaleOnChain.NotBought RadSaleOnChain.NotClosed)
         , Test.test "test NotConnectedNotAbleTo view" <|
             \_ ->
                 let
                     initialModel =
-                        Main.NotConnectedNotAbleTo Main.Development
+                        RadSaleOnChain.NotConnectedNotAbleTo RadSaleOnChain.Development
                 in
-                Test.Html.Query.fromHtml (Main.view initialModel)
+                Test.Html.Query.fromHtml (RadSaleOnChain.view initialModel)
                     |> Test.Html.Query.find [ Test.Html.Selector.id "startButton" ]
                     |> Test.Html.Query.has
                         [ Test.Html.Selector.all
@@ -76,18 +76,18 @@ suite =
             \_ ->
                 let
                     initialModel =
-                        Main.NotConnectedAbleTo Main.Development Main.Nami
+                        RadSaleOnChain.NotConnectedAbleTo RadSaleOnChain.Development RadSaleOnChain.Nami
                 in
-                Test.Html.Query.fromHtml (Main.view initialModel)
+                Test.Html.Query.fromHtml (RadSaleOnChain.view initialModel)
                     |> Test.Html.Query.find [ Test.Html.Selector.id "startButton" ]
                     |> Test.Html.Query.has [ Test.Html.Selector.text "Connect" ]
         , Test.test "test ConnectionEstablished view" <|
             \_ ->
                 let
                     initialModel =
-                        Main.ConnectionEstablished Main.Development Main.Nami
+                        RadSaleOnChain.ConnectionEstablished RadSaleOnChain.Development RadSaleOnChain.Nami
                 in
-                Test.Html.Query.fromHtml (Main.view initialModel)
+                Test.Html.Query.fromHtml (RadSaleOnChain.view initialModel)
                     |> Test.Html.Query.find [ Test.Html.Selector.id "startButton" ]
                     |> Test.Html.Query.has
                         [ Test.Html.Selector.all
@@ -99,9 +99,9 @@ suite =
             \_ ->
                 let
                     initialModel =
-                        Main.Connecting Main.Development
+                        RadSaleOnChain.Connecting RadSaleOnChain.Development
                 in
-                Test.Html.Query.fromHtml (Main.view initialModel)
+                Test.Html.Query.fromHtml (RadSaleOnChain.view initialModel)
                     |> Test.Html.Query.find [ Test.Html.Selector.id "startButton" ]
                     |> Test.Html.Query.has
                         [ Test.Html.Selector.all
