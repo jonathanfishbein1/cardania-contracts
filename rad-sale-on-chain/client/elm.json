@@ -2,7 +2,8 @@
     "type": "application",
     "source-directories": [
         "delegation",
-        "rad-sale-on-chain"
+        "rad-sale-on-chain",
+        "library"
     ],
     "elm-version": "0.19.1",
     "dependencies": {
@@ -11,9 +12,7 @@
             "elm/browser": "1.0.2",
             "elm/core": "1.0.5",
             "elm/html": "1.0.0",
-            "elm/http": "2.0.0",
             "elm/json": "1.1.3",
-            "elm-explorations/test": "1.2.2",
             "mdgriffith/elm-ui": "1.1.8"
         },
         "indirect": {
@@ -26,7 +25,9 @@
         }
     },
     "test-dependencies": {
-        "direct": {},
+        "direct": {
+            "elm-explorations/test": "1.2.2"
+        },
         "indirect": {}
     }
 }

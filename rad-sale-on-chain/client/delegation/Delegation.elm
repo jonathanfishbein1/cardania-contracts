@@ -3,9 +3,7 @@ port module Delegation exposing
     , DelegationStatus(..)
     , Model(..)
     , Msg(..)
-    , SupportedWallet(..)
-    , encodeWallet
-    , init
+    , PoolId
     , main
     , update
     , view
@@ -20,30 +18,11 @@ import Html
 import Html.Attributes
 import Json.Decode
 import Json.Decode.Pipeline
+import Library
 
 
 type alias PoolId =
     String
-
-
-type alias TransactionSuccessStatus =
-    Bool
-
-
-decodeWallet : String -> Maybe SupportedWallet
-decodeWallet status =
-    case status of
-        "nami" ->
-            Just Nami
-
-        "eternl" ->
-            Just Eternl
-
-        "flint" ->
-            Just Flint
-
-        _ ->
-            Nothing
 
 
 decodeAccount : Json.Decode.Decoder Account
@@ -54,19 +33,6 @@ decodeAccount =
         |> Json.Decode.Pipeline.required "active" Json.Decode.bool
 
 
-encodeWallet : SupportedWallet -> String
-encodeWallet wallet =
-    case wallet of
-        Nami ->
-            "nami"
-
-        Eternl ->
-            "eternl"
-
-        Flint ->
-            "flint"
-
-
 type alias Account =
     { stake_address : String
     , pool_id : PoolId
@@ -74,25 +40,18 @@ type alias Account =
     }
 
 
-type SupportedWallet
-    = Nami
-    | Eternl
-    | Flint
-
-
 type Msg
-    = Connect PoolId SupportedWallet
-    | Disconnect PoolId SupportedWallet
+    = Connect PoolId Library.SupportedWallet
     | NoOp
-    | ReceiveWalletConnected (Maybe SupportedWallet)
+    | ReceiveWalletConnected (Maybe Library.SupportedWallet)
     | GetAccountStatus
     | ReceiveAccountStatus (Result Json.Decode.Error Account)
-    | RegisterAndDelegateToSumn Account
-    | ReceiveRegisterAndDelegateStatus TransactionSuccessStatus
+    | RegisterAndDelegateToSumn
+    | ReceiveRegisterAndDelegateStatus Library.TransactionSuccessStatus
     | DelegateToSumn
-    | ReceiveDelegateToSumnStatus TransactionSuccessStatus
+    | ReceiveDelegateToSumnStatus Library.TransactionSuccessStatus
     | UndelegateFromSumn
-    | ReceiveUndelegateStatus TransactionSuccessStatus
+    | ReceiveUndelegateStatus Library.TransactionSuccessStatus
 
 
 type DelegationStatus
@@ -103,22 +62,23 @@ type DelegationStatus
 
 type Model
     = NotConnectedNotAbleTo
-    | NotConnectedAbleTo PoolId SupportedWallet
+    | NotConnectedAbleTo PoolId Library.SupportedWallet
     | Connecting PoolId
-    | GettingAcountStatus PoolId SupportedWallet
-    | ConnectionEstablished PoolId SupportedWallet
-    | Connected PoolId SupportedWallet Account DelegationStatus
-    | RegisteringAndDelegating PoolId SupportedWallet Account
-    | Delegating PoolId SupportedWallet Account
-    | Undelegating PoolId SupportedWallet Account
+    | GettingAcountStatus PoolId Library.SupportedWallet
+    | ConnectionEstablished PoolId Library.SupportedWallet
+    | Connected PoolId Library.SupportedWallet Account DelegationStatus
+    | RegisteringAndDelegating PoolId Library.SupportedWallet Account
+    | Delegating PoolId Library.SupportedWallet Account
+    | Undelegating PoolId Library.SupportedWallet Account
     | NullState
 
 
 init : ( String, PoolId ) -> ( Model, Cmd Msg )
 init ( supportedWallet, sumnPoolId ) =
     let
+        wallet : Maybe Library.SupportedWallet
         wallet =
-            decodeWallet supportedWallet
+            Library.decodeWallet supportedWallet
     in
     ( case wallet of
         Just w ->
@@ -133,16 +93,14 @@ init ( supportedWallet, sumnPoolId ) =
 update : Msg -> Model -> ( Model, Cmd msg )
 update msg model =
     case ( msg, model ) of
-        ( Connect sumnPoolId w, NotConnectedAbleTo p wallet ) ->
-            ( Connecting sumnPoolId, connectWalletDelegation (encodeWallet w) )
-
-        ( Disconnect sumnPoolId wallet, _ ) ->
-            ( NotConnectedAbleTo sumnPoolId wallet, Cmd.none )
+        ( Connect sumnPoolId w, NotConnectedAbleTo _ _ ) ->
+            ( Connecting sumnPoolId, connectWalletDelegation (Library.encodeWallet w) )
 
         ( ReceiveWalletConnected wallet, Connecting sumnPoolId ) ->
             case wallet of
                 Just w ->
                     let
+                        newModel : Model
                         newModel =
                             ConnectionEstablished sumnPoolId w
                     in
@@ -163,7 +121,7 @@ update msg model =
                         (if acc.active == False then
                             NotDelegating
 
-                         else if acc.active == True && acc.pool_id /= sumnPoolId then
+                         else if acc.active && acc.pool_id /= sumnPoolId then
                             DelegatingToOther
 
                          else if acc.active && acc.pool_id == sumnPoolId then
@@ -173,18 +131,19 @@ update msg model =
                             NotDelegating
                         )
 
-                Err e ->
+                Err _ ->
                     NullState
             , Cmd.none
             )
 
-        ( RegisterAndDelegateToSumn a, Connected p w account NotDelegating ) ->
+        ( RegisterAndDelegateToSumn, Connected p w account NotDelegating ) ->
             ( RegisteringAndDelegating p w account, registerAndDelegateToSumn account.stake_address )
 
         ( ReceiveRegisterAndDelegateStatus result, RegisteringAndDelegating p w account ) ->
             let
+                newModel : Model
                 newModel =
-                    if result == True then
+                    if result then
                         Connected p w account DelegatingToSumn
 
                     else
@@ -199,8 +158,9 @@ update msg model =
 
         ( ReceiveDelegateToSumnStatus result, Delegating p w account ) ->
             let
+                newModel : Model
                 newModel =
-                    if result == True then
+                    if result then
                         Connected p w account DelegatingToSumn
 
                     else
@@ -215,8 +175,9 @@ update msg model =
 
         ( ReceiveUndelegateStatus result, Undelegating p w account ) ->
             let
+                newModel : Model
                 newModel =
-                    if result == True then
+                    if result then
                         Connected p w account NotDelegating
 
                     else
@@ -226,13 +187,14 @@ update msg model =
             , Cmd.none
             )
 
-        ( _, _ ) ->
+        _ ->
             ( model, Cmd.none )
 
 
 view : Model -> Html.Html Msg
 view model =
     let
+        id : Element.Attribute msg
         id =
             Element.htmlAttribute (Html.Attributes.id "delegationButton")
 
@@ -258,7 +220,7 @@ view model =
                       ]
                     )
 
-                ConnectionEstablished sumnPoolId w ->
+                ConnectionEstablished _ _ ->
                     ( NoOp
                     , "Connection established"
                     , [ Element.Background.color buttonHoverColor
@@ -276,10 +238,10 @@ view model =
                       ]
                     )
 
-                Connected _ w acc d ->
+                Connected _ _ _ d ->
                     case d of
                         NotDelegating ->
-                            ( RegisterAndDelegateToSumn acc
+                            ( RegisterAndDelegateToSumn
                             , "Register and Delegate"
                             , [ Element.Background.color buttonHoverColor
                               , Element.mouseOver
@@ -375,7 +337,7 @@ buttonHoverColor =
 subscriptions : Model -> Sub Msg
 subscriptions _ =
     Sub.batch
-        [ receiveWalletConnectionDelegation (\s -> ReceiveWalletConnected (decodeWallet s))
+        [ receiveWalletConnectionDelegation (\s -> ReceiveWalletConnected (Library.decodeWallet s))
         , receiveAccountStatus (\s -> ReceiveAccountStatus (Json.Decode.decodeString decodeAccount s))
         , receiveRegisterAndDelegateStatus ReceiveRegisterAndDelegateStatus
         , receiveDelegateStatus ReceiveDelegateToSumnStatus
@@ -408,16 +370,16 @@ port receiveAccountStatus : (String -> msg) -> Sub msg
 port registerAndDelegateToSumn : String -> Cmd msg
 
 
-port receiveRegisterAndDelegateStatus : (TransactionSuccessStatus -> msg) -> Sub msg
+port receiveRegisterAndDelegateStatus : (Library.TransactionSuccessStatus -> msg) -> Sub msg
 
 
 port delegateToSumn : String -> Cmd msg
 
 
-port receiveDelegateStatus : (TransactionSuccessStatus -> msg) -> Sub msg
+port receiveDelegateStatus : (Library.TransactionSuccessStatus -> msg) -> Sub msg
 
 
 port undelegate : String -> Cmd msg
 
 
-port receiveUndelegateStatus : (TransactionSuccessStatus -> msg) -> Sub msg
+port receiveUndelegateStatus : (Library.TransactionSuccessStatus -> msg) -> Sub msg

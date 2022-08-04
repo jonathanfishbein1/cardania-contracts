@@ -1,6 +1,6 @@
 import * as Lucid from 'lucid-cardano'
 import * as Wallet from '../wallet'
-var { Elm } = require('./src/RadSaleOnChain.elm')
+var { Elm } = require('./RadSaleOnChain.elm')
 
 const
     bk = "testnetwIyK8IphOti170JCngH0NedP0yK8wBZs"
