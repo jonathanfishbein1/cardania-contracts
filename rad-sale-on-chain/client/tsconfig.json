@@ -94,6 +94,7 @@
         "skipLibCheck": true /* Skip type checking all .d.ts files. */
     },
     "include": [
-        "./",
+        "./delegation",
+        "./rad-sale-on-chain"
     ]
 }
