@@ -9,18 +9,19 @@ const
     , blockfrostClient = new Lucid.Blockfrost(blockfrostApi, bk)
     , lucid = await Lucid.Lucid.new(blockfrostClient,
         'Testnet'),
-    register = async rewardAddress => {
-        const transaction =
-            await lucid
-                .newTx()
-                .registerStake(rewardAddress)
-                .complete()
-            , signedTx = await transaction
-                .sign()
-                .complete()
-            , transactionHash = await signedTx
-                .submit()
-    },
+    // register = async rewardAddress => {
+    //     const transaction =
+    //         await lucid
+    //             .newTx()
+    //             .registerStake(rewardAddress)
+    //             .complete()
+    //         , signedTx = await transaction
+    //             .sign()
+    //             .complete()
+    //         , transactionHash = await signedTx
+    //             .submit()
+    //     return transactionHash
+    // },
     delegate = async rewardAddress => {
         const transaction =
             await lucid
@@ -32,6 +33,7 @@ const
                 .complete()
             , transactionHash = await signedTx
                 .submit()
+        return transactionHash
     },
     deregister = async rewardAddress => {
         const transaction =
@@ -44,6 +46,7 @@ const
                 .complete()
             , transactionHash = await signedTx
                 .submit()
+        return transactionHash
     }
     , registerAndDelegate = async rewardAddress => {
         const transaction =
@@ -87,7 +90,8 @@ app.ports.getAccountStatus.subscribe(async () => {
 app.ports.registerAndDelegateToSumn.subscribe(async rewardAddress => {
     try {
         const txHash = await registerAndDelegate(rewardAddress)
-        app.ports.receiveRegisterAndDelegateStatus.send(true)
+        txHash ? app.ports.receiveRegisterAndDelegateStatus.send(true)
+            : app.ports.receiveRegisterAndDelegateStatus.send(false)
     }
     catch (e) {
         app.ports.receiveRegisterAndDelegateStatus.send(false)
@@ -97,7 +101,8 @@ app.ports.registerAndDelegateToSumn.subscribe(async rewardAddress => {
 app.ports.delegateToSumn.subscribe(async rewardAddress => {
     try {
         const txHash = await delegate(rewardAddress)
-        app.ports.receiveDelegateToSumnStatus.send(true)
+        txHash ? app.ports.receiveDelegateToSumnStatus.send(true)
+            : app.ports.receiveDelegateToSumnStatus.send(false)
     }
     catch (e) {
         app.ports.receiveDelegateToSumnStatus.send(false)
@@ -107,7 +112,8 @@ app.ports.delegateToSumn.subscribe(async rewardAddress => {
 app.ports.undelegate.subscribe(async rewardAddress => {
     try {
         const txHash = await deregister(rewardAddress)
-        app.ports.receiveUndelegateStatus.send(true)
+        txHash ? app.ports.receiveUndelegateStatus.send(true)
+            : app.ports.receiveUndelegateStatus.send(false)
     }
     catch (e) {
         app.ports.receiveUndelegateStatus.send(false)

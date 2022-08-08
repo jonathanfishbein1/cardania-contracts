@@ -116,7 +116,8 @@ app.ports.connectWallet.subscribe(async supportedWallet => {
 app.ports.startContract.subscribe(async () => {
     try {
         const txHash = await startContract()
-        app.ports.receiveStartContractStatus.send(true)
+        txHash ? app.ports.receiveStartContractStatus.send(true)
+            : app.ports.receiveStartContractStatus.send(false)
     }
     catch (e) {
         app.ports.receiveStartContractStatus.send(false)
@@ -126,7 +127,8 @@ app.ports.startContract.subscribe(async () => {
 app.ports.buyContract.subscribe(async () => {
     try {
         const txHash = await buyContract()
-        app.ports.receiveBuyContractStatus.send(true)
+        txHash ? app.ports.receiveBuyContractStatus.send(true)
+            : app.ports.receiveBuyContractStatus.send(false)
     }
     catch (e) {
         app.ports.receiveBuyContractStatus.send(false)
@@ -136,7 +138,8 @@ app.ports.buyContract.subscribe(async () => {
 app.ports.closeContract.subscribe(async () => {
     try {
         const txHash = await closeContract()
-        app.ports.receiveCloseContractStatus.send(true)
+        txHash ? app.ports.receiveCloseContractStatus.send(true)
+            : app.ports.receiveCloseContractStatus.send(false)
     }
     catch (e) {
         app.ports.receiveCloseContractStatus.send(false)
