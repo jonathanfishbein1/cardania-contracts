@@ -32,7 +32,7 @@ import NoUnused.Patterns
 import NoUnused.Variables
 import Review.Rule as Rule exposing (Rule)
 import Simplify
-
+import NoEtaReducibleLambdas
 
 config : List Rule
 config =
@@ -57,4 +57,8 @@ config =
     , NoUnused.Variables.rule
     , Simplify.rule Simplify.defaults
     , NoImportAs.rule
+    ,  NoEtaReducibleLambdas.rule
+        { lambdaReduceStrategy = NoEtaReducibleLambdas.AlwaysRemoveLambdaWhenPossible
+        , argumentNamePredicate = always True
+        }
     ]
