@@ -7,7 +7,7 @@ export default {
     mode: 'development',
     entry: './rad-sale-on-chain/index.ts',
     output: {
-        path: path.resolve(__dirname, 'dist'),
+        path: path.resolve(__dirname, 'distBuy'),
         publicPath: '/',
         filename: '[contenthash].js',
         clean: true
