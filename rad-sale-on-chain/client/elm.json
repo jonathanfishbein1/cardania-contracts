@@ -1,9 +1,7 @@
 {
     "type": "application",
     "source-directories": [
-        "delegation",
-        "rad-sale-on-chain",
-        "library"
+        "src"
     ],
     "elm-version": "0.19.1",
     "dependencies": {
