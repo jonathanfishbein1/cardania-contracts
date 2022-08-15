@@ -1,6 +1,7 @@
 import * as Lucid from 'lucid-cardano'
 import * as Wallet from './wallet'
 var { Elm } = require('./RadSaleOnChain.elm')
+declare const MODE: string
 
 const
     bk = "testnetwIyK8IphOti170JCngH0NedP0yK8wBZs"
@@ -100,9 +101,9 @@ const
                 .submit()
         return transactionHash
     }
-
+console.log(MODE)
 var app = Elm.RadSaleOnChain.init({
-    flags: [Wallet.hasWallet(), 'development'],
+    flags: [Wallet.hasWallet(), MODE],
     node: document.getElementById("elm-app-is-loaded-here")
 })
 

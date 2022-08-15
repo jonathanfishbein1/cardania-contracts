@@ -2,7 +2,7 @@ import path from 'path'
 import HtmlWebPackPlugin from "html-webpack-plugin"
 import webpack from 'webpack';
 const __dirname = path.resolve()
-    , mode = process.env.NODE_ENV || 'development'
+    , mode = process.env.NODE_ENV
 console.log(mode)
 export default {
     mode: mode,
@@ -44,6 +44,9 @@ export default {
         title: 'index',
         filename: `index.html`,
         template: `./src/buy.html`,
+    }),
+    new webpack.DefinePlugin({
+        MODE: JSON.stringify(mode)
     }),
     new webpack.ProvidePlugin({ Buffer: ['buffer', 'Buffer'] })
     ]
