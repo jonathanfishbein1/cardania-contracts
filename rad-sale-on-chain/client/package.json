@@ -5,11 +5,11 @@
     "description": "",
     "type": "module",
     "scripts": {
-        "devBuy": "cd src/rad-sale-on-chain && webpack serve --config webpack.config.js --open",
-        "devDelegate": "cd src/delegation && webpack serve --config webpack.config.js --open",
-        "buildBuy": "webpack build --config rad-sale-on-chain/webpack.config.js",
+        "devBuy": "webpack serve --config buy-webpack.config.js --open",
+        "devDelegate": "webpack serve --config delegation-webpack.config.js --open",
+        "buildBuy": "webpack build --config buy-webpack.config.js",
         "startBuy": "npm run buildBuy && cp server.cjs distBuy/ && cd distBuy && node server.cjs",
-        "buildDelegate": "webpack build --config delegation/webpack.config.js",
+        "buildDelegate": "webpack build --config delegation-webpack.config.js",
         "startDelegate": "npm run buildDelegate && cp server.cjs distDelegate/ && cd distDelegate && node server.cjs"
     },
     "keywords": [],

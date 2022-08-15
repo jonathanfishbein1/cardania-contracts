@@ -5,9 +5,9 @@ const __dirname = path.resolve()
 
 export default {
     mode: 'development',
-    entry: './index.ts',
+    entry: './src/buy.ts',
     output: {
-        path: path.resolve(__dirname, 'distDelegate'),
+        path: path.resolve(__dirname, 'distBuy'),
         publicPath: '/',
         filename: '[contenthash].js',
         clean: true
@@ -42,7 +42,7 @@ export default {
     plugins: [new HtmlWebPackPlugin({
         title: 'index',
         filename: `index.html`,
-        template: `./index.html`,
+        template: `./src/buy.html`,
     }),
     new webpack.ProvidePlugin({ Buffer: ['buffer', 'Buffer'] })
     ]

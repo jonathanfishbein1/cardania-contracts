@@ -1,6 +1,6 @@
 import * as Lucid from 'lucid-cardano'
-import * as Wallet from '../../wallet'
-var { Elm } = require('../Delegation.elm')
+import * as Wallet from './wallet'
+var { Elm } = require('./Delegation.elm')
 
 const
     sumnPoolId = "pool13dgxp4ph2ut5datuh5na4wy7hrnqgkj4fyvac3e8fzfqcc7qh0h",
