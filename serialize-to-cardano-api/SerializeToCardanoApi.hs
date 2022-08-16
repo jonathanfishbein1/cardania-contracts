@@ -38,8 +38,8 @@ import qualified PlutusTx.Builtins
 import qualified PlutusTx.Builtins.Class
 import qualified PlutusTx.Builtins.Internal
 import qualified PlutusTx.Prelude
+import qualified Relude
 import qualified System.Environment
-import qualified Prelude
 
 dataToScriptData :: PlutusTx.Data -> Cardano.Api.Shelley.ScriptData
 dataToScriptData (PlutusTx.Constr n xs) = Cardano.Api.Shelley.ScriptDataConstructor n PlutusTx.Prelude.$ dataToScriptData PlutusTx.Prelude.<$> xs
@@ -48,7 +48,7 @@ dataToScriptData (PlutusTx.List xs) = Cardano.Api.Shelley.ScriptDataList PlutusT
 dataToScriptData (PlutusTx.I n) = Cardano.Api.Shelley.ScriptDataNumber n
 dataToScriptData (PlutusTx.B bs) = Cardano.Api.Shelley.ScriptDataBytes bs
 
-writeJSON :: PlutusTx.ToData a => Prelude.FilePath -> a -> Prelude.IO ()
+writeJSON :: PlutusTx.ToData a => Relude.FilePath -> a -> Relude.IO ()
 writeJSON file =
   Data.ByteString.Lazy.writeFile file
     PlutusTx.Prelude.. Data.Aeson.encode
@@ -56,7 +56,7 @@ writeJSON file =
     PlutusTx.Prelude.. dataToScriptData
     PlutusTx.Prelude.. PlutusTx.toData
 
-writeUnit :: Prelude.IO ()
+writeUnit :: Relude.IO ()
 writeUnit = writeJSON "/home/jonathan/Documents/cardania-contracts/rad-sale-on-chain/transactions/unit.json" ()
 
 credentialLedgerToPlutus ::
@@ -76,7 +76,7 @@ credentialLedgerToPlutus (Cardano.Ledger.Credential.KeyHashObj (Cardano.Ledger.K
       PlutusTx.Builtins.toBuiltin PlutusTx.Prelude.$ Cardano.Crypto.Hash.Class.hashToBytes h
 
 tryReadAddress ::
-  Prelude.String ->
+  Relude.String ->
   PlutusTx.Prelude.Maybe Ledger.Address
 tryReadAddress x = case Cardano.Api.Shelley.deserialiseAddress
   Cardano.Api.Shelley.AsAddressAny
@@ -91,11 +91,11 @@ tryReadAddress x = case Cardano.Api.Shelley.deserialiseAddress
             Ledger.addressStakingCredential = PlutusTx.Prelude.Nothing
           }
 
-unsafeReadAddress :: Prelude.String -> Ledger.Address
+unsafeReadAddress :: Relude.String -> Ledger.Address
 unsafeReadAddress s =
   PlutusTx.Prelude.fromMaybe
-    ( Prelude.error PlutusTx.Prelude.$
-        "can't parse " PlutusTx.Prelude.++ s PlutusTx.Prelude.++ " as an address"
+    ( Relude.error PlutusTx.Prelude.$
+        "can't parse " `Data.Text.append` (Data.Text.pack s) `Data.Text.append` " as an address"
     )
     PlutusTx.Prelude.$ tryReadAddress s
 
@@ -122,15 +122,15 @@ getCredentials (Ledger.Address x y) = case x of
 unsafePaymentPubKeyHash :: Ledger.Address -> Ledger.PaymentPubKeyHash
 unsafePaymentPubKeyHash addr =
   PlutusTx.Prelude.maybe
-    ( Prelude.error PlutusTx.Prelude.$
+    ( Relude.error PlutusTx.Prelude.$
         "script address "
-          PlutusTx.Prelude.++ Prelude.show addr
-          PlutusTx.Prelude.++ " does not contain a payment key"
+          `Data.Text.append` (Data.Text.pack (Relude.show addr))
+          `Data.Text.append` " does not contain a payment key"
     )
     PlutusTx.Prelude.fst
     PlutusTx.Prelude.$ getCredentials addr
 
-unsafeTokenNameToHex :: Plutus.V1.Ledger.Value.TokenName -> Prelude.String
+unsafeTokenNameToHex :: Plutus.V1.Ledger.Value.TokenName -> Relude.String
 unsafeTokenNameToHex =
   Data.ByteString.Char8.unpack
     PlutusTx.Prelude.. Cardano.Api.Shelley.serialiseToRawBytesHex

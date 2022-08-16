@@ -4,12 +4,13 @@ module Main
 where
 
 import qualified Data.String
+import qualified Relude
 import qualified SerializeToCardanoApi
 import qualified System.Environment
 
-main :: Prelude.IO ()
+main :: Relude.IO ()
 main = do
   [tn'] <- System.Environment.getArgs
   let tn = Data.String.fromString tn'
-  Prelude.putStrLn Prelude.$
+  Relude.putStrLn Relude.$
     SerializeToCardanoApi.unsafeTokenNameToHex tn

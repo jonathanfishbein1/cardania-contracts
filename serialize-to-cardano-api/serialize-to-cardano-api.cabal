@@ -6,35 +6,7 @@ build-type:    Simple
 library
     exposed-modules:    SerializeToCardanoApi
     default-language:   Haskell2010
-    default-extensions: NoImplicitPrelude
-    ghc-options:        -Wall
-    build-depends:
-        base,
-        plutus-tx-plugin,
-        plutus-tx,
-        plutus-core,
-        plutus-ledger-api,
-        plutus-ledger,
-        plutus-contract,
-        plutus-ledger-constraints,
-        text,
-        containers,
-        aeson,
-        flat,
-        bytestring,
-        cardano-api,
-        serialise,
-        cardano-crypto-class,
-        cardano-ledger-core,
-        cardano-ledger-shelley,
-        playground-common,
-        freer-extras
-
-executable token-name
-    main-is:            TokenName.hs
-    hs-source-dirs:     ./
-    default-language:   Haskell2010
-    default-extensions: OverloadedStrings DuplicateRecordFields DeriveGeneric
+    default-extensions: OverloadedStrings NoImplicitPrelude
     ghc-options:        -Wall
     build-depends:
         base,
@@ -57,4 +29,34 @@ executable token-name
         cardano-ledger-shelley,
         playground-common,
         freer-extras,
-        serialize-to-cardano-api
+        relude
+
+executable token-name
+    main-is:            TokenName.hs
+    hs-source-dirs:     ./
+    default-language:   Haskell2010
+    default-extensions: OverloadedStrings DuplicateRecordFields DeriveGeneric NoImplicitPrelude
+    ghc-options:        -Wall
+    build-depends:
+        base,
+        plutus-tx-plugin,
+        plutus-tx,
+        plutus-core,
+        plutus-ledger-api,
+        plutus-ledger,
+        plutus-contract,
+        plutus-ledger-constraints,
+        text,
+        containers,
+        aeson,
+        flat,
+        bytestring,
+        cardano-api,
+        serialise,
+        cardano-crypto-class,
+        cardano-ledger-core,
+        cardano-ledger-shelley,
+        playground-common,
+        freer-extras,
+        serialize-to-cardano-api,
+        relude
