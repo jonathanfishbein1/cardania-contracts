@@ -5,12 +5,14 @@
     "description": "",
     "type": "module",
     "scripts": {
-        "devBuy": "webpack serve --config buy-webpack.config.js --open",
-        "devDelegate": "webpack serve --config delegation-webpack.config.js --open",
-        "buildBuy": "NODE_ENV=production webpack build --config buy-webpack.config.js --progress",
-        "startBuy": "npm run buildBuy && cp server.cjs distBuy/ && cd distBuy && node server.cjs",
-        "buildDelegate": "NODE_ENV=production webpack build --config delegation-webpack.config.js",
-        "startDelegate": "npm run buildDelegate && cp server.cjs distDelegate/ && cd distDelegate && node server.cjs"
+        "development-delegate": "webpack serve --config delegation-webpack.config.js --open",
+        "build-delegate": "NODE_ENV=production webpack build --config delegation-webpack.config.js",
+        "start-delegate": "npm run build-delegate && cp server.cjs distDelegate/ && cd distDelegate && node server.cjs",
+        "development-buy": "webpack serve --config buy-webpack.config.js --open",
+        "build-elevated-buy": "NODE_ENV=development webpack build --config buy-webpack.config.js --progress",
+        "start-elevated-buy": "npm run build-elevated-buy && cp server.cjs distBuy/ && cd distBuy && node server.cjs",
+        "build-buy": "NODE_ENV=production webpack build --config buy-webpack.config.js --progress",
+        "start-buy": "npm run build-buy && cp server.cjs distBuy/ && cd distBuy && node server.cjs"
     },
     "keywords": [],
     "author": "",

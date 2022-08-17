@@ -2,7 +2,7 @@ import path from 'path'
 import HtmlWebPackPlugin from "html-webpack-plugin"
 import webpack from 'webpack';
 const __dirname = path.resolve()
-    , mode = process.env.NODE_ENV
+    , mode = process.env.NODE_ENV || 'development'
 console.log(mode)
 export default {
     mode: mode,
